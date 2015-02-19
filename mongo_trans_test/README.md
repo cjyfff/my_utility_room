@@ -1,11 +1,3 @@
-参考这篇[mongodb的文档](http://docs.mongodb.org/manual/tutorial/perform-two-phase-commits/)写了一个小程序测试mongodb的事务操作实现，该程序能执行以下功能：    
-1、每次运行程序都从A账户扣100到B账户    
-2、可以多个程序同时运行，不会造成账户的金额混乱    
-3、金额出现负数时终止程序    
-4、执行账户金额操作时假如出现错误的话，会再执行一次，2次都失败的话就进行回滚并退出程序   
-   
-   
-ps:需要mongodb中已经存在以下两条documents：   
-{ _id: "A", balance: 1000, pendingTransactions: [] }   
-{ _id: "B", balance: 1000, pendingTransactions: [] }   
-   
+本代码主要目的是在mongodb中实现事务操作   
+其中Snapshot目录的代码是使用快照（也就是版本控制）的方式实现事务操作，详细说明可以参看我博客上的这边文章：[Go](http://cjyfff.sinaapp.com/blog/25/)   
+Two Phase Commits目录中的代码，顾名思义就是使用Two Phase Commits的方法来实现事务操作。   
