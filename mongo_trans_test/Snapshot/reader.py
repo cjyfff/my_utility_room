@@ -2,10 +2,6 @@
 #coding=utf-8
 import pymongo
 
-mongo_client = pymongo.MongoClient('mongodb://localhost:27017/')
-test_db = mongo_client['testA']
-accounts = test_db['accounts']
-
 
 def get_version_num(coll):
     version = coll.find_one({"version": True})
@@ -13,11 +9,13 @@ def get_version_num(coll):
     return version_num
 
 
-def get_account(coll, account_name):
-    version_num = get_version_num(coll)
+mongo_client = pymongo.MongoClient('mongodb://localhost:27017/')
+test_db = mongo_client['testA']
+accounts = test_db['accounts']
 
-    return coll.find_one({
-               "account": account_name,
+version_num = get_version_num(accounts)
+
+account_datas = accounts.find({
                "create_version": {"$lte": version_num},
                "$or": [
                     {"delete_version": {"$exists": False}},
@@ -25,10 +23,12 @@ def get_account(coll, account_name):
                 ]
         })
 
-account_A = get_account(accounts, "A")
-account_B = get_account(accounts, "B")
+for acc in account_datas:
+    if acc.get('account') == "A":
+        account_A = acc.get('balance')
+    if acc.get('account') == "B":
+        account_B = acc.get('balance')
 
-if account_A:
-    print "account A's balance is %d" % account_A['balance']
-if account_B:
-    print "account B's balance is %d" % account_B['balance']
+
+print "account A's balance is %d" % account_A
+print "account B's balance is %d" % account_B
