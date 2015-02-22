@@ -19,7 +19,7 @@ def my_map(file):
         r.release()
         if temp == 0:
             l.release()
-            temp += 1
+            temp = 1
     finish_flag = 1
 
 
