@@ -4,6 +4,7 @@
 ####目前包括以下代码：   
 1. mongo_trans_test   
 关于在mongodb上实现事务操作的试验   
-2. multithreading_test    
-主要测试python的多线程实现，使用旗语锁实现线程同步。    
+   
+2. word_counting   
+主要测试使用多线程、协程实现词频统计。    
 

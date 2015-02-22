@@ -1,2 +1,0 @@
-尝试了一下使用python的多线程实现MapReduce词频统计。    
-代码中，旗语锁l的作用是保证my_map线程比my_reduce线程先执行，其实这里不加这个锁也是可以的，因为假如my_reduce线程先执行的话，由于temp_list为空，将会触发IndexError异常，my_reduce线程会返回while循环的开头，直到my_map线程执行并向temp_list插入数据。但是为了记录使用旗语锁来进行线程同步的方法，这里还是保留这个锁吧。   
