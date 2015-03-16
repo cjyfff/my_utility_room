@@ -14,5 +14,5 @@ for i in xrange(simulate_total):
     if (randA * randA + randB * randB) < 1:
         inside_count = inside_count + 1
 
-print (inside_count * 1.0 / simulate_total * 4)
-print ("Time spent", time.time() - time_start)
+print inside_count * 1.0 / simulate_total * 4
+print "Time spent", time.time() - time_start
