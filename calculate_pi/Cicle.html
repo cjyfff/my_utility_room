@@ -1,0 +1,14 @@
+<script>
+var startTime = new Date().getTime();
+var insideCount = 0;
+var simulateTot = 25000000;
+for (var i = 0; i<simulateTot; i++){
+	var randA = Math.random();
+	var randB = Math.random();
+	if ((randA * randA + randB * randB) < 1){
+		insideCount++;
+	}
+}
+console.log(insideCount / simulateTot * 4);
+console.log("Time spent: " + (new Date().getTime() - startTime));
+</script>

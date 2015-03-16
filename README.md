@@ -9,5 +9,5 @@
 主要测试使用多线程、协程实现词频统计。    
 
 3. calculate_pi   
-使用python（以及ctypes）、java用蒙特卡罗算法计算pi，比较计算的速度   
+分别使用python、java、javascript用蒙特卡罗算法计算pi，比较不同语言的计算速度   
 
