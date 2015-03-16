@@ -11,7 +11,7 @@ simulate_total = 25000000
 for i in xrange(simulate_total):
     randA = random.random()
     randB = random.random()
-    if ((randA * randA + randB * randB) < 1):
+    if (randA * randA + randB * randB) < 1:
         inside_count = inside_count + 1
 
 print (inside_count * 1.0 / simulate_total * 4)
