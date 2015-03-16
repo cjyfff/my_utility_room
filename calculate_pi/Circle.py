@@ -16,3 +16,6 @@ for i in xrange(simulate_total):
 
 print inside_count * 1.0 / simulate_total * 4
 print "Time spent", time.time() - time_start
+
+
+dfdsfsdf
