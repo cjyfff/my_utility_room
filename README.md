@@ -11,3 +11,5 @@
 3. calculate_pi   
 分别使用python、java、javascript用蒙特卡罗算法计算pi，比较不同语言的计算速度   
 
+4. mongodb_concurrency_test   
+主要测试mongodb2.6与3.0版本中，不同读写策略下并发性能的差异   
