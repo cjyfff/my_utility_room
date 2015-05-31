@@ -1,41 +1,37 @@
 #! /usr/bin/env python
-#coding=utf-8
+# coding=utf-8
 import sys
 import threading
 
-l = threading.Semaphore(0)
-r = threading.Lock()
+lock = threading.Lock()
 temp_list = []
 finish_flag = 0
 
 
 def my_map(file):
     global finish_flag
-    temp = 0
     for line in file:
         word_list = line.split()
-        r.acquire()
+        lock.acquire()
         map(lambda x: temp_list.append(','.join(['%s' % x, "1"])), word_list)
-        r.release()
-        if temp == 0:
-            l.release()
-            temp = 1
+        lock.release()
+    lock.acquire()
     finish_flag = 1
+    lock.release()
 
 
 def my_reduce(word_count):
     global finish_flag
-    l.acquire()
     while 1:
         try:
-            r.acquire()
+            lock.acquire()
             data = temp_list.pop(0)
         except IndexError:
-            r.release()
             if finish_flag:
                 break
             continue
-        r.release()
+        finally:
+            lock.release()
         word = data.split(',')[0].strip()
         count = data.split(',')[1]
         if word not in word_count:
@@ -47,7 +43,7 @@ def my_reduce(word_count):
 def main():
     try:
         fp = open(sys.argv[1], 'r')
-    except:
+    except IOError:
         print "Can't open the file."
         sys.exit(1)
     word_count = {}
@@ -64,5 +60,5 @@ def main():
     print word_count
     fp.close()
 
-if __name__=='__main__':
+if __name__ == '__main__':
     main()
