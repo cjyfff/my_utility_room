@@ -4,7 +4,7 @@ import sys
 import threading
 
 lock = threading.Lock()
-temp_list = []
+queen = []
 finish_flag = 0
 
 
@@ -13,7 +13,7 @@ def my_map(file):
     for line in file:
         word_list = line.split()
         lock.acquire()
-        map(lambda x: temp_list.append(','.join(['%s' % x, "1"])), word_list)
+        map(lambda x: queen.append(','.join(['%s' % x, "1"])), word_list)
         lock.release()
     lock.acquire()
     finish_flag = 1
@@ -25,7 +25,7 @@ def my_reduce(word_count):
     while 1:
         try:
             lock.acquire()
-            data = temp_list.pop(0)
+            data = queen.pop(0)
         except IndexError:
             if finish_flag:
                 break
