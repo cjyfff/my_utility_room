@@ -44,3 +44,5 @@ local_settings.py
 #DB file
 *.sqlite3
 
+#pycharm file
+.idea/
