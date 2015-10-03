@@ -41,4 +41,6 @@ local_settings.py
 # java
 *.class
 
+#DB file
+*.sqlite3
 
