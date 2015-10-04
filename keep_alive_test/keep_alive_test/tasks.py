@@ -14,7 +14,9 @@ def test_task():
 
     i = 0
     while i < 30:
+        # 轮询数据库，监控数据变化，以达到监控事件变化的目的
         if select_db_or_cache():
             break
         time.sleep(1)
+        i += 1
     return HttpResponse('fuck')
