@@ -7,5 +7,14 @@ from django.http import HttpResponse
 
 @celery.task
 def test_task():
-    time.sleep(10)
+    def select_db_or_cache():
+        """查询数据库操作，假如满足指定条件，返回True"""
+        # return True
+        return False
+
+    i = 0
+    while i < 30:
+        if select_db_or_cache():
+            break
+        time.sleep(1)
     return HttpResponse('fuck')

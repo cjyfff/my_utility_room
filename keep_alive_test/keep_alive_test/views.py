@@ -1,5 +1,4 @@
 from django.views.generic.base import View
-from django.http import HttpResponse
 
 from .tasks import test_task
 
