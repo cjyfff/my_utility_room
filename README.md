@@ -13,3 +13,7 @@
 
 4. mongodb_concurrency_test   
 主要测试mongodb2.6与3.0版本中，不同读写策略下并发性能的差异   
+
+5. change_files_name   
+批量修改文件名脚本   
+
