@@ -20,3 +20,6 @@ Django + Celery实现长轮询的试验
 6. change_files_name   
 批量修改文件名脚本   
 
+7. ml   
+机器学习相关的练习   
+
