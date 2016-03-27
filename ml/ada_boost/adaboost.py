@@ -1,3 +1,4 @@
+# coding=utf-8
 import numpy as np
 from boost import build_stump
 
@@ -17,7 +18,8 @@ def ada_boost_train_ds(data_arr, class_labels, num_lt=40):
     # weak_class_arr：保存弱分类器的列表
     weak_class_arr = []
     m = data_arr.shape[0]
-    D = np.mat(np.ones((m, 1)))
+    D = np.mat(np.ones((m, 1)) / m)
+    print('22', D)
     agg_class_est = np.mat(np.zeros((m, 1)))
     for i in xrange(num_lt):
         # class_est: 树庄的分类结果
@@ -40,3 +42,15 @@ def ada_boost_train_ds(data_arr, class_labels, num_lt=40):
         if error_rate == 0.0:
             break
     return weak_class_arr
+
+
+if __name__ == '__main__':
+    data_mat, class_labels = load_simp_data()
+    classifier_array = ada_boost_train_ds(data_mat, class_labels, 9)
+    """
+    classifier_array是保存弱分类器的数组，格式如下：
+    [{'dim': 0, 'ineq': 'lt', 'thresh': 1.3, 'alpha': 0.6931471805599453},
+     {'dim': 1, 'ineq': 'lt', 'thresh': 1.0, 'alpha': 0.9729550745276565},
+     {'dim': 0, 'ineq': 'lt', 'thresh': 0.90000000000000002, 'alpha': 0.8958797346140273}]
+    """
+    print('classifier_array:', classifier_array)

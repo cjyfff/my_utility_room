@@ -1,3 +1,4 @@
+# coding=utf-8
 import numpy as np
 
 
@@ -47,3 +48,32 @@ def build_stump(data_arr, class_labels, D):
                     best_stump['thresh'] = thresh_val
                     best_stump['ineq'] = inequal
     return best_stump, min_error, best_class_est
+
+
+def ada_classify(dat_to_class, classifier_arr):
+    data_mat = np.mat(dat_to_class)
+    m = data_mat.shape[0]
+    agg_class_est = np.mat(np.zeros((m, 1)))
+    for i in xrange(len(classifier_arr)):
+        class_est = stump_classify(data_mat, classifier_arr[i]['dim'],
+                                   classifier_arr[i]['thresh'],
+                                   classifier_arr[i]['ineq'])
+        agg_class_est += classifier_arr[i]['alpha'] * class_est
+        """
+        随着迭代进行，分类的结果会越来越强。
+        即小于0的分类越来越小，大于0的越来越大
+        """
+        print("agg_class_est:", agg_class_est)
+    return np.sign(agg_class_est)
+
+
+if __name__ == '__main__':
+    from adaboost import load_simp_data, ada_boost_train_ds
+    data_mat, class_labels = load_simp_data()
+    # D = np.mat(np.ones((5, 1)) / 5)
+    # best_stump, min_error, best_class_est = build_stump(data_mat, class_labels, D)
+    # print best_stump
+
+    classifier_arr = ada_boost_train_ds(data_mat, class_labels, 30)
+    res = ada_classify([1.3, 1.2], classifier_arr)
+    print("res: ", res)
