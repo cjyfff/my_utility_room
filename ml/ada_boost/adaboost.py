@@ -19,14 +19,12 @@ def ada_boost_train_ds(data_arr, class_labels, num_lt=40):
     weak_class_arr = []
     m = data_arr.shape[0]
     D = np.mat(np.ones((m, 1)) / m)
-    print('22', D)
     agg_class_est = np.mat(np.zeros((m, 1)))
     for i in xrange(num_lt):
         # class_est: 树庄的分类结果
         best_stump, error, class_est = build_stump(data_arr, class_labels, D)
         print "D:", D.T
-        # TODO: alpha有问题
-        alpha = float(0.5 * np.log(((1.0 - error) / max(error, 0.000001))))
+        alpha = float(0.5 * np.log(((1.0 - error) / max(error, 1e-16))))
         best_stump['alpha'] = alpha
         weak_class_arr.append(best_stump)
         print "class_est: ", class_est.T
