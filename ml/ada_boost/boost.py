@@ -3,6 +3,9 @@ import numpy as np
 
 
 def stump_classify(data_matrix, dimen, thresh_val, thresh_ineq):
+    """
+    thresh_ineq决定了一个样本的权重
+    """
     ret_array = np.ones((data_matrix.shape[0], 1))
     if thresh_ineq == 'lt':
         ret_array[data_matrix[:, dimen] <= thresh_val] = -1.0
