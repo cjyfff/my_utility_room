@@ -22,4 +22,10 @@ Django + Celery实现长轮询的试验
 
 7. ml   
 机器学习相关的练习，主要参考自《机器学习实战》   
+   
+8. some_algorithms   
+一些算法练习   
+   
+9. sample_word_segmentation   
+一个简单的分词器   
 
