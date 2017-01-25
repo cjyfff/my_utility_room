@@ -41,8 +41,16 @@ local_settings.py
 # java
 *.class
 
-#DB file
+# DB file
 *.sqlite3
 
-#pycharm file
+# pycharm file
 .idea/
+
+# Java file
+*.class
+*.iml
+classes/
+META-INF/
+target/
+
