@@ -11,8 +11,8 @@ import com.example.Person;
 
 @Controller
 public class PersonController {
-    @RequestMapping("/")
-    String index(Model model) {
+    @RequestMapping("/person")
+    String person(Model model) {
         Person singlePerson = new Person("cjyfff", 29);
 
         List<Person> people = new ArrayList<>();
@@ -27,6 +27,6 @@ public class PersonController {
         model.addAttribute("singlePerson", singlePerson);
         model.addAttribute("people", people);
 
-        return "index";
+        return "person";
     }
 }
