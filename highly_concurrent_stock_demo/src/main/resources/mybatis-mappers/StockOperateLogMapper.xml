@@ -1,0 +1,23 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.mapper.StockOperateLogMapper">
+    <insert id="insertStockOperateLog" parameterType="com.example.demo.model.StockOperateLog" useGeneratedKeys="true" keyProperty="id" >
+        <![CDATA[
+       INSERT INTO stock_operate_log
+       (
+           stock_id,
+           operate_amount,
+           create_at,
+           update_at
+       )
+       VALUES
+       (
+           #{stockId, jdbcType=Integer},
+           #{operateAmount, jdbcType=java.math.BigDecimal},
+           #{createAt, jdbcType=java.util.Date},
+           #{updateAt, jdbcType=java.util.Date}
+       )
+       ]]>
+    </insert>
+</mapper>
