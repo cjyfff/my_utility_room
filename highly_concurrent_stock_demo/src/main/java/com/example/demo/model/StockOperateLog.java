@@ -13,6 +13,6 @@ public class StockOperateLog {
     Integer id;
     Integer stockId;
     BigDecimal operateAmount;
-    Date createdAt;
+    Date createAt;
     Date updateAt;
 }

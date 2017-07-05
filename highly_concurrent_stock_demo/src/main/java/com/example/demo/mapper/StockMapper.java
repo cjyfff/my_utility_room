@@ -10,5 +10,5 @@ import org.apache.ibatis.annotations.Mapper;
 public interface StockMapper {
     Stock selectStockById(Integer id);
 
-    Integer updateStock(Stock stock);
+    Integer updateStockByPrimaryKeySelective(Stock stock);
 }

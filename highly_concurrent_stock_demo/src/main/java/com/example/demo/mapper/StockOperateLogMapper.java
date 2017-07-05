@@ -8,5 +8,7 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface StockOperateLogMapper {
+    StockOperateLog selectStockOpLogById(Integer id);
+
     Integer insertStockOperateLog(StockOperateLog stockOperateLog);
 }

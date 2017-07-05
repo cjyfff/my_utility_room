@@ -12,6 +12,6 @@ import java.util.Date;
 public class Stock {
     Integer id;
     BigDecimal amount;
-    Date createdAt;
+    Date createAt;
     Date updateAt;
 }
