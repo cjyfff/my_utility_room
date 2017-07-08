@@ -24,7 +24,7 @@ public class ConcurrentAccess {
         ExecutorService es = new ThreadPoolExecutor(10, 100, 0L,
             TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), namedThreadFactory, new ThreadPoolExecutor.AbortPolicy());
 
-        for (int i = 0; i < 100000; i++) {
+        for (int i = 0; i < 10000; i++) {
             es.submit(() -> {
                 try {
                     workFlow.count(1, BigDecimal.valueOf(-1));
