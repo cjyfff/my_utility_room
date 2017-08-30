@@ -31,6 +31,7 @@ public class WorkFlow {
             BigDecimal nowAmount = (BigDecimal) this.redisTemplate.opsForValue().get(stockId);
             BigDecimal newAmount = nowAmount.add(operateAmount);
             if (Integer.valueOf(1).equals(newAmount.compareTo(BigDecimal.valueOf(0)))) {
+                // 缓存中更新库存，数据库中更新日志
                 this.redisTemplate.opsForValue().set(stockId, newAmount);
                 writeStockOperateLog.writeStockOperateLog(stockId, operateAmount);
             } else {
