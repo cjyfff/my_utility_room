@@ -1,4 +1,4 @@
-package com.example.demo.service;
+package com.example.demo.service.abandon;
 
 import java.math.BigDecimal;
 import java.util.concurrent.ExecutorService;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
  * @author jiashen
  * @date 17-7-6
  */
-@Service
+//@Service
 public class ConcurrentAccess {
 
     public ConcurrentAccess(WorkFlow workFlow) {

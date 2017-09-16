@@ -1,4 +1,4 @@
-package com.example.demo.service;
+package com.example.demo.service.abandon;
 
 import java.math.BigDecimal;
 
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
  * @author jiashen
  * @date 17-7-5
  */
-@Service
+//@Service
 public class WorkFlow {
     private final WriteStockOperateLog writeStockOperateLog;
 
