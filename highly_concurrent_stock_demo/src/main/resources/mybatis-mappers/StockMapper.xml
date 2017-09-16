@@ -4,13 +4,14 @@
 <mapper namespace="com.example.demo.mapper.StockMapper">
     <resultMap id="BaseResultMap" type="com.example.demo.model.Stock">
         <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="user_id" jdbcType="INTEGER" property="userId" />
         <result column="amount" jdbcType="DECIMAL" property="amount" />
         <result column="create_at" jdbcType="DATE" property="createAt" />
         <result column="update_at" jdbcType="DATE" property="updateAt" />
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, amount, create_at, update_at
+        id, user_id, amount, create_at, update_at
     </sql>
 
     <select id="selectStockById" resultMap="BaseResultMap">
@@ -22,6 +23,9 @@
     <update id="updateStockByPrimaryKeySelective" parameterType="com.example.demo.model.Stock">
         update stock
         <set>
+            <if test="userId != null">
+                user_id = #{userId,jdbcType=DECIMAL},
+            </if>
             <if test="amount != null">
                 amount = #{amount,jdbcType=DECIMAL},
             </if>

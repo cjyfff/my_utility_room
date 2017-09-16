@@ -4,14 +4,15 @@
 <mapper namespace="com.example.demo.mapper.StockOperateLogMapper">
     <resultMap id="BaseResultMap" type="com.example.demo.model.StockOperateLog">
         <id column="id" jdbcType="INTEGER" property="id" />
-        <id column="stock_id" jdbcType="INTEGER" property="stockId" />
+        <result column="user_id" jdbcType="INTEGER" property="userId" />
+        <result column="stock_id" jdbcType="INTEGER" property="stockId" />
         <result column="operate_amount" jdbcType="DECIMAL" property="operateAmount" />
         <result column="create_at" jdbcType="DATE" property="createAt" />
         <result column="update_at" jdbcType="DATE" property="updateAt" />
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, stock_id, operate_amount, create_at, update_at
+        id, user_id, stock_id, operate_amount, create_at, update_at
     </sql>
 
     <select id="selectStockOpLogById" resultType="com.example.demo.model.StockOperateLog">
@@ -24,6 +25,7 @@
         <![CDATA[
        INSERT INTO stock_operate_log
        (
+           user_id,
            stock_id,
            operate_amount,
            create_at,
@@ -31,6 +33,7 @@
        )
        VALUES
        (
+           #{userId, jdbcType=INTEGER},
            #{stockId, jdbcType=INTEGER},
            #{operateAmount, jdbcType=DECIMAL},
            #{createAt, jdbcType=DATE},

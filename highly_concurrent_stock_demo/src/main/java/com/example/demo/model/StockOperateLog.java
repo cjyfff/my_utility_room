@@ -6,11 +6,14 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
- * Created by cjyfff on 17-7-2.
+ *
+ * @author cjyfff
+ * @date 17-7-2
  */
 @Data
 public class StockOperateLog {
     Integer id;
+    Integer userId;
     Integer stockId;
     BigDecimal operateAmount;
     Date createAt;
