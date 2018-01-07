@@ -2,10 +2,30 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.mapper.StockOperateLogMapper">
+    <resultMap id="BaseResultMap" type="com.example.demo.model.StockOperateLog">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="user_id" jdbcType="INTEGER" property="userId" />
+        <result column="stock_id" jdbcType="INTEGER" property="stockId" />
+        <result column="operate_amount" jdbcType="DECIMAL" property="operateAmount" />
+        <result column="create_at" jdbcType="DATE" property="createAt" />
+        <result column="update_at" jdbcType="DATE" property="updateAt" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, user_id, stock_id, operate_amount, create_at, update_at
+    </sql>
+
+    <select id="selectStockOpLogById" resultType="com.example.demo.model.StockOperateLog">
+        select
+        <include refid="Base_Column_List" />
+        from stock_operate_log where id = #{id, jdbcType=INTEGER}
+    </select>
+
     <insert id="insertStockOperateLog" parameterType="com.example.demo.model.StockOperateLog" useGeneratedKeys="true" keyProperty="id" >
         <![CDATA[
        INSERT INTO stock_operate_log
        (
+           user_id,
            stock_id,
            operate_amount,
            create_at,
@@ -13,10 +33,11 @@
        )
        VALUES
        (
-           #{stockId, jdbcType=Integer},
-           #{operateAmount, jdbcType=java.math.BigDecimal},
-           #{createAt, jdbcType=java.util.Date},
-           #{updateAt, jdbcType=java.util.Date}
+           #{userId, jdbcType=INTEGER},
+           #{stockId, jdbcType=INTEGER},
+           #{operateAmount, jdbcType=DECIMAL},
+           #{createAt, jdbcType=DATE},
+           #{updateAt, jdbcType=DATE}
        )
        ]]>
     </insert>

@@ -6,12 +6,15 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
- * Created by cjyfff on 17-7-2.
+ *
+ * @author cjyfff
+ * @date 17-7-2
  */
 @Data
 public class Stock {
     Integer id;
+    Integer userId;
     BigDecimal amount;
-    Date createdAt;
+    Date createAt;
     Date updateAt;
 }
