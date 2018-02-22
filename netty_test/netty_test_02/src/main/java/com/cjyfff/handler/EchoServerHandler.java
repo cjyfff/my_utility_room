@@ -2,6 +2,7 @@ package com.cjyfff.handler;
 
 import com.alibaba.fastjson.JSON;
 import com.cjyfff.vo.CommentDetailReqVo;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
@@ -52,7 +53,6 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
 
                         CommentDetailReqVo reqVo = JSON.parseObject(jsonStr, CommentDetailReqVo.class);
 
-
                         boolean keepAlive = HttpUtil.isKeepAlive(req);
                         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(CONTENT));
                         response.headers().set(CONTENT_TYPE, "text/plain");
@@ -77,9 +77,16 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
         ctx.close();
     }
 
+
     private static ExecutorService newBlockingExecutorsUseCallerRun(int size) {
-        return new ThreadPoolExecutor(size, size, 0L, TimeUnit.MILLISECONDS, new SynchronousQueue<>(),
-                new RejectedExecutionHandler() {
+        ThreadFactory namedThreadFactory = new ThreadFactoryBuilder()
+            .setNameFormat("netty-test-pool-%d").build();
+
+        // 这里使用SynchronousQueue的话，当任务达到最大线程数时，生产线程再插入任务会阻塞，继而会阻塞NioEvenLoop，
+        // 因此应该使用LinkedBlockingQueue
+        return new ThreadPoolExecutor(size, size, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+            namedThreadFactory,
+            new RejectedExecutionHandler() {
                     @Override
                     public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
                         try {
