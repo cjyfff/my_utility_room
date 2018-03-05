@@ -26,6 +26,7 @@ public class EchoServerInitializer extends ChannelInitializer<SocketChannel> {
         }
 
         p.addLast(new HttpServerCodec());
+        // 需要使用这个才有FullHttpRequest
         p.addLast(new HttpObjectAggregator(2048));
         p.addLast(new EchoServerHandler());
     }
