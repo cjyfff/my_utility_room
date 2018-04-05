@@ -82,9 +82,11 @@ public class EchoServerHandler extends ChannelInboundHandlerAdapter {
         ThreadFactory namedThreadFactory = new ThreadFactoryBuilder()
             .setNameFormat("netty-test-pool-%d").build();
 
-        // 这里使用SynchronousQueue的话，当任务达到最大线程数时，生产线程再插入任务会阻塞，继而会阻塞NioEvenLoop，
-        // 因此应该使用LinkedBlockingQueue
-        return new ThreadPoolExecutor(size, size, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+        // 1、使用LinkedBlockingQueue，就可以有一个缓冲过程。不过LinkedBlockingQueue需要指定一个容量，不然过多任务堆积，
+        // 会消耗大量的资源，请求也不能在短时间内得到相应
+        // 2、使用SynchronousQueue，当任务达到最大线程数时，生产线程再插入任务会阻塞，继而会阻塞NioEvenLoop，考虑到请求已经多到
+        // 达到线程池最大线程数，让请求阻塞其实也是一种合理的选择。
+        return new ThreadPoolExecutor(size, size, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(size * 2),
             namedThreadFactory,
             new RejectedExecutionHandler() {
                     @Override
