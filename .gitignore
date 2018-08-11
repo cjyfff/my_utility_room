@@ -54,3 +54,6 @@ classes/
 META-INF/
 target/
 
+# macOS
+.DS_Store
+
