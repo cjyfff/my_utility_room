@@ -1,4 +1,4 @@
-package com.cjyfff;
+package com.cjyfff.demo;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -14,7 +14,7 @@ public class LeaderSelectorTest2 {
         private static final int COUNT = 5;
 
         public static void main(String[] args) throws Exception {
-            CuratorFramework client = CuratorFrameworkFactory.newClient("127.0.0.1:2181",
+            CuratorFramework client = CuratorFrameworkFactory.newClient("192.168.43.241:2181",
                 new ExponentialBackoffRetry(1000, 3));
             client.start();
 

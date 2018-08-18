@@ -1,4 +1,4 @@
-package com.cjyfff;
+package com.cjyfff.demo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +23,7 @@ public class LeaderSelectorTest {
     private static final int COUNT = 5;
 
     public static void main(String[] args) throws Exception {
-        CuratorFramework client = CuratorFrameworkFactory.newClient("localhost:2181",
+        CuratorFramework client = CuratorFrameworkFactory.newClient("192.168.43.241:2181",
             new ExponentialBackoffRetry(1000, 3));
         client.start();
 
