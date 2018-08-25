@@ -1,7 +1,6 @@
 package com.cjyfff.election;
 
 import java.net.InetAddress;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -10,9 +9,18 @@ import javax.annotation.PostConstruct;
 
 import com.alibaba.fastjson.JSON;
 
+import com.cjyfff.election.ElectionStatus.ElectionStatusType;
+import com.cjyfff.election.master.MasterAction;
+import com.cjyfff.election.slave.SlaveAction;
 import com.cjyfff.repository.ZooKeeperClient;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.recipes.cache.ChildData;
+import org.apache.curator.framework.recipes.cache.NodeCache;
+import org.apache.curator.framework.recipes.cache.NodeCacheListener;
+import org.apache.curator.framework.recipes.cache.PathChildrenCache;
+import org.apache.curator.framework.recipes.cache.PathChildrenCacheListener;
 import org.apache.curator.framework.recipes.leader.LeaderLatch;
 import org.apache.curator.framework.recipes.leader.LeaderLatchListener;
 import org.apache.zookeeper.CreateMode;
@@ -20,6 +28,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent.Type;
 
 /**
  * Created by jiashen on 2018/8/18.
@@ -31,7 +41,9 @@ public class Election {
 
     private static final String NODE_INFO_PATH = "/node_info";
 
-    private static final String SHARDING_INFO_PATH = "/sharding_info_path";
+    private static final String SHARDING_INFO_PATH = "/sharding_info";
+
+    private static final String ELECTION_STATUS_PATH = "/election_status";
 
     private static final String CLIENT_ID = UUID.randomUUID().toString();
 
@@ -41,12 +53,23 @@ public class Election {
     @Autowired
     private ZooKeeperClient zooKeeperClient;
 
+    @Autowired
+    private ElectionStatus electionStatus;
+
+    @Autowired
+    private MasterAction masterAction;
+
+    @Autowired
+    private SlaveAction slaveAction;
+
     @PostConstruct
     public void start() {
         try {
             CuratorFramework client = zooKeeperClient.getClient();
 
             writeNodeInfo(client);
+
+            monitorNodeInfo(client);
 
             electLeader(client);
         } catch (Exception e) {
@@ -68,24 +91,30 @@ public class Election {
         client.create().withMode(CreateMode.EPHEMERAL).forPath(myNodeInfoPath, "".getBytes());
     }
 
+
     /**
-     * master统计节点，分配node id，写入zk
+     * 所有节点，监控集群节点信息（NODE_INFO_PATH）
+     * 在选举成功后，发生节点变更，需要触发重新选举
      * @param client
+     * @throws Exception
      */
-    private void masterSetShardingInfo(CuratorFramework client) throws Exception {
-        List<String> nodeIpList = client.getChildren().forPath(NODE_INFO_PATH);
-        Integer nodeId = 0;
-        Map<Integer, String> shardingMap = Maps.newHashMapWithExpectedSize(15);
-        for (String nodeIp : nodeIpList) {
-            shardingMap.put(nodeId, nodeIp);
-            logger.info("Host: " + nodeIp + "get nodeId: " + nodeId);
-            nodeId ++;
-        }
+    private void monitorNodeInfo(CuratorFramework client) throws Exception {
+        PathChildrenCacheListener cacheListener = (client1, event) -> {
+            logger.info("NODE_INFO_PATH listener monitor data change, event type is：" + event.getType());
 
-        client.create().withMode(CreateMode.EPHEMERAL)
-            .forPath(SHARDING_INFO_PATH,
-                JSON.toJSONString(shardingMap).getBytes());
+            if (Lists.newArrayList(Type.CHILD_ADDED, Type.CHILD_REMOVED, Type.CHILD_UPDATED).contains(event.getType())) {
+                // todo:触发选举流程
+                if (ElectionStatusType.FINISH.equals(electionStatus.getElectionFinish())) {
+                    electionStatus.setElectionFinish(ElectionStatusType.NOT_YET);
+                    logger.info("NODE_INFO_PATH change, start election");
+                }
+            }
+        };
 
+        PathChildrenCache cache = new PathChildrenCache(client, NODE_INFO_PATH, true);
+        cache.getListenable().addListener(cacheListener);
+        cache.start();
+        // todo: 考虑cache回收问题
     }
 
     /**
