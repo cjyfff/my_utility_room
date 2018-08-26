@@ -1,6 +1,7 @@
 package com.cjyfff.election.slave;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import com.alibaba.fastjson.JSON;
 
@@ -41,6 +42,11 @@ public class SlaveAction {
      */
     public void slaveMonitorShardingInfo(CuratorFramework client) throws Exception {
 
+        // 防止监控开始时，master还没有写入分片信息，因此循环等待
+        while (client.checkExists().forPath(SHARDING_INFO_PATH) == null) {
+            TimeUnit.SECONDS.sleep(1);
+        }
+
         // 防止listener启动前，数据已经被设置，因此先读取一次数据
         byte[] bs = client.getData().forPath(SHARDING_INFO_PATH);
         if (bs != null && bs.length > 0) {
@@ -77,6 +83,11 @@ public class SlaveAction {
      */
     public void slaveMonitorElectionStatus(CuratorFramework client) throws Exception {
 
+        // 防止监控开始时，master还没有写入选举状态信息，因此循环等待
+        while (client.checkExists().forPath(ELECTION_STATUS_PATH) == null) {
+            TimeUnit.SECONDS.sleep(1);
+        }
+
         // 防止listener启动前，数据已经被设置，因此先读取一次数据
         byte[] bs = client.getData().forPath(ELECTION_STATUS_PATH);
         if (bs != null && bs.length > 0) {
@@ -85,6 +96,7 @@ public class SlaveAction {
 
             if (ElectionStatusType.FINISH.getValue().equals(electionStatusValue)) {
                 electionStatus.setElectionFinish(ElectionStatusType.FINISH);
+                logger.info("*** Election finish. ***");
             } else {
                 electionStatus.setElectionFinish(ElectionStatusType.NOT_YET);
             }
@@ -100,6 +112,7 @@ public class SlaveAction {
 
                 if (ElectionStatusType.FINISH.getValue().equals(electionStatusValue)) {
                     electionStatus.setElectionFinish(ElectionStatusType.FINISH);
+                    logger.info("*** Election finish. ***");
                 } else {
                     electionStatus.setElectionFinish(ElectionStatusType.NOT_YET);
                 }

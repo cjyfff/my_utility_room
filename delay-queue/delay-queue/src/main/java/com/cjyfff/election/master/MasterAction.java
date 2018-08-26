@@ -10,6 +10,7 @@ import com.cjyfff.election.ElectionStatus.ElectionStatusType;
 import com.google.common.collect.Maps;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,9 +47,14 @@ public class MasterAction {
             nodeId ++;
         }
 
-        client.create().withMode(CreateMode.EPHEMERAL)
-            .forPath(SHARDING_INFO_PATH,
-                JSON.toJSONString(shardingMap).getBytes());
+        Stat stat = client.checkExists().forPath(SHARDING_INFO_PATH);
+        String ShardingInfo = JSON.toJSONString(shardingMap);
+        if (stat == null) {
+            client.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL)
+                .forPath(SHARDING_INFO_PATH, ShardingInfo.getBytes());
+        } else {
+            client.setData().forPath(SHARDING_INFO_PATH, ShardingInfo.getBytes());
+        }
 
     }
 
@@ -58,8 +64,14 @@ public class MasterAction {
      * @throws Exception
      */
     public void masterClaimElectionSuccess(CuratorFramework client) throws Exception {
-        client.create().creatingParentsIfNeeded().forPath(ELECTION_STATUS_PATH,
-            ElectionStatusType.FINISH.getValue().toString().getBytes());
+        Stat stat = client.checkExists().forPath(ELECTION_STATUS_PATH);
+        if (stat == null) {
+            client.create().creatingParentsIfNeeded().forPath(ELECTION_STATUS_PATH,
+                ElectionStatusType.FINISH.getValue().toString().getBytes());
+        } else {
+            client.setData().forPath(ELECTION_STATUS_PATH,
+                ElectionStatusType.FINISH.getValue().toString().getBytes());
+        }
     }
 
     /**
@@ -67,5 +79,6 @@ public class MasterAction {
      */
     public void masterUpdateSelfStatus() {
         electionStatus.setElectionFinish(ElectionStatusType.FINISH);
+        logger.info("*** Election finish. ***");
     }
 }

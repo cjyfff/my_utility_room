@@ -16,6 +16,7 @@ import org.apache.curator.framework.recipes.cache.PathChildrenCacheListener;
 import org.apache.curator.framework.recipes.leader.LeaderLatch;
 import org.apache.curator.framework.recipes.leader.LeaderLatchListener;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +33,6 @@ public class Election {
     private static final String ELECTION_PATH = "/leader";
 
     private static final String NODE_INFO_PATH = "/node_info";
-
-    private static final String SHARDING_INFO_PATH = "/sharding_info";
-
-    private static final String ELECTION_STATUS_PATH = "/election_status";
 
     private static final String CLIENT_ID = UUID.randomUUID().toString();
 
@@ -80,7 +77,11 @@ public class Election {
         InetAddress addr = InetAddress.getLocalHost();
         String ip=addr.getHostAddress();
         String myNodeInfoPath = NODE_INFO_PATH + "/" + ip;
-        client.create().withMode(CreateMode.EPHEMERAL).forPath(myNodeInfoPath, "".getBytes());
+        Stat stat = client.checkExists().forPath(myNodeInfoPath);
+        if (stat == null) {
+            client.create().creatingParentsIfNeeded()
+                .withMode(CreateMode.EPHEMERAL).forPath(myNodeInfoPath, "".getBytes());
+        }
     }
 
 
