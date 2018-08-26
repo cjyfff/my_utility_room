@@ -1,24 +1,16 @@
 package com.cjyfff.election;
 
 import java.net.InetAddress;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
-
-import com.alibaba.fastjson.JSON;
 
 import com.cjyfff.election.ElectionStatus.ElectionStatusType;
 import com.cjyfff.election.master.MasterAction;
 import com.cjyfff.election.slave.SlaveAction;
 import com.cjyfff.repository.ZooKeeperClient;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.recipes.cache.ChildData;
-import org.apache.curator.framework.recipes.cache.NodeCache;
-import org.apache.curator.framework.recipes.cache.NodeCacheListener;
 import org.apache.curator.framework.recipes.cache.PathChildrenCache;
 import org.apache.curator.framework.recipes.cache.PathChildrenCacheListener;
 import org.apache.curator.framework.recipes.leader.LeaderLatch;
@@ -103,10 +95,13 @@ public class Election {
             logger.info("NODE_INFO_PATH listener monitor data change, event type is：" + event.getType());
 
             if (Lists.newArrayList(Type.CHILD_ADDED, Type.CHILD_REMOVED, Type.CHILD_UPDATED).contains(event.getType())) {
-                // todo:触发选举流程
+
+                // 在选举成功后，发生节点变更，需要触发重新选举
                 if (ElectionStatusType.FINISH.equals(electionStatus.getElectionFinish())) {
                     electionStatus.setElectionFinish(ElectionStatusType.NOT_YET);
                     logger.info("NODE_INFO_PATH change, start election");
+
+                    electLeader(client);
                 }
             }
         };
@@ -129,12 +124,34 @@ public class Election {
 
             @Override
             public void isLeader() {
-                logger.info("I am Leader");
+                try {
+                    logger.info("I am Leader");
+
+                    masterAction.masterSetShardingInfo(client);
+
+                    masterAction.masterClaimElectionSuccess(client);
+
+                    masterAction.masterUpdateSelfStatus();
+
+                } catch (Exception e) {
+                    logger.error("Master action get error: ", e);
+                }
+
             }
 
             @Override
             public void notLeader() {
-                logger.info("I am not Leader");
+                try {
+                    logger.info("I am not Leader");
+
+                    slaveAction.slaveMonitorShardingInfo(client);
+
+                    slaveAction.slaveMonitorElectionStatus(client);
+
+                } catch (Exception e) {
+                    logger.error("Slave action get error: ", e);
+                }
+
             }
         });
 

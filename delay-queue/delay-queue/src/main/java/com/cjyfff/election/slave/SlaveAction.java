@@ -1,7 +1,6 @@
 package com.cjyfff.election.slave;
 
 import java.util.Map;
-import java.util.UUID;
 
 import com.alibaba.fastjson.JSON;
 
@@ -22,9 +21,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class SlaveAction {
-    private static final String ELECTION_PATH = "/leader";
-
-    private static final String NODE_INFO_PATH = "/node_info";
 
     private static final String SHARDING_INFO_PATH = "/sharding_info";
 
@@ -79,7 +75,7 @@ public class SlaveAction {
      * @param client
      * @throws Exception
      */
-    private void slaveMonitorElectionStatus(CuratorFramework client) throws Exception {
+    public void slaveMonitorElectionStatus(CuratorFramework client) throws Exception {
 
         // 防止listener启动前，数据已经被设置，因此先读取一次数据
         byte[] bs = client.getData().forPath(ELECTION_STATUS_PATH);

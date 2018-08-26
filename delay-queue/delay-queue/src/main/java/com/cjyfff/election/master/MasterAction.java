@@ -5,12 +5,14 @@ import java.util.Map;
 
 import com.alibaba.fastjson.JSON;
 
+import com.cjyfff.election.ElectionStatus;
 import com.cjyfff.election.ElectionStatus.ElectionStatusType;
 import com.google.common.collect.Maps;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.zookeeper.CreateMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -21,13 +23,14 @@ public class MasterAction {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private static final String ELECTION_PATH = "/leader";
-
     private static final String NODE_INFO_PATH = "/node_info";
 
     private static final String SHARDING_INFO_PATH = "/sharding_info";
 
     private static final String ELECTION_STATUS_PATH = "/election_status";
+
+    @Autowired
+    private ElectionStatus electionStatus;
 
     /**
      * master统计节点，分配node id，写入zk
@@ -57,5 +60,12 @@ public class MasterAction {
     public void masterClaimElectionSuccess(CuratorFramework client) throws Exception {
         client.create().creatingParentsIfNeeded().forPath(ELECTION_STATUS_PATH,
             ElectionStatusType.FINISH.getValue().toString().getBytes());
+    }
+
+    /**
+     * master设置本机选举状态为完成
+     */
+    public void masterUpdateSelfStatus() {
+        electionStatus.setElectionFinish(ElectionStatusType.FINISH);
     }
 }
