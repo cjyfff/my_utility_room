@@ -2,6 +2,7 @@ package com.cjyfff.election;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.curator.framework.recipes.leader.LeaderLatch;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,6 +15,7 @@ public class ElectionStatus {
 
     private volatile ElectionStatusType electionFinish = ElectionStatusType.NOT_YET;
 
+    private volatile LeaderLatch leaderLatch;
 
     public enum ElectionStatusType {
 

@@ -47,6 +47,14 @@ public class SlaveAction {
             TimeUnit.SECONDS.sleep(1);
         }
 
+        if (electionStatus.getLeaderLatch() == null) {
+            throw new Exception("LeaderLatch in electionStatus get null.");
+        }
+        // 确保只有slave才执行
+        if (electionStatus.getLeaderLatch().hasLeadership()) {
+            return;
+        }
+
         // 防止listener启动前，数据已经被设置，因此先读取一次数据
         byte[] bs = client.getData().forPath(SHARDING_INFO_PATH);
         if (bs != null && bs.length > 0) {
@@ -88,6 +96,14 @@ public class SlaveAction {
             TimeUnit.SECONDS.sleep(1);
         }
 
+        if (electionStatus.getLeaderLatch() == null) {
+            throw new Exception("LeaderLatch in electionStatus get null.");
+        }
+        // 确保只有slave才执行
+        if (electionStatus.getLeaderLatch().hasLeadership()) {
+            return;
+        }
+
         // 防止listener启动前，数据已经被设置，因此先读取一次数据
         byte[] bs = client.getData().forPath(ELECTION_STATUS_PATH);
         if (bs != null && bs.length > 0) {
@@ -96,7 +112,7 @@ public class SlaveAction {
 
             if (ElectionStatusType.FINISH.getValue().equals(electionStatusValue)) {
                 electionStatus.setElectionFinish(ElectionStatusType.FINISH);
-                logger.info("*** Election finish. ***");
+                logger.info("*** Election finish. I am slave. ***");
             } else {
                 electionStatus.setElectionFinish(ElectionStatusType.NOT_YET);
             }
@@ -112,7 +128,7 @@ public class SlaveAction {
 
                 if (ElectionStatusType.FINISH.getValue().equals(electionStatusValue)) {
                     electionStatus.setElectionFinish(ElectionStatusType.FINISH);
-                    logger.info("*** Election finish. ***");
+                    logger.info("*** Election finish. I am slave. ***");
                 } else {
                     electionStatus.setElectionFinish(ElectionStatusType.NOT_YET);
                 }

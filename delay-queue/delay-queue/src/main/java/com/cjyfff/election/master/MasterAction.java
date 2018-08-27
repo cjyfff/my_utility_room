@@ -79,6 +79,6 @@ public class MasterAction {
      */
     public void masterUpdateSelfStatus() {
         electionStatus.setElectionFinish(ElectionStatusType.FINISH);
-        logger.info("*** Election finish. ***");
+        logger.info("*** Election finish. I am master. ***");
     }
 }

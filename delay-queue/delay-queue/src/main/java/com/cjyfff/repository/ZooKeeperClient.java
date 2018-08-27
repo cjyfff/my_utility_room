@@ -7,6 +7,7 @@ import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,7 +16,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ZooKeeperClient {
 
-    private static final String ZK_HOST = "192.168.43.48:2181";
+    @Value("${delay_queue.zk_host}")
+    private String zk_host;
 
     private CuratorFramework client;
 
@@ -24,7 +26,7 @@ public class ZooKeeperClient {
     public CuratorFramework getClient() {
         if (this.client == null) {
             // todo: 连接不上zk应该直接退出
-            CuratorFramework c = CuratorFrameworkFactory.newClient(ZK_HOST,
+            CuratorFramework c = CuratorFrameworkFactory.newClient(zk_host,
                 new ExponentialBackoffRetry(1000, 3));
             c.start();
             this.client = c;

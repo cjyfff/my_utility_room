@@ -61,6 +61,11 @@ public class Election {
             monitorNodeInfo(client);
 
             electLeader(client);
+
+            slaveAction.slaveMonitorShardingInfo(client);
+
+            slaveAction.slaveMonitorElectionStatus(client);
+
         } catch (Exception e) {
             logger.error("Starting election get error: ", e);
             System.exit(1);
@@ -143,11 +148,12 @@ public class Election {
             @Override
             public void notLeader() {
                 try {
+                    // todo: 搞清楚什么时候触发
                     logger.info("I am not Leader");
 
-                    slaveAction.slaveMonitorShardingInfo(client);
-
-                    slaveAction.slaveMonitorElectionStatus(client);
+                    //slaveAction.slaveMonitorShardingInfo(client);
+                    //
+                    //slaveAction.slaveMonitorElectionStatus(client);
 
                 } catch (Exception e) {
                     logger.error("Slave action get error: ", e);
@@ -158,5 +164,6 @@ public class Election {
 
 
         leaderLatch.start();
+        electionStatus.setLeaderLatch(leaderLatch);
     }
 }
