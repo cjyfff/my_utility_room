@@ -59,7 +59,7 @@ public class SlaveAction {
         byte[] bs = client.getData().forPath(SHARDING_INFO_PATH);
         if (bs != null && bs.length > 0) {
             String shardingData = new String(bs);
-            logger.info("Get Cluster sharding info: " + shardingData);
+            logger.info("Slave get cluster sharding info: " + shardingData);
             Map<Integer, String> shardingMap = JSON.parseObject(shardingData, Map.class);
             shardingInfo.setShardingMap(shardingMap);
         }
@@ -69,13 +69,13 @@ public class SlaveAction {
             ChildData data = cache.getCurrentData();
             if (null != data) {
                 String shardingData = new String(cache.getCurrentData().getData());
-                logger.info("Cluster sharding info changed：" + shardingData);
+                logger.info("Slave get cluster sharding info changed：" + shardingData);
                 Map<Integer, String> shardingMap = JSON.parseObject(shardingData, Map.class);
                 shardingInfo.setShardingMap(shardingMap);
 
             } else {
                 shardingInfo.setShardingMap(null);
-                logger.info("Cluster sharding info has been deleted or not exist..,");
+                logger.info("Slave get cluster sharding info has been deleted or not exist..,");
             }
         };
 
@@ -108,7 +108,7 @@ public class SlaveAction {
         byte[] bs = client.getData().forPath(ELECTION_STATUS_PATH);
         if (bs != null && bs.length > 0) {
             Integer electionStatusValue = Integer.valueOf(new String(bs));
-            logger.info("Get election status: " + electionStatusValue);
+            logger.info("Slave get election status: " + electionStatusValue);
 
             if (ElectionStatusType.FINISH.getValue().equals(electionStatusValue)) {
                 electionStatus.setElectionFinish(ElectionStatusType.FINISH);
@@ -124,7 +124,7 @@ public class SlaveAction {
             ChildData data = cache.getCurrentData();
             if (null != data) {
                 Integer electionStatusValue = Integer.valueOf(new String(cache.getCurrentData().getData()));
-                logger.info("Election status data changed：" + electionStatusValue);
+                logger.info("Slave get election status data changed：" + electionStatusValue);
 
                 if (ElectionStatusType.FINISH.getValue().equals(electionStatusValue)) {
                     electionStatus.setElectionFinish(ElectionStatusType.FINISH);
@@ -134,7 +134,7 @@ public class SlaveAction {
                 }
 
             } else {
-                logger.info("Election status data has been deleted or not exist..,");
+                logger.info("Slave get election status data has been deleted or not exist..,");
             }
         };
 

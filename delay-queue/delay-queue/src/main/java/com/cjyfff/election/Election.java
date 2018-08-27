@@ -17,6 +17,7 @@ import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 
@@ -47,6 +48,9 @@ public class Election {
     @Autowired
     private SlaveAction slaveAction;
 
+    @Value("${server.port}")
+    private String servicePort;
+
     @PostConstruct
     public void start() {
         try {
@@ -68,14 +72,14 @@ public class Election {
     }
 
     /**
-     * 把自身ip作为临时节点写入zk
+     * 把自身ip和端口作为临时节点路径写入zk
      * @param client
      * @throws Exception
      */
     private void writeNodeInfo(CuratorFramework client) throws Exception {
         InetAddress addr = InetAddress.getLocalHost();
-        String ip=addr.getHostAddress();
-        String myNodeInfoPath = NODE_INFO_PATH + "/" + ip;
+        String host = addr.getHostAddress() + servicePort;
+        String myNodeInfoPath = NODE_INFO_PATH + "/" + host;
         Stat stat = client.checkExists().forPath(myNodeInfoPath);
         if (stat == null) {
             client.create().creatingParentsIfNeeded()
@@ -111,6 +115,7 @@ public class Election {
 
                     masterAction.masterClaimElectionStatus(client, true);
 
+                    // todo: 处理本机设置选举成功后，node info change listener才回调导致2次分片的问题
                     masterAction.masterUpdateSelfStatus(true);
 
                 } catch (Exception e) {
