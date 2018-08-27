@@ -43,6 +43,7 @@ public class SlaveAction {
     public void slaveMonitorShardingInfo(CuratorFramework client) throws Exception {
 
         // 防止监控开始时，master还没有写入分片信息，因此循环等待
+        // 同时也根据SHARDING_INFO_PATH是否存在来判断master是否已经选举出来
         while (client.checkExists().forPath(SHARDING_INFO_PATH) == null) {
             TimeUnit.SECONDS.sleep(1);
         }
@@ -92,6 +93,7 @@ public class SlaveAction {
     public void slaveMonitorElectionStatus(CuratorFramework client) throws Exception {
 
         // 防止监控开始时，master还没有写入选举状态信息，因此循环等待
+        // 同时也根据ELECTION_STATUS_PATH是否存在来判断master是否已经选举出来
         while (client.checkExists().forPath(ELECTION_STATUS_PATH) == null) {
             TimeUnit.SECONDS.sleep(1);
         }
@@ -134,6 +136,7 @@ public class SlaveAction {
                 }
 
             } else {
+                electionStatus.setElectionFinish(ElectionStatusType.NOT_YET);
                 logger.info("Slave get election status data has been deleted or not exist..,");
             }
         };

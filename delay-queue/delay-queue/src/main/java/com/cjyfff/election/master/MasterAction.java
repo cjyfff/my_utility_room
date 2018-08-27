@@ -54,6 +54,7 @@ public class MasterAction {
         Stat stat = client.checkExists().forPath(SHARDING_INFO_PATH);
         String ShardingInfo = JSON.toJSONString(shardingMap);
         if (stat == null) {
+            // SHARDING_INFO_PATH设为临时节点
             client.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL)
                 .forPath(SHARDING_INFO_PATH, ShardingInfo.getBytes());
         } else {
@@ -106,7 +107,8 @@ public class MasterAction {
 
         Stat stat = client.checkExists().forPath(ELECTION_STATUS_PATH);
         if (stat == null) {
-            client.create().creatingParentsIfNeeded().forPath(ELECTION_STATUS_PATH,
+            // ELECTION_STATUS_PATH设为临时节点
+            client.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL).forPath(ELECTION_STATUS_PATH,
                 electionStatusType.getValue().toString().getBytes());
         } else {
             client.setData().forPath(ELECTION_STATUS_PATH,
