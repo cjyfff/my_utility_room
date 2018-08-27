@@ -78,7 +78,7 @@ public class Election {
      */
     private void writeNodeInfo(CuratorFramework client) throws Exception {
         InetAddress addr = InetAddress.getLocalHost();
-        String host = addr.getHostAddress() + servicePort;
+        String host = addr.getHostAddress() + ":" + servicePort;
         String myNodeInfoPath = NODE_INFO_PATH + "/" + host;
         Stat stat = client.checkExists().forPath(myNodeInfoPath);
         if (stat == null) {

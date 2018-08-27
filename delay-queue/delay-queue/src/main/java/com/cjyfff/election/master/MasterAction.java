@@ -77,7 +77,7 @@ public class MasterAction {
 
                 // 在选举成功后，发生节点变更，需要触发重新分片
                 if (ElectionStatusType.FINISH.equals(electionStatus.getElectionFinish())) {
-                    electionStatus.setElectionFinish(ElectionStatusType.NOT_YET);
+                    //electionStatus.setElectionFinish(ElectionStatusType.NOT_YET);
                     logger.info("NODE_INFO_PATH change, start sharding...");
 
                     masterSetShardingInfo(client);
