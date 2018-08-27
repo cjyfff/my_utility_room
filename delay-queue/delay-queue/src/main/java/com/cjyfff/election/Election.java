@@ -9,10 +9,7 @@ import com.cjyfff.election.ElectionStatus.ElectionStatusType;
 import com.cjyfff.election.master.MasterAction;
 import com.cjyfff.election.slave.SlaveAction;
 import com.cjyfff.repository.ZooKeeperClient;
-import com.google.common.collect.Lists;
 import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.recipes.cache.PathChildrenCache;
-import org.apache.curator.framework.recipes.cache.PathChildrenCacheListener;
 import org.apache.curator.framework.recipes.leader.LeaderLatch;
 import org.apache.curator.framework.recipes.leader.LeaderLatchListener;
 import org.apache.zookeeper.CreateMode;
@@ -22,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent.Type;
 
 /**
  * Created by jiashen on 2018/8/18.
@@ -58,8 +54,6 @@ public class Election {
 
             writeNodeInfo(client);
 
-            monitorNodeInfo(client);
-
             electLeader(client);
 
             slaveAction.slaveMonitorShardingInfo(client);
@@ -89,35 +83,6 @@ public class Election {
         }
     }
 
-
-    /**
-     * 所有节点，监控集群节点信息（NODE_INFO_PATH）
-     * 在选举成功后，发生节点变更，需要触发重新选举
-     * @param client
-     * @throws Exception
-     */
-    private void monitorNodeInfo(CuratorFramework client) throws Exception {
-        PathChildrenCacheListener cacheListener = (client1, event) -> {
-            logger.info("NODE_INFO_PATH listener monitor data change, event type is：" + event.getType());
-
-            if (Lists.newArrayList(Type.CHILD_ADDED, Type.CHILD_REMOVED, Type.CHILD_UPDATED).contains(event.getType())) {
-
-                // 在选举成功后，发生节点变更，需要触发重新选举
-                if (ElectionStatusType.FINISH.equals(electionStatus.getElectionFinish())) {
-                    electionStatus.setElectionFinish(ElectionStatusType.NOT_YET);
-                    logger.info("NODE_INFO_PATH change, start election");
-
-                    electLeader(client);
-                }
-            }
-        };
-
-        PathChildrenCache cache = new PathChildrenCache(client, NODE_INFO_PATH, true);
-        cache.getListenable().addListener(cacheListener);
-        cache.start();
-        // todo: 考虑cache回收问题
-    }
-
     /**
      * 选举master
      * @param client
@@ -133,11 +98,20 @@ public class Election {
                 try {
                     logger.info("I am Leader");
 
+                    if (ElectionStatusType.FINISH.equals(electionStatus.getElectionFinish())) {
+                        logger.info("Starting re-election...");
+                        masterAction.masterClaimElectionStatus(client, false);
+
+                        masterAction.masterUpdateSelfStatus(false);
+                    }
+
                     masterAction.masterSetShardingInfo(client);
 
-                    masterAction.masterClaimElectionSuccess(client);
+                    masterAction.masterMonitorNodeInfo(client);
 
-                    masterAction.masterUpdateSelfStatus();
+                    masterAction.masterClaimElectionStatus(client, true);
+
+                    masterAction.masterUpdateSelfStatus(true);
 
                 } catch (Exception e) {
                     logger.error("Master action get error: ", e);
