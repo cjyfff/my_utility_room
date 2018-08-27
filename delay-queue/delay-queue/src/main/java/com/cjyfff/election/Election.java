@@ -126,18 +126,8 @@ public class Election {
 
             @Override
             public void notLeader() {
-                try {
-                    // todo: 搞清楚什么时候触发
-                    logger.info("I am not Leader");
-
-                    //slaveAction.slaveMonitorShardingInfo(client);
-                    //
-                    //slaveAction.slaveMonitorElectionStatus(client);
-
-                } catch (Exception e) {
-                    logger.error("Slave action get error: ", e);
-                }
-
+                // 本服务没有主动放弃master的逻辑，notLeader应该永远不被触发
+                logger.error("`notLeader` method should never not be call...");
             }
         });
 
