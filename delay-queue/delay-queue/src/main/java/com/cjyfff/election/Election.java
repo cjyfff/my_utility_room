@@ -2,6 +2,7 @@ package com.cjyfff.election;
 
 import java.net.InetAddress;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
@@ -30,6 +31,10 @@ public class Election {
     private static final String ELECTION_PATH = "/leader";
 
     private static final String NODE_INFO_PATH = "/node_info";
+
+    private static final String SHARDING_INFO_PATH = "/sharding_info";
+
+    private static final String ELECTION_STATUS_PATH = "/election_status";
 
     private static final String CLIENT_ID = UUID.randomUUID().toString();
 
@@ -60,14 +65,29 @@ public class Election {
 
             electLeader(client);
 
-            slaveAction.slaveMonitorShardingInfo(client);
+            // 防止监控开始时，master还没有写入分片信息，因此循环等待
+            // 同时也根据SHARDING_INFO_PATH和ELECTION_STATUS_PATH是否存在来判断master是否已经选举出来
+            while (client.checkExists().forPath(SHARDING_INFO_PATH) == null ||
+                   client.checkExists().forPath(ELECTION_STATUS_PATH) == null) {
+                TimeUnit.SECONDS.sleep(1);
+            }
 
-            slaveAction.slaveMonitorElectionStatus(client);
+            if (electionStatus.getLeaderLatch() == null) {
+                throw new Exception("LeaderLatch in electionStatus get null.");
+            }
+
+            // 确保只有slave才执行
+            if (! electionStatus.getLeaderLatch().hasLeadership()) {
+
+                slaveAction.slaveMonitorShardingInfo(client);
+
+                slaveAction.slaveMonitorElectionStatus(client);
+            }
 
         } catch (Exception e) {
             logger.error("Starting election get error: ", e);
             System.exit(1);
-        }
+j        }
 
     }
 
