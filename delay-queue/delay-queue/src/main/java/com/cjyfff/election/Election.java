@@ -87,7 +87,7 @@ public class Election {
         } catch (Exception e) {
             logger.error("Starting election get error: ", e);
             System.exit(1);
-j        }
+       }
 
     }
 
