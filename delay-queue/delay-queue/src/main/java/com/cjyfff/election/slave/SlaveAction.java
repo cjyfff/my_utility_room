@@ -42,13 +42,13 @@ public class SlaveAction {
     public void slaveMonitorShardingInfo(CuratorFramework client) throws Exception {
 
         // 防止listener启动前，数据已经被设置，因此先读取一次数据
-        byte[] bs = client.getData().forPath(SHARDING_INFO_PATH);
-        if (bs != null && bs.length > 0) {
-            String shardingData = new String(bs);
-            logger.info("Slave get cluster sharding info: " + shardingData);
-            Map<Integer, String> shardingMap = JSON.parseObject(shardingData, Map.class);
-            shardingInfo.setShardingMap(shardingMap);
-        }
+        //byte[] bs = client.getData().forPath(SHARDING_INFO_PATH);
+        //if (bs != null && bs.length > 0) {
+        //    String shardingData = new String(bs);
+        //    logger.info("Slave get cluster sharding info: " + shardingData);
+        //    Map<Integer, String> shardingMap = JSON.parseObject(shardingData, Map.class);
+        //    shardingInfo.setShardingMap(shardingMap);
+        //}
 
         NodeCache cache = new NodeCache(client, SHARDING_INFO_PATH);
         NodeCacheListener listener = () -> {
@@ -78,19 +78,19 @@ public class SlaveAction {
     public void slaveMonitorElectionStatus(CuratorFramework client) throws Exception {
 
         // 防止listener启动前，数据已经被设置，因此先读取一次数据
-        byte[] bs = client.getData().forPath(ELECTION_STATUS_PATH);
-        if (bs != null && bs.length > 0) {
-            Integer electionStatusValue = Integer.valueOf(new String(bs));
-            logger.info("Slave get election status: " + electionStatusValue);
-
-            if (ElectionStatusType.FINISH.getValue().equals(electionStatusValue)) {
-                electionStatus.setElectionFinish(ElectionStatusType.FINISH);
-                logger.info("*** Election finish. I am slave. ***");
-            } else {
-                electionStatus.setElectionFinish(ElectionStatusType.NOT_YET);
-            }
-
-        }
+        //byte[] bs = client.getData().forPath(ELECTION_STATUS_PATH);
+        //if (bs != null && bs.length > 0) {
+        //    Integer electionStatusValue = Integer.valueOf(new String(bs));
+        //    logger.info("Slave get election status: " + electionStatusValue);
+        //
+        //    if (ElectionStatusType.FINISH.getValue().equals(electionStatusValue)) {
+        //        electionStatus.setElectionFinish(ElectionStatusType.FINISH);
+        //        logger.info("*** Election finish. I am slave. ***");
+        //    } else {
+        //        electionStatus.setElectionFinish(ElectionStatusType.NOT_YET);
+        //    }
+        //
+        //}
 
         NodeCache cache = new NodeCache(client, ELECTION_STATUS_PATH);
         NodeCacheListener listener = () -> {
@@ -99,7 +99,8 @@ public class SlaveAction {
                 Integer electionStatusValue = Integer.valueOf(new String(cache.getCurrentData().getData()));
                 logger.info("Slave get election status data changed：" + electionStatusValue);
 
-                if (ElectionStatusType.FINISH.getValue().equals(electionStatusValue)) {
+                if (ElectionStatusType.FINISH.getValue().equals(electionStatusValue)
+                    && ! electionStatus.getLeaderLatch().hasLeadership()) {
                     electionStatus.setElectionFinish(ElectionStatusType.FINISH);
                     logger.info("*** Election finish. I am slave. ***");
                 } else {
