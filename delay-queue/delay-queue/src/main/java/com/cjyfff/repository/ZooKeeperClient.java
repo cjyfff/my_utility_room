@@ -4,6 +4,7 @@ import javax.annotation.PreDestroy;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.framework.imps.CuratorFrameworkState;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +18,7 @@ import org.springframework.stereotype.Component;
 public class ZooKeeperClient {
 
     @Value("${delay_queue.zk_host}")
-    private String zk_host;
+    private String zkHost;
 
     private CuratorFramework client;
 
@@ -26,7 +27,7 @@ public class ZooKeeperClient {
     public CuratorFramework getClient() {
         if (this.client == null) {
             // todo: 连接不上zk应该直接退出
-            CuratorFramework c = CuratorFrameworkFactory.newClient(zk_host,
+            CuratorFramework c = CuratorFrameworkFactory.newClient(zkHost,
                 new ExponentialBackoffRetry(1000, 3));
             c.start();
             this.client = c;
@@ -36,7 +37,9 @@ public class ZooKeeperClient {
 
     @PreDestroy
     public void closeClient() {
-        this.client.close();
+        if (! CuratorFrameworkState.STOPPED.equals(this.client.getState())) {
+            this.client.close();
+        }
         logger.info("Close zookeeper connection.");
     }
 }
