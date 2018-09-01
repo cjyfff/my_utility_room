@@ -10,7 +10,11 @@ import com.cjyfff.election.ElectionStatus.ElectionStatusType;
 import com.cjyfff.election.master.MasterAction;
 import com.cjyfff.election.slave.SlaveAction;
 import com.cjyfff.repository.ZooKeeperClient;
+import com.google.common.collect.Lists;
 import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.recipes.cache.PathChildrenCache;
+import org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent.Type;
+import org.apache.curator.framework.recipes.cache.PathChildrenCacheListener;
 import org.apache.curator.framework.recipes.leader.LeaderLatch;
 import org.apache.curator.framework.recipes.leader.LeaderLatchListener;
 import org.apache.zookeeper.CreateMode;
@@ -65,6 +69,8 @@ public class Election {
 
             electLeader(client);
 
+            monitorNodeInfo(client);
+
             // 防止监控开始时，master还没有写入分片信息，因此循环等待
             // 同时也根据SHARDING_INFO_PATH和ELECTION_STATUS_PATH是否存在来判断master是否已经选举出来
             while (client.checkExists().forPath(SHARDING_INFO_PATH) == null ||
@@ -108,6 +114,41 @@ public class Election {
     }
 
     /**
+     * 监控集群节点信息（NODE_INFO_PATH）
+     * 在选举成功后，发生节点变更，需要触发重新分片
+     * @param client
+     * @throws Exception
+     */
+    public void monitorNodeInfo(CuratorFramework client) throws Exception {
+        PathChildrenCacheListener cacheListener = (client1, event) -> {
+            logger.info("NODE_INFO_PATH listener monitor data change, event type is：" + event.getType());
+
+            if (Lists.newArrayList(Type.CHILD_ADDED, Type.CHILD_REMOVED, Type.CHILD_UPDATED).contains(event.getType())) {
+
+                // 在选举成功后，发生节点变更，master需要触发重新分片
+                if (electionStatus.getLeaderLatch().hasLeadership()) {
+                    if (ElectionStatusType.FINISH.equals(electionStatus.getElectionFinish())) {
+                        //electionStatus.setElectionFinish(ElectionStatusType.NOT_YET);
+                        logger.info("NODE_INFO_PATH change, start sharding...");
+
+                        masterAction.masterSetShardingInfo(client);
+                    }
+                }
+            }
+
+            // 重新连上zk是需要再写入node info，以便触发重新分片
+            if (Type.CONNECTION_RECONNECTED.equals(event.getType())) {
+                writeNodeInfo(client);
+            }
+        };
+
+        PathChildrenCache cache = new PathChildrenCache(client, NODE_INFO_PATH, true);
+        cache.getListenable().addListener(cacheListener);
+        cache.start();
+        // todo: 考虑cache回收问题
+    }
+
+    /**
      * 选举master
      * @param client
      * @throws Exception
@@ -132,8 +173,6 @@ public class Election {
                     }
 
                     masterAction.masterSetShardingInfo(client);
-
-                    masterAction.masterMonitorNodeInfo(client);
 
                     masterAction.masterClaimElectionStatus(client, true);
 

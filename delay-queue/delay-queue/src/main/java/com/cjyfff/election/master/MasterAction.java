@@ -67,33 +67,6 @@ public class MasterAction {
 
     }
 
-    /**
-     * 监控集群节点信息（NODE_INFO_PATH）
-     * 在选举成功后，发生节点变更，需要触发重新分片
-     * @param client
-     * @throws Exception
-     */
-    public void masterMonitorNodeInfo(CuratorFramework client) throws Exception {
-        PathChildrenCacheListener cacheListener = (client1, event) -> {
-            logger.info("NODE_INFO_PATH listener monitor data change, event type is：" + event.getType());
-
-            if (Lists.newArrayList(Type.CHILD_ADDED, Type.CHILD_REMOVED, Type.CHILD_UPDATED).contains(event.getType())) {
-
-                // 在选举成功后，发生节点变更，需要触发重新分片
-                if (ElectionStatusType.FINISH.equals(electionStatus.getElectionFinish())) {
-                    //electionStatus.setElectionFinish(ElectionStatusType.NOT_YET);
-                    logger.info("NODE_INFO_PATH change, start sharding...");
-
-                    masterSetShardingInfo(client);
-                }
-            }
-        };
-
-        PathChildrenCache cache = new PathChildrenCache(client, NODE_INFO_PATH, true);
-        cache.getListenable().addListener(cacheListener);
-        cache.start();
-        // todo: 考虑cache回收问题
-    }
 
     /**
      * master把选举状态信息写入zk
