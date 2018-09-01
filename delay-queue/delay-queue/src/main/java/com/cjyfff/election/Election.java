@@ -115,11 +115,12 @@ public class Election {
 
     /**
      * 监控集群节点信息（NODE_INFO_PATH）
-     * 在选举成功后，发生节点变更，需要触发重新分片
+     * 1、在选举成功后，发生节点变更，master需要触发重新分片
+     * 2、发生重连后，要再次写入分片信息，以便触发分片
      * @param client
      * @throws Exception
      */
-    public void monitorNodeInfo(CuratorFramework client) throws Exception {
+    private void monitorNodeInfo(CuratorFramework client) throws Exception {
         PathChildrenCacheListener cacheListener = (client1, event) -> {
             logger.info("NODE_INFO_PATH listener monitor data change, event type is：" + event.getType());
 
@@ -185,10 +186,22 @@ public class Election {
 
             }
 
+            /**
+             * 作为master，断开zk的连接后会触发本方法
+             */
             @Override
             public void notLeader() {
-                // 本服务没有主动放弃master的逻辑，notLeader应该永远不被触发
-                logger.error("`notLeader` method should never not be call...");
+                try {
+                    logger.warn("Lose leader status...");
+                    electionStatus.setElectionFinish(ElectionStatusType.NOT_YET);
+
+                    slaveAction.slaveMonitorShardingInfo(client);
+
+                    slaveAction.slaveMonitorElectionStatus(client);
+                } catch (Exception e) {
+                    logger.error("notLeader method get error: ", e);
+                }
+
             }
         });
 
