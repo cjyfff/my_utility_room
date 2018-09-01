@@ -122,6 +122,8 @@ public class Election {
                 try {
                     logger.info("I am Leader");
 
+                    masterAction.masterCloseSlaveListener();
+
                     if (ElectionStatusType.FINISH.equals(electionStatus.getElectionFinish())) {
                         logger.info("Starting re-election...");
                         masterAction.masterClaimElectionStatus(client, false);

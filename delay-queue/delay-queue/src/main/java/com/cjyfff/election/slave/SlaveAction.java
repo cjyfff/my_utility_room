@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.alibaba.fastjson.JSON;
 
+import com.cjyfff.election.ElectionListener;
 import com.cjyfff.election.ElectionStatus;
 import com.cjyfff.election.ElectionStatus.ElectionStatusType;
 import com.cjyfff.election.ShardingInfo;
@@ -33,6 +34,9 @@ public class SlaveAction {
 
     @Autowired
     private ElectionStatus electionStatus;
+
+    @Autowired
+    private ElectionListener electionListener;
 
     /**
      * slave监听并保存集群分片信息
@@ -67,6 +71,7 @@ public class SlaveAction {
 
         cache.getListenable().addListener(listener);
         cache.start();
+        electionListener.setSlaveMonitorShardingInfoListener(cache);
     }
 
     /**
@@ -99,8 +104,7 @@ public class SlaveAction {
                 Integer electionStatusValue = Integer.valueOf(new String(cache.getCurrentData().getData()));
                 logger.info("Slave get election status data changed：" + electionStatusValue);
 
-                if (ElectionStatusType.FINISH.getValue().equals(electionStatusValue)
-                    && ! electionStatus.getLeaderLatch().hasLeadership()) {
+                if (ElectionStatusType.FINISH.getValue().equals(electionStatusValue)) {
                     electionStatus.setElectionFinish(ElectionStatusType.FINISH);
                     logger.info("*** Election finish. I am slave. ***");
                 } else {
@@ -115,5 +119,6 @@ public class SlaveAction {
 
         cache.getListenable().addListener(listener);
         cache.start();
+        electionListener.setSlaveMonitorElectionStatusListener(cache);
     }
 }

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.alibaba.fastjson.JSON;
 
+import com.cjyfff.election.ElectionListener;
 import com.cjyfff.election.ElectionStatus;
 import com.cjyfff.election.ElectionStatus.ElectionStatusType;
 import com.google.common.collect.Lists;
@@ -36,6 +37,9 @@ public class MasterAction {
 
     @Autowired
     private ElectionStatus electionStatus;
+
+    @Autowired
+    private ElectionListener electionListener;
 
     /**
      * master统计节点，分配node id，写入zk
@@ -126,6 +130,21 @@ public class MasterAction {
             logger.info("*** Election finish. I am master. ***");
         } else {
             logger.info("*** Re-election finish. I am master. ***");
+        }
+    }
+
+    /**
+     * 成为master后，可能master是由slave转变而成的
+     * 一部分zk目录是由master创建，master无需在监控这些节点，所以需要关闭之前作为slave
+     * 而创建的listener
+     */
+    public void masterCloseSlaveListener() throws Exception {
+        if (electionListener.getSlaveMonitorShardingInfoListener() != null) {
+            electionListener.getSlaveMonitorShardingInfoListener().close();
+        }
+
+        if (electionListener.getSlaveMonitorElectionStatusListener() != null) {
+            electionListener.getSlaveMonitorElectionStatusListener().close();
         }
     }
 }
