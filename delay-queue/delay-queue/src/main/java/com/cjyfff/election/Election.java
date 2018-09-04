@@ -128,8 +128,8 @@ public class Election {
 
                 // 在选举成功后，发生节点变更，master需要触发重新分片
                 if (electionStatus.getLeaderLatch().hasLeadership()) {
-                    if (ElectionStatusType.FINISH.equals(electionStatus.getElectionFinish())) {
-                        //electionStatus.setElectionFinish(ElectionStatusType.NOT_YET);
+                    if (ElectionStatusType.FINISH.equals(electionStatus.getElectionStatus())) {
+                        //electionStatus.setElectionStatus(ElectionStatusType.NOT_YET);
                         logger.info("NODE_INFO_PATH change, start sharding...");
 
                         masterAction.masterSetShardingInfo(client);
@@ -166,7 +166,7 @@ public class Election {
 
                     masterAction.masterCloseSlaveListener();
 
-                    if (ElectionStatusType.FINISH.equals(electionStatus.getElectionFinish())) {
+                    if (ElectionStatusType.FINISH.equals(electionStatus.getElectionStatus())) {
                         logger.info("Starting re-election...");
                         masterAction.masterClaimElectionStatus(client, false);
 
@@ -192,7 +192,7 @@ public class Election {
             public void notLeader() {
                 try {
                     logger.warn("Lose master status...");
-                    electionStatus.setElectionFinish(ElectionStatusType.NOT_YET);
+                    electionStatus.setElectionStatus(ElectionStatusType.NOT_YET);
 
                     slaveAction.slaveMonitorShardingInfo(client);
 

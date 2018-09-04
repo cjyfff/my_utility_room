@@ -95,7 +95,7 @@ public class MasterAction {
      * @Param isFinish 是否选举完成
      */
     public void masterUpdateSelfStatus(boolean isFinish) {
-        electionStatus.setElectionFinish(ElectionStatusType.FINISH);
+        electionStatus.setElectionStatus(ElectionStatusType.FINISH);
         if (isFinish) {
             logger.info("*** Election finish. I am master. ***");
         } else {

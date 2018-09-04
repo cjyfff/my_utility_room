@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ElectionStatus {
 
-    private volatile ElectionStatusType electionFinish = ElectionStatusType.NOT_YET;
+    private volatile ElectionStatusType electionStatus = ElectionStatusType.NOT_YET;
 
     private volatile LeaderLatch leaderLatch;
 

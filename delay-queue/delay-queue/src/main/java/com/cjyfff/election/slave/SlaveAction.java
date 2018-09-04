@@ -89,10 +89,10 @@ public class SlaveAction {
         //    logger.info("Slave get election status: " + electionStatusValue);
         //
         //    if (ElectionStatusType.FINISH.getValue().equals(electionStatusValue)) {
-        //        electionStatus.setElectionFinish(ElectionStatusType.FINISH);
+        //        electionStatus.setElectionStatus(ElectionStatusType.FINISH);
         //        logger.info("*** Election finish. I am slave. ***");
         //    } else {
-        //        electionStatus.setElectionFinish(ElectionStatusType.NOT_YET);
+        //        electionStatus.setElectionStatus(ElectionStatusType.NOT_YET);
         //    }
         //
         //}
@@ -105,14 +105,14 @@ public class SlaveAction {
                 logger.info("Slave get election status data changed：" + electionStatusValue);
 
                 if (ElectionStatusType.FINISH.getValue().equals(electionStatusValue)) {
-                    electionStatus.setElectionFinish(ElectionStatusType.FINISH);
+                    electionStatus.setElectionStatus(ElectionStatusType.FINISH);
                     logger.info("*** Election finish. I am slave. ***");
                 } else {
-                    electionStatus.setElectionFinish(ElectionStatusType.NOT_YET);
+                    electionStatus.setElectionStatus(ElectionStatusType.NOT_YET);
                 }
 
             } else {
-                electionStatus.setElectionFinish(ElectionStatusType.NOT_YET);
+                electionStatus.setElectionStatus(ElectionStatusType.NOT_YET);
                 logger.info("Slave get election status data has been deleted or not exist..,");
             }
         };
