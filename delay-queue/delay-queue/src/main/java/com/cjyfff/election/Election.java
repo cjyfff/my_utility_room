@@ -154,7 +154,7 @@ public class Election {
      * @param client
      * @throws Exception
      */
-    public void electLeader(CuratorFramework client) throws Exception {
+    private void electLeader(CuratorFramework client) throws Exception {
         LeaderLatch leaderLatch = new LeaderLatch(client, ELECTION_PATH, "Client #" + CLIENT_ID);
 
         leaderLatch.addListener(new LeaderLatchListener() {
