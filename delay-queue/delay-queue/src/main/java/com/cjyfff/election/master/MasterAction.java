@@ -2,18 +2,15 @@ package com.cjyfff.election.master;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import com.alibaba.fastjson.JSON;
 
 import com.cjyfff.election.ElectionListener;
 import com.cjyfff.election.ElectionStatus;
 import com.cjyfff.election.ElectionStatus.ElectionStatusType;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.recipes.cache.PathChildrenCache;
-import org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent.Type;
-import org.apache.curator.framework.recipes.cache.PathChildrenCacheListener;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
@@ -108,7 +105,7 @@ public class MasterAction {
 
     /**
      * 成为master后，可能master是由slave转变而成的
-     * 一部分zk目录是由master创建，master无需在监控这些节点，所以需要关闭之前作为slave
+     * 一部分zk目录是由master创建，master无需再监控这些节点，所以需要关闭之前作为slave
      * 而创建的listener
      */
     public void masterCloseSlaveListener() throws Exception {
@@ -119,5 +116,33 @@ public class MasterAction {
         if (electionListener.getSlaveMonitorElectionStatusListener() != null) {
             electionListener.getSlaveMonitorElectionStatusListener().close();
         }
+    }
+
+    /**
+     * 当选为master后
+     * 先进行的业务逻辑处理
+     * 然后在宣告选举结束
+     * @throws Exception
+     */
+    public void masterProcessBusinessLogicAndClaimElectionFinish(CuratorFramework client) throws Exception {
+
+        masterProcessBusinessLogic();
+
+        masterClaimElectionStatus(client, true);
+
+        // todo: 处理本机设置选举成功后，node info change listener才回调导致2次分片的问题
+        masterUpdateSelfStatus(true);
+    }
+
+    /**
+     * 当选为master后需要先进行的业务逻辑
+     * 目前需要进行的处理有：
+     * 1、数据库中的重新分片
+     * @throws Exception
+     */
+    private void masterProcessBusinessLogic() throws Exception {
+        logger.info("Master begin process business logic...");
+        TimeUnit.SECONDS.sleep(5);
+        logger.info("Master finish processing business logic.");
     }
 }
