@@ -162,7 +162,7 @@ public class Election {
             @Override
             public void isLeader() {
                 try {
-                    logger.info("I am Leader");
+                    logger.info("I am Master");
 
                     masterAction.masterCloseSlaveListener();
 
@@ -177,8 +177,7 @@ public class Election {
 
                     masterAction.masterClaimElectionStatus(client, true);
 
-                    // todo: 处理本机设置选举成功后，node info change listener才回调导致2次分片的问题
-                    masterAction.masterUpdateSelfStatus(true);
+                    masterAction.masterProcessBusinessLogicAndClaimElectionFinish(client);
 
                 } catch (Exception e) {
                     logger.error("Master action get error: ", e);
@@ -192,7 +191,7 @@ public class Election {
             @Override
             public void notLeader() {
                 try {
-                    logger.warn("Lose leader status...");
+                    logger.warn("Lose master status...");
                     electionStatus.setElectionFinish(ElectionStatusType.NOT_YET);
 
                     slaveAction.slaveMonitorShardingInfo(client);
