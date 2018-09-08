@@ -1,4 +1,4 @@
-package com.cjyfff.election.status;
+package com.cjyfff.election.info;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -9,13 +9,20 @@ import org.springframework.stereotype.Component;
  * Created by jiashen on 18-8-25.
  */
 @Getter
-@Setter
 @Component
 public class ElectionStatus {
 
     private volatile ElectionStatusType electionStatus = ElectionStatusType.NOT_YET;
 
     private volatile LeaderLatch leaderLatch;
+
+    void setElectionStatus(ElectionStatusType electionStatus) {
+        this.electionStatus = electionStatus;
+    }
+
+    public void setLeaderLatch(LeaderLatch leaderLatch) {
+        this.leaderLatch = leaderLatch;
+    }
 
     public enum ElectionStatusType {
 

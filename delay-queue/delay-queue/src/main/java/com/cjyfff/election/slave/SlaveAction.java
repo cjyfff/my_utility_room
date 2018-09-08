@@ -4,10 +4,12 @@ import java.util.Map;
 
 import com.alibaba.fastjson.JSON;
 
-import com.cjyfff.election.status.ElectionListener;
-import com.cjyfff.election.status.ElectionStatus;
-import com.cjyfff.election.status.ElectionStatus.ElectionStatusType;
+import com.cjyfff.bl.NoneBusinessLogic;
+import com.cjyfff.election.info.ElectionListener;
+import com.cjyfff.election.info.ElectionStatus;
+import com.cjyfff.election.info.ElectionStatus.ElectionStatusType;
 import com.cjyfff.election.ElectionUtils;
+import com.cjyfff.election.info.SetSelfESAndRunBLProxy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.ChildData;
 import org.apache.curator.framework.recipes.cache.NodeCache;
@@ -37,6 +39,9 @@ public class SlaveAction {
 
     @Autowired
     private ElectionUtils electionUtils;
+
+    @Autowired
+    private SetSelfESAndRunBLProxy setSelfESAndRunBLProxy;
 
     /**
      * slave监听并保存集群分片信息
@@ -81,15 +86,15 @@ public class SlaveAction {
                 logger.info("Slave get election status data changed：" + electionStatusValue);
 
                 if (ElectionStatusType.FINISH.getValue().equals(electionStatusValue)) {
-                    electionStatus.setElectionStatus(ElectionStatusType.FINISH);
+                    setSelfESAndRunBLProxy.setFinish(new NoneBusinessLogic(), new NoneBusinessLogic());
                     logger.info("*** Election finish. I am slave. ***");
                 } else {
-                    electionStatus.setElectionStatus(ElectionStatusType.NOT_YET);
+                    setSelfESAndRunBLProxy.setNotYet(new NoneBusinessLogic(), new NoneBusinessLogic());
                 }
 
             } else {
-                electionStatus.setElectionStatus(ElectionStatusType.NOT_YET);
-                logger.info("Slave get election status data has been deleted or not exist..,");
+                setSelfESAndRunBLProxy.setNotYet(new NoneBusinessLogic(), new NoneBusinessLogic());
+                logger.info("Slave get election info data has been deleted or not exist..,");
             }
         };
 

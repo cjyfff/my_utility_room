@@ -1,4 +1,4 @@
-package com.cjyfff.election.status;
+package com.cjyfff.election.info;
 
 import lombok.Getter;
 import lombok.Setter;

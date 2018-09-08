@@ -6,10 +6,13 @@ import java.util.concurrent.TimeUnit;
 
 import com.alibaba.fastjson.JSON;
 
-import com.cjyfff.election.status.ElectionListener;
-import com.cjyfff.election.status.ElectionStatus;
-import com.cjyfff.election.status.ElectionStatus.ElectionStatusType;
+import com.cjyfff.bl.MasterBLAfterElectionFinish;
+import com.cjyfff.bl.NoneBusinessLogic;
+import com.cjyfff.election.info.ElectionListener;
+import com.cjyfff.election.info.ElectionStatus;
+import com.cjyfff.election.info.ElectionStatus.ElectionStatusType;
 import com.cjyfff.election.ElectionUtils;
+import com.cjyfff.election.info.SetSelfESAndRunBLProxy;
 import com.google.common.collect.Maps;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.zookeeper.CreateMode;
@@ -41,6 +44,12 @@ public class MasterAction {
 
     @Autowired
     private ElectionUtils electionUtils;
+
+    @Autowired
+    private SetSelfESAndRunBLProxy setSelfESAndRunBLProxy;
+
+    @Autowired
+    private MasterBLAfterElectionFinish masterBLAfterElectionFinish;
 
     /**
      * master统计节点，分配node id，写入zk
@@ -100,8 +109,9 @@ public class MasterAction {
      * master更新本机选举状态
      * @Param isFinish 是否选举完成
      */
-    public void masterUpdateSelfStatus(boolean isFinish) {
-        electionStatus.setElectionStatus(ElectionStatusType.FINISH);
+    public void masterUpdateSelfStatus(boolean isFinish) throws Exception {
+
+        setSelfESAndRunBLProxy.setFinish(new NoneBusinessLogic(), masterBLAfterElectionFinish);
         if (isFinish) {
             logger.info("*** Election finish. I am master. ***");
         } else {
@@ -126,29 +136,13 @@ public class MasterAction {
 
     /**
      * 当选为master后
-     * 先进行的业务逻辑处理
-     * 然后在宣告选举结束
+     * 宣告选举结束，更新 zk 与自身的选举状态
      * @throws Exception
      */
-    public void masterProcessBusinessLogicAndClaimElectionFinish(CuratorFramework client) throws Exception {
-
-        masterProcessBusinessLogic();
-
+    public void masterClaimElectionFinish(CuratorFramework client) throws Exception {
         masterClaimElectionStatus(client, true);
 
         // todo: 处理本机设置选举成功后，node info change listener才回调导致2次分片的问题
         masterUpdateSelfStatus(true);
-    }
-
-    /**
-     * 当选为master后需要先进行的业务逻辑
-     * 目前需要进行的处理有：
-     * 1、数据库中的重新分片
-     * @throws Exception
-     */
-    private void masterProcessBusinessLogic() throws Exception {
-        logger.info("Master begin process business logic...");
-        TimeUnit.SECONDS.sleep(5);
-        logger.info("Master finish processing business logic.");
     }
 }

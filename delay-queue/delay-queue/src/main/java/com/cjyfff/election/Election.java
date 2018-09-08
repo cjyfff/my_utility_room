@@ -6,8 +6,10 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
-import com.cjyfff.election.status.ElectionStatus;
-import com.cjyfff.election.status.ElectionStatus.ElectionStatusType;
+import com.cjyfff.bl.NoneBusinessLogic;
+import com.cjyfff.election.info.ElectionStatus;
+import com.cjyfff.election.info.ElectionStatus.ElectionStatusType;
+import com.cjyfff.election.info.SetSelfESAndRunBLProxy;
 import com.cjyfff.election.master.MasterAction;
 import com.cjyfff.election.slave.SlaveAction;
 import com.cjyfff.repository.ZooKeeperClient;
@@ -57,6 +59,9 @@ public class Election {
 
     @Autowired
     private SlaveAction slaveAction;
+
+    @Autowired
+    private SetSelfESAndRunBLProxy setSelfESAndRunBLProxy;
 
     @Value("${server.port}")
     private String servicePort;
@@ -178,7 +183,7 @@ public class Election {
 
                     masterAction.masterClaimElectionStatus(client, true);
 
-                    masterAction.masterProcessBusinessLogicAndClaimElectionFinish(client);
+                    masterAction.masterClaimElectionFinish(client);
 
                 } catch (Exception e) {
                     logger.error("Master action get error: ", e);
@@ -193,7 +198,7 @@ public class Election {
             public void notLeader() {
                 try {
                     logger.warn("Lose master status...");
-                    electionStatus.setElectionStatus(ElectionStatusType.NOT_YET);
+                    setSelfESAndRunBLProxy.setNotYet(new NoneBusinessLogic(), new NoneBusinessLogic());
 
                     slaveAction.slaveMonitorShardingInfo(client);
 

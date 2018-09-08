@@ -1,4 +1,4 @@
-package com.cjyfff.election.status;
+package com.cjyfff.election.info;
 
 import java.util.Map;
 
@@ -18,5 +18,8 @@ public class ShardingInfo {
      */
     private Map<Integer, String> shardingMap;
 
+    /**
+     * 本机 node id
+     */
     private Integer nodeId;
 }

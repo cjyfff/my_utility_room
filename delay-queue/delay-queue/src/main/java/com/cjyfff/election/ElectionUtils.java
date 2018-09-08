@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.cjyfff.election.exception.ElectionException;
-import com.cjyfff.election.status.ShardingInfo;
+import com.cjyfff.election.info.ShardingInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
