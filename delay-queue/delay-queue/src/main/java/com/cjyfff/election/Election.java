@@ -6,7 +6,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
-import com.cjyfff.election.ElectionStatus.ElectionStatusType;
+import com.cjyfff.election.status.ElectionStatus;
+import com.cjyfff.election.status.ElectionStatus.ElectionStatusType;
 import com.cjyfff.election.master.MasterAction;
 import com.cjyfff.election.slave.SlaveAction;
 import com.cjyfff.repository.ZooKeeperClient;

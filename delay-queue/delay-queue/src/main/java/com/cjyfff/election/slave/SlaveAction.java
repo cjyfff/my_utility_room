@@ -4,10 +4,10 @@ import java.util.Map;
 
 import com.alibaba.fastjson.JSON;
 
-import com.cjyfff.election.ElectionListener;
-import com.cjyfff.election.ElectionStatus;
-import com.cjyfff.election.ElectionStatus.ElectionStatusType;
-import com.cjyfff.election.ShardingInfo;
+import com.cjyfff.election.status.ElectionListener;
+import com.cjyfff.election.status.ElectionStatus;
+import com.cjyfff.election.status.ElectionStatus.ElectionStatusType;
+import com.cjyfff.election.ElectionUtils;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.ChildData;
 import org.apache.curator.framework.recipes.cache.NodeCache;
@@ -30,13 +30,13 @@ public class SlaveAction {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private ShardingInfo shardingInfo;
-
-    @Autowired
     private ElectionStatus electionStatus;
 
     @Autowired
     private ElectionListener electionListener;
+
+    @Autowired
+    private ElectionUtils electionUtils;
 
     /**
      * slave监听并保存集群分片信息
@@ -45,15 +45,6 @@ public class SlaveAction {
      */
     public void slaveMonitorShardingInfo(CuratorFramework client) throws Exception {
 
-        // 防止listener启动前，数据已经被设置，因此先读取一次数据
-        //byte[] bs = client.getData().forPath(SHARDING_INFO_PATH);
-        //if (bs != null && bs.length > 0) {
-        //    String shardingData = new String(bs);
-        //    logger.info("Slave get cluster sharding info: " + shardingData);
-        //    Map<Integer, String> shardingMap = JSON.parseObject(shardingData, Map.class);
-        //    shardingInfo.setShardingMap(shardingMap);
-        //}
-
         NodeCache cache = new NodeCache(client, SHARDING_INFO_PATH);
         NodeCacheListener listener = () -> {
             ChildData data = cache.getCurrentData();
@@ -61,10 +52,10 @@ public class SlaveAction {
                 String shardingData = new String(cache.getCurrentData().getData());
                 logger.info("Slave get cluster sharding info changed：" + shardingData);
                 Map<Integer, String> shardingMap = JSON.parseObject(shardingData, Map.class);
-                shardingInfo.setShardingMap(shardingMap);
+                electionUtils.updateSelfShardingInfo(shardingMap);
 
             } else {
-                shardingInfo.setShardingMap(null);
+                electionUtils.updateSelfShardingInfo(null);
                 logger.info("Slave get cluster sharding info has been deleted or not exist..,");
             }
         };
@@ -81,21 +72,6 @@ public class SlaveAction {
      * @throws Exception
      */
     public void slaveMonitorElectionStatus(CuratorFramework client) throws Exception {
-
-        // 防止listener启动前，数据已经被设置，因此先读取一次数据
-        //byte[] bs = client.getData().forPath(ELECTION_STATUS_PATH);
-        //if (bs != null && bs.length > 0) {
-        //    Integer electionStatusValue = Integer.valueOf(new String(bs));
-        //    logger.info("Slave get election status: " + electionStatusValue);
-        //
-        //    if (ElectionStatusType.FINISH.getValue().equals(electionStatusValue)) {
-        //        electionStatus.setElectionStatus(ElectionStatusType.FINISH);
-        //        logger.info("*** Election finish. I am slave. ***");
-        //    } else {
-        //        electionStatus.setElectionStatus(ElectionStatusType.NOT_YET);
-        //    }
-        //
-        //}
 
         NodeCache cache = new NodeCache(client, ELECTION_STATUS_PATH);
         NodeCacheListener listener = () -> {

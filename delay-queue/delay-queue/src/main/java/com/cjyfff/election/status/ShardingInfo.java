@@ -1,4 +1,4 @@
-package com.cjyfff.election;
+package com.cjyfff.election.status;
 
 import java.util.Map;
 
@@ -17,4 +17,6 @@ public class ShardingInfo {
      * 集群所有机器的分片信息，key为node id，value为机器ip
      */
     private Map<Integer, String> shardingMap;
+
+    private Integer nodeId;
 }

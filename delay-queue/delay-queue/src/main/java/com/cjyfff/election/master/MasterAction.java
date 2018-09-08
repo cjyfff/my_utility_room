@@ -6,9 +6,10 @@ import java.util.concurrent.TimeUnit;
 
 import com.alibaba.fastjson.JSON;
 
-import com.cjyfff.election.ElectionListener;
-import com.cjyfff.election.ElectionStatus;
-import com.cjyfff.election.ElectionStatus.ElectionStatusType;
+import com.cjyfff.election.status.ElectionListener;
+import com.cjyfff.election.status.ElectionStatus;
+import com.cjyfff.election.status.ElectionStatus.ElectionStatusType;
+import com.cjyfff.election.ElectionUtils;
 import com.google.common.collect.Maps;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.zookeeper.CreateMode;
@@ -38,17 +39,21 @@ public class MasterAction {
     @Autowired
     private ElectionListener electionListener;
 
+    @Autowired
+    private ElectionUtils electionUtils;
+
     /**
      * master统计节点，分配node id，写入zk
+     * 同时更新本机节点信息
      * @param client
      */
     public void masterSetShardingInfo(CuratorFramework client) throws Exception {
-        List<String> nodeIpList = client.getChildren().forPath(NODE_INFO_PATH);
+        List<String> nodeHostList = client.getChildren().forPath(NODE_INFO_PATH);
         Integer nodeId = 0;
         Map<Integer, String> shardingMap = Maps.newHashMapWithExpectedSize(15);
-        for (String nodeIp : nodeIpList) {
-            shardingMap.put(nodeId, nodeIp);
-            logger.info("Host: " + nodeIp + ", get nodeId: " + nodeId);
+        for (String nodeHost : nodeHostList) {
+            shardingMap.put(nodeId, nodeHost);
+            logger.info("Host: " + nodeHost + ", get nodeId: " + nodeId);
             nodeId ++;
         }
 
@@ -62,6 +67,7 @@ public class MasterAction {
             client.setData().forPath(SHARDING_INFO_PATH, ShardingInfo.getBytes());
         }
 
+        electionUtils.updateSelfShardingInfo(shardingMap);
     }
 
 
