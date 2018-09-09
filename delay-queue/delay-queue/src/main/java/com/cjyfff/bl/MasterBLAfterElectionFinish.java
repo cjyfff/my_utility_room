@@ -18,7 +18,7 @@ public class MasterBLAfterElectionFinish implements BusinessLogic {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
-    public void run() {
+    public void run() throws Exception {
         logger.info("Master begin process business logic...");
         TimeUnit.SECONDS.sleep(5);
         logger.info("Master finish processing business logic.");

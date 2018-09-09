@@ -2,7 +2,6 @@ package com.cjyfff.election.master;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import com.alibaba.fastjson.JSON;
 
@@ -135,7 +134,6 @@ public class MasterAction {
     }
 
     /**
-     * 当选为master后
      * 宣告选举结束，更新 zk 与自身的选举状态
      * @throws Exception
      */
