@@ -110,12 +110,13 @@ public class MasterAction {
      */
     public void masterUpdateSelfStatus(boolean isFinish) throws Exception {
 
-        setSelfESAndRunBLProxy.setFinish(new NoneBusinessLogic(), masterBLAfterElectionFinish);
         if (isFinish) {
             logger.info("*** Election finish. I am master. ***");
+            setSelfESAndRunBLProxy.setFinish(new NoneBusinessLogic(), masterBLAfterElectionFinish);
         } else {
-            logger.info("*** Re-election finish. I am master. ***");
+            setSelfESAndRunBLProxy.setNotYet(new NoneBusinessLogic(), new NoneBusinessLogic());
         }
+
     }
 
     /**
@@ -134,13 +135,19 @@ public class MasterAction {
     }
 
     /**
-     * 宣告选举结束，更新 zk 与自身的选举状态
+     * master 更新 zk 与自身的选举状态
      * @throws Exception
      */
-    public void masterClaimElectionFinish(CuratorFramework client) throws Exception {
-        masterClaimElectionStatus(client, true);
+    public void masterUpdateZkAndSelfElectionStatus(CuratorFramework client, boolean isFinish) throws Exception {
+        if (isFinish) {
+            masterClaimElectionStatus(client, true);
 
-        // todo: 处理本机设置选举成功后，node info change listener才回调导致2次分片的问题
-        masterUpdateSelfStatus(true);
+            // todo: 处理本机设置选举成功后，node info change listener才回调导致2次分片的问题
+            masterUpdateSelfStatus(true);
+        } else {
+            masterClaimElectionStatus(client, false);
+
+            masterUpdateSelfStatus(false);
+        }
     }
 }

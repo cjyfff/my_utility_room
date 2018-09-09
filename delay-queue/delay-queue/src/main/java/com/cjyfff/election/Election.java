@@ -132,12 +132,14 @@ public class Election {
 
             if (Lists.newArrayList(Type.CHILD_ADDED, Type.CHILD_REMOVED, Type.CHILD_UPDATED).contains(event.getType())) {
 
-                // 在选举成功后，发生节点变更，master需要触发重新分片
+                // 在选举成功后，发生节点变更，master需要触发重新分片，在这个过程需要宣告选举没完成
                 if (electionStatus.getLeaderLatch().hasLeadership()) {
                     if (ElectionStatusType.FINISH.equals(electionStatus.getElectionStatus())) {
                         logger.info("NODE_INFO_PATH change, start sharding...");
 
+                        masterAction.masterUpdateZkAndSelfElectionStatus(client, false);
                         masterAction.masterSetShardingInfo(client);
+                        masterAction.masterUpdateZkAndSelfElectionStatus(client, true);
                     }
                 }
             }
@@ -173,14 +175,13 @@ public class Election {
 
                     if (ElectionStatusType.FINISH.equals(electionStatus.getElectionStatus())) {
                         logger.info("Starting re-election...");
-                        masterAction.masterClaimElectionStatus(client, false);
+                        masterAction.masterUpdateZkAndSelfElectionStatus(client, false);
 
-                        masterAction.masterUpdateSelfStatus(false);
                     }
 
                     masterAction.masterSetShardingInfo(client);
 
-                    masterAction.masterClaimElectionFinish(client);
+                    masterAction.masterUpdateZkAndSelfElectionStatus(client, true);
 
                 } catch (Exception e) {
                     logger.error("Master action get error: ", e);
