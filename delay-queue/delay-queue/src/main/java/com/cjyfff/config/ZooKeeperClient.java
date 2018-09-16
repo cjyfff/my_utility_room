@@ -1,4 +1,4 @@
-package com.cjyfff.repository;
+package com.cjyfff.config;
 
 import javax.annotation.PreDestroy;
 

@@ -12,7 +12,7 @@ import com.cjyfff.election.info.ElectionStatus.ElectionStatusType;
 import com.cjyfff.election.info.SetSelfESAndRunBLProxy;
 import com.cjyfff.election.master.MasterAction;
 import com.cjyfff.election.slave.SlaveAction;
-import com.cjyfff.repository.ZooKeeperClient;
+import com.cjyfff.config.ZooKeeperClient;
 import com.google.common.collect.Lists;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.PathChildrenCache;
