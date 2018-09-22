@@ -1,4 +1,4 @@
-package com.cjyfff.dq.controller;
+package com.cjyfff.dq.task.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 

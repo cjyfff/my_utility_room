@@ -1,4 +1,4 @@
-package com.cjyfff.dq.mapper;
+package com.cjyfff.dq.task.mapper;
 
 /**
  * Created by jiashen on 2018/9/16.
