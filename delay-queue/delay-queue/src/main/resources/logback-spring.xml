@@ -14,7 +14,7 @@
 
     <springProfile name="local">
         <!-- Search service Loggers -->
-        <logger name="com.cjyfff" level="DEBUG" additivity="false">
+        <logger name="com.cjyfff.dq" level="DEBUG" additivity="false">
             <appender-ref ref="STDOUT"/>
         </logger>
 
@@ -51,7 +51,7 @@
 
     <springProfile name="dev">
         <!-- Search service Loggers -->
-        <logger name="com.cjyfff" level="DEBUG" additivity="false">
+        <logger name="com.cjyfff.dq" level="DEBUG" additivity="false">
             <appender-ref ref="STDOUT"/>
         </logger>
 
@@ -88,7 +88,7 @@
 
     <springProfile name="prod">
         <!-- Search service Loggers -->
-        <logger name="com.cjyfff" level="INFO" additivity="false">
+        <logger name="com.cjyfff.dq" level="INFO" additivity="false">
             <appender-ref ref="STDOUT"/>
         </logger>
 
