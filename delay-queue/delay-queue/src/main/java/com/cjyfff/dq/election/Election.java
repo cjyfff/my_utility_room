@@ -63,6 +63,9 @@ public class Election {
     @Autowired
     private SetSelfESAndRunBLProxy setSelfESAndRunBLProxy;
 
+    @Autowired
+    private ElectionUtils electionUtils;
+
     @Value("${server.port}")
     private String servicePort;
 
@@ -109,8 +112,8 @@ public class Election {
      * @throws Exception
      */
     private void writeNodeInfo(CuratorFramework client) throws Exception {
-        InetAddress addr = InetAddress.getLocalHost();
-        String host = addr.getHostAddress() + ":" + servicePort;
+
+        String host = electionUtils.getHost();
         String myNodeInfoPath = NODE_INFO_PATH + "/" + host;
         Stat stat = client.checkExists().forPath(myNodeInfoPath);
         if (stat == null) {
