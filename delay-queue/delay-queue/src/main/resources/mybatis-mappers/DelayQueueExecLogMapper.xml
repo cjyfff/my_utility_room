@@ -4,7 +4,7 @@
   <resultMap id="BaseResultMap" type="com.cjyfff.dq.task.model.DelayQueueExecLog">
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="task_id" jdbcType="VARCHAR" property="taskId" />
-    <result column="status" jdbcType="TINYINT" property="status" />
+    <result column="status" jdbcType="INTEGER" property="status" />
     <result column="sharding" jdbcType="TINYINT" property="sharding" />
     <result column="function_name" jdbcType="VARCHAR" property="functionName" />
     <result column="params" jdbcType="VARCHAR" property="params" />
@@ -28,7 +28,7 @@
     insert into delay_queue_exec_log (id, task_id, status, 
       sharding, function_name, params, 
       task_result_id, created_at)
-    values (#{id,jdbcType=BIGINT}, #{taskId,jdbcType=VARCHAR}, #{status,jdbcType=TINYINT}, 
+    values (#{id,jdbcType=BIGINT}, #{taskId,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER},
       #{sharding,jdbcType=TINYINT}, #{functionName,jdbcType=VARCHAR}, #{params,jdbcType=VARCHAR}, 
       #{taskResultId,jdbcType=BIGINT}, #{createdAt,jdbcType=TIMESTAMP})
   </insert>
@@ -68,7 +68,7 @@
         #{taskId,jdbcType=VARCHAR},
       </if>
       <if test="status != null">
-        #{status,jdbcType=TINYINT},
+        #{status,jdbcType=INTEGER},
       </if>
       <if test="sharding != null">
         #{sharding,jdbcType=TINYINT},
@@ -94,7 +94,7 @@
         task_id = #{taskId,jdbcType=VARCHAR},
       </if>
       <if test="status != null">
-        status = #{status,jdbcType=TINYINT},
+        status = #{status,jdbcType=INTEGER},
       </if>
       <if test="sharding != null">
         sharding = #{sharding,jdbcType=TINYINT},
@@ -117,7 +117,7 @@
   <update id="updateByPrimaryKey" parameterType="com.cjyfff.dq.task.model.DelayQueueExecLog">
     update delay_queue_exec_log
     set task_id = #{taskId,jdbcType=VARCHAR},
-      status = #{status,jdbcType=TINYINT},
+      status = #{status,jdbcType=INTEGER},
       sharding = #{sharding,jdbcType=TINYINT},
       function_name = #{functionName,jdbcType=VARCHAR},
       params = #{params,jdbcType=VARCHAR},
