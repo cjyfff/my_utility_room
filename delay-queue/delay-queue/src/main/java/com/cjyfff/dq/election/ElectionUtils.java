@@ -44,10 +44,10 @@ public class ElectionUtils {
             }
         }
         if (nodeId == null) {
-            throw new ElectionException("Invalid Sharding Map, can not find self node info.");
+            log.warn("Invalid Sharding Map, can not find self node info.");
+        } else {
+            shardingInfo.setNodeId(nodeId);
         }
-
-        shardingInfo.setNodeId(nodeId);
     }
 
     /**
