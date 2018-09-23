@@ -1,0 +1,36 @@
+create database delay_queue default charset utf8 COLLATE utf8_general_ci;
+
+use delay_queue;
+
+CREATE TABLE `delay_task` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `task_id` varchar(32) NOT NULL COMMENT '任务id',
+  `function_name` varchar(100) NOT NULL COMMENT '任务方法名称',
+  `params` varchar(1000) NOT NULL COMMENT '任务方法参数',
+  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '状态 0:未开始 1: 执行中 2: 重试中 3: 执行成功 4：执行失败 5: 重试失败',
+  `retry_interval` int(11) DEFAULT NULL COMMENT '重试间隔，单位秒',
+  `sharding_id` tinyint(4) NOT NULL COMMENT '分片id',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `modified_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `delay_task_task_id_IDX` (`task_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `delay_queue_exec_log` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `task_id` varchar(32) NOT NULL COMMENT '任务id',
+  `status` tinyint(4) DEFAULT '0' COMMENT '状态 0:未开始 1: 执行中 2: 重试中 3: 执行成功 4：执行失败',
+  `sharding` tinyint(4) NOT NULL COMMENT '分片id',
+  `function_name` varchar(100) NOT NULL COMMENT '任务方法名',
+  `params` varchar(1000) NOT NULL COMMENT '任务参数',
+  `task_result_id` bigint(20) DEFAULT NULL COMMENT '任务结果id，可为空',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`),
+  KEY `delay_queue_exec_log_task_id_IDX` (`task_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='任务执行日志';
+
+CREATE TABLE `task_result` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `result` text COMMENT '结果',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='任务结果表';
