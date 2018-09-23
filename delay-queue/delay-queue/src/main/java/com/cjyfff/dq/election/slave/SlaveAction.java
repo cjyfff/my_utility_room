@@ -8,7 +8,7 @@ import com.cjyfff.dq.bl.NoneBusinessLogic;
 import com.cjyfff.dq.election.info.ElectionListener;
 import com.cjyfff.dq.election.info.ElectionStatus;
 import com.cjyfff.dq.election.info.ElectionStatus.ElectionStatusType;
-import com.cjyfff.dq.election.ElectionUtils;
+import com.cjyfff.dq.election.ElectionComponent;
 import com.cjyfff.dq.election.info.SetSelfESAndRunBLProxy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.ChildData;
@@ -38,7 +38,7 @@ public class SlaveAction {
     private ElectionListener electionListener;
 
     @Autowired
-    private ElectionUtils electionUtils;
+    private ElectionComponent electionComponent;
 
     @Autowired
     private SetSelfESAndRunBLProxy setSelfESAndRunBLProxy;
@@ -57,10 +57,10 @@ public class SlaveAction {
                 String shardingData = new String(cache.getCurrentData().getData());
                 logger.info("Slave get cluster sharding info changed：" + shardingData);
                 Map<Integer, String> shardingMap = JSON.parseObject(shardingData, Map.class);
-                electionUtils.updateSelfShardingInfo(shardingMap);
+                electionComponent.updateSelfShardingInfo(shardingMap);
 
             } else {
-                electionUtils.updateSelfShardingInfo(null);
+                electionComponent.updateSelfShardingInfo(null);
                 logger.info("Slave get cluster sharding info has been deleted or not exist..,");
             }
         };

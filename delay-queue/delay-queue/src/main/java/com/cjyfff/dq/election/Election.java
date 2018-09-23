@@ -1,6 +1,5 @@
 package com.cjyfff.dq.election;
 
-import java.net.InetAddress;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -64,7 +63,7 @@ public class Election {
     private SetSelfESAndRunBLProxy setSelfESAndRunBLProxy;
 
     @Autowired
-    private ElectionUtils electionUtils;
+    private ElectionComponent electionComponent;
 
     @Value("${server.port}")
     private String servicePort;
@@ -113,7 +112,7 @@ public class Election {
      */
     private void writeNodeInfo(CuratorFramework client) throws Exception {
 
-        String host = electionUtils.getHost();
+        String host = electionComponent.getHost();
         String myNodeInfoPath = NODE_INFO_PATH + "/" + host;
         Stat stat = client.checkExists().forPath(myNodeInfoPath);
         if (stat == null) {

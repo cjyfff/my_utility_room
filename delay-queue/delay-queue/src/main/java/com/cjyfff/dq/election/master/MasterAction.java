@@ -10,7 +10,7 @@ import com.cjyfff.dq.bl.NoneBusinessLogic;
 import com.cjyfff.dq.election.info.ElectionListener;
 import com.cjyfff.dq.election.info.ElectionStatus;
 import com.cjyfff.dq.election.info.ElectionStatus.ElectionStatusType;
-import com.cjyfff.dq.election.ElectionUtils;
+import com.cjyfff.dq.election.ElectionComponent;
 import com.cjyfff.dq.election.info.SetSelfESAndRunBLProxy;
 import com.google.common.collect.Maps;
 import org.apache.curator.framework.CuratorFramework;
@@ -42,7 +42,7 @@ public class MasterAction {
     private ElectionListener electionListener;
 
     @Autowired
-    private ElectionUtils electionUtils;
+    private ElectionComponent electionComponent;
 
     @Autowired
     private SetSelfESAndRunBLProxy setSelfESAndRunBLProxy;
@@ -75,7 +75,7 @@ public class MasterAction {
             client.setData().forPath(SHARDING_INFO_PATH, ShardingInfo.getBytes());
         }
 
-        electionUtils.updateSelfShardingInfo(shardingMap);
+        electionComponent.updateSelfShardingInfo(shardingMap);
     }
 
 

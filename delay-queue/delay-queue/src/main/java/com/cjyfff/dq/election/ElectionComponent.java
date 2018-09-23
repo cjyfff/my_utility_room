@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Slf4j
-public class ElectionUtils {
+public class ElectionComponent {
 
     @Autowired
     private ShardingInfo shardingInfo;
