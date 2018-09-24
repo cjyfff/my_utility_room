@@ -4,7 +4,7 @@ server.port=8888
 delay_queue.zk_host=127.0.0.1:2181
 
 jdbc.driverClassName = com.mysql.jdbc.Driver
-jdbc.url = jdbc:mysql://192.168.43.101:3306/delay_queue?zeroDateTimeBehavior=convertToNull&amp;useUnicode=true&amp;characterEncoding=utf-8
+jdbc.url = jdbc:mysql://192.168.43.101:3306/delay_queue?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&useSSL=false
 jdbc.username = root
 jdbc.password = xxxxx
 
