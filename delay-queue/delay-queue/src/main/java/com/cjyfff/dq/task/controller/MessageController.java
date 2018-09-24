@@ -6,6 +6,9 @@ import com.cjyfff.dq.task.service.PublicMsgService;
 import com.cjyfff.dq.task.vo.dto.AcceptMsgDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -21,7 +24,8 @@ public class MessageController {
     /**
      * 接收外部消息
      */
-    public DefaultWebApiResult acceptMsg(AcceptMsgDto reqDto) {
+    @RequestMapping(path = "/dq/acceptMsg", method={RequestMethod.POST})
+    public DefaultWebApiResult acceptMsg(@RequestBody AcceptMsgDto reqDto) {
         try {
             publicMsgService.acceptMsg(reqDto);
             return DefaultWebApiResult.success();

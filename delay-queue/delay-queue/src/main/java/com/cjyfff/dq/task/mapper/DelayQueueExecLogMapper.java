@@ -1,7 +1,9 @@
 package com.cjyfff.dq.task.mapper;
 
 import com.cjyfff.dq.task.model.DelayQueueExecLog;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface DelayQueueExecLogMapper {
     int deleteByPrimaryKey(Long id);
 

@@ -28,7 +28,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * Created by jiashen on 2018/9/16.
  */
 @Configuration
-@MapperScan(basePackages = "com.cjyfffblog.mapper")
+@MapperScan(basePackages = "com.cjyfff.dq.task.mapper")
 public class MyBatisConfig {
     @Value("${druidOption.setTestWhileIdle}")
     boolean testWhileIdle;

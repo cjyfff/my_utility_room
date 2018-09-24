@@ -1,7 +1,9 @@
 package com.cjyfff.dq.task.mapper;
 
 import com.cjyfff.dq.task.model.TaskResult;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface TaskResultMapper {
     int deleteByPrimaryKey(Long id);
 
