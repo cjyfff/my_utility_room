@@ -6,6 +6,8 @@ import com.cjyfff.dq.election.info.ElectionStatus;
 import com.cjyfff.dq.election.info.ElectionStatus.ElectionStatusType;
 import com.cjyfff.dq.election.info.ShardingInfo;
 import com.cjyfff.dq.task.common.ApiException;
+import com.cjyfff.dq.task.queue.QueueTask;
+import com.cjyfff.dq.task.queue.DelayTaskQueue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +22,9 @@ public class AcceptTaskComponent {
 
     @Autowired
     private ShardingInfo shardingInfo;
+
+    @Autowired
+    private DelayTaskQueue delayTaskQueue;
 
     public void checkElectionStatus() throws ApiException {
         if (! ElectionStatusType.FINISH.equals(electionStatus.getElectionStatus())) {
@@ -36,8 +41,8 @@ public class AcceptTaskComponent {
         return taskId.hashCode() % shardingAmount;
     }
 
-    public void pushToQueue(PushToQueueDto pushToQueueDto) {
-
+    public void pushToQueue(QueueTask task) {
+        delayTaskQueue.queue.add(task);
     }
 
     public static class PushToQueueDto {

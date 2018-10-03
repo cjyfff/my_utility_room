@@ -6,6 +6,7 @@ import com.cjyfff.dq.election.info.ShardingInfo;
 import com.cjyfff.dq.task.common.TaskStatus;
 import com.cjyfff.dq.task.mapper.DelayTaskMapper;
 import com.cjyfff.dq.task.model.DelayTask;
+import com.cjyfff.dq.task.queue.QueueTask;
 import com.cjyfff.dq.task.service.PublicMsgService;
 import com.cjyfff.dq.task.vo.dto.AcceptMsgDto;
 import com.cjyfff.dq.task.utils.AcceptTaskComponent;
@@ -40,8 +41,11 @@ public class PublicMsgServiceImpl implements PublicMsgService {
         createTask(reqDto);
 
         if (checkIsMyTask(reqDto.getTaskId())) {
-            if (checkNeedPushQueueNow(reqDto.getDelayTime())) {
-
+            if (checkNeedToPushQueueNow(reqDto.getDelayTime())) {
+                QueueTask task = new QueueTask(
+                    reqDto.getTaskId(), reqDto.getFunctionName(), reqDto.getParams(), reqDto.getDelayTime()
+                );
+                acceptTaskComponent.pushToQueue(task);
             }
         } else {
             // 转发到对应机器
@@ -54,7 +58,7 @@ public class PublicMsgServiceImpl implements PublicMsgService {
      * @param delayTime
      * @return
      */
-    private boolean checkNeedPushQueueNow(Long delayTime) {
+    private boolean checkNeedToPushQueueNow(Long delayTime) {
         return delayTime.compareTo(criticalPollingTime) <= 0;
     }
 

@@ -2,6 +2,8 @@ server.port=8888
 
 
 delay_queue.zk_host=127.0.0.1:2181
+delay_queue.critical_polling_time=1800
+
 
 jdbc.driverClassName = com.mysql.jdbc.Driver
 jdbc.url = jdbc:mysql://192.168.43.101:3306/delay_queue?zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=utf-8&useSSL=false

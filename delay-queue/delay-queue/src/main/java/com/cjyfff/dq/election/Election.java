@@ -3,8 +3,6 @@ package com.cjyfff.dq.election;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.PostConstruct;
-
 import com.cjyfff.dq.bl.NoneBusinessLogic;
 import com.cjyfff.dq.election.info.ElectionStatus;
 import com.cjyfff.dq.election.info.ElectionStatus.ElectionStatusType;
@@ -68,7 +66,6 @@ public class Election {
     @Value("${server.port}")
     private String servicePort;
 
-    @PostConstruct
     public void start() {
         try {
             CuratorFramework client = zooKeeperClient.getClient();
