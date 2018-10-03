@@ -18,6 +18,8 @@ public class AcceptMsgDto {
 
     private String functionName;
 
+    private Long delayTime;
+
     private String params;
 
     private Byte retryCount;

@@ -35,4 +35,12 @@ public class AcceptTaskComponent {
 
         return taskId.hashCode() % shardingAmount;
     }
+
+    public void pushToQueue(PushToQueueDto pushToQueueDto) {
+
+    }
+
+    public static class PushToQueueDto {
+
+    }
 }

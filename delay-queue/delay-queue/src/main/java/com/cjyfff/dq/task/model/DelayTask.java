@@ -18,6 +18,8 @@ public class DelayTask {
 
     private Integer status;
 
+    private Long delayTime;
+
     private Integer retryInterval;
 
     private Byte retryCount;
