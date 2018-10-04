@@ -43,7 +43,8 @@ public class PublicMsgServiceImpl implements PublicMsgService {
         if (checkIsMyTask(reqDto.getTaskId())) {
             if (checkNeedToPushQueueNow(reqDto.getDelayTime())) {
                 QueueTask task = new QueueTask(
-                    reqDto.getTaskId(), reqDto.getFunctionName(), reqDto.getParams(), reqDto.getDelayTime()
+                    reqDto.getTaskId(), reqDto.getFunctionName(), reqDto.getParams(),
+                    reqDto.getDelayTime() * 1000
                 );
                 acceptTaskComponent.pushToQueue(task);
             }

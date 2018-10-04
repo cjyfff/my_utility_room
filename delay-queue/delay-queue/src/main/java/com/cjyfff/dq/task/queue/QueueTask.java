@@ -21,6 +21,10 @@ public class QueueTask implements Delayed {
 
     private Long delayTime;
 
+    public TimeUnit delayTimeUnit;
+
+    public Long executeTime;
+
     private QueueTask() {}
 
     public QueueTask(String taskId, String functionName, String params, Long delayTime) {
@@ -28,11 +32,12 @@ public class QueueTask implements Delayed {
         this.functionName = functionName;
         this.params = params;
         this.delayTime = delayTime;
+        this.delayTimeUnit = TimeUnit.MILLISECONDS;
+        this.executeTime = System.currentTimeMillis() + delayTimeUnit.toMillis(delayTime);
     }
 
     @Override
     public long getDelay(TimeUnit unit) {
-        long executeTime = System.currentTimeMillis() + TimeUnit.MILLISECONDS.toMillis(delayTime);
         return unit.convert(executeTime - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
     }
 
