@@ -44,8 +44,4 @@ public class AcceptTaskComponent {
     public void pushToQueue(QueueTask task) {
         delayTaskQueue.queue.add(task);
     }
-
-    public static class PushToQueueDto {
-
-    }
 }

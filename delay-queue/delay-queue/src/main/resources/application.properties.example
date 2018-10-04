@@ -2,6 +2,7 @@ server.port=8888
 
 
 delay_queue.zk_host=127.0.0.1:2181
+# 从数据库中取出任务插入延时队列的定时任务执行间隔，单位秒
 delay_queue.critical_polling_time=1800
 
 
