@@ -2,7 +2,7 @@ server.port=8888
 
 
 delay_queue.zk_host=127.0.0.1:2181
-delay_queue.critical_polling_time=1800000
+delay_queue.critical_polling_time=1800
 
 
 jdbc.driverClassName = com.mysql.jdbc.Driver

@@ -19,6 +19,9 @@ public class QueueTask implements Delayed {
 
     private String params;
 
+    /**
+     * 延时时间，单位秒
+     */
     private Long delayTime;
 
     public TimeUnit delayTimeUnit;
@@ -33,7 +36,7 @@ public class QueueTask implements Delayed {
         this.params = params;
         this.delayTime = delayTime;
         this.delayTimeUnit = TimeUnit.MILLISECONDS;
-        this.executeTime = System.currentTimeMillis() + delayTimeUnit.toMillis(delayTime);
+        this.executeTime = System.currentTimeMillis() + delayTimeUnit.toMillis(delayTime * 1000);
     }
 
     @Override
