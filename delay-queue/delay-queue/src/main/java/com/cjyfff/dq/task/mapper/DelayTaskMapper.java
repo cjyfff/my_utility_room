@@ -1,6 +1,9 @@
 package com.cjyfff.dq.task.mapper;
 
+import java.util.List;
+
 import com.cjyfff.dq.task.model.DelayTask;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -14,6 +17,17 @@ public interface DelayTaskMapper {
     DelayTask selectByPrimaryKey(Long id);
 
     int updateByPrimaryKeySelective(DelayTask record);
+
+    int updateStatusByOldStatusAndExecuteTime(@Param(value = "oldStatus") Integer oldStatus,
+                                              @Param(value = "newStatus") Integer newStatus,
+                                              @Param(value = "shardingId") Byte shardingId,
+                                              @Param(value = "executeTimeBegin") Long executeTimeBegin,
+                                              @Param(value = "executeTimeEnd") Long executeTimeEnd);
+
+    List<DelayTask> selectByStatusAndExecuteTimeForUpdate(@Param(value = "oldStatus") Integer oldStatus,
+                                                          @Param(value = "shardingId") Byte shardingId,
+                                                          @Param(value = "executeTimeBegin") Long executeTimeBegin,
+                                                          @Param(value = "executeTimeEnd") Long executeTimeEnd);
 
     int updateByPrimaryKey(DelayTask record);
 }
