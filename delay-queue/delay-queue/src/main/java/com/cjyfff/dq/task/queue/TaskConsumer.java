@@ -32,6 +32,10 @@ public class TaskConsumer {
         while (! delayTaskQueue.queue.isEmpty()) {
             QueueTask task = delayTaskQueue.queue.take();
             log.info(String.format("task %s begin", task.getTaskId()));
+            // 1、乐观锁更新状态
+            // 2、用task id 查出数据
+            // 3、处理
+            // 4、修改状态
         }
     }
 }
