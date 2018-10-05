@@ -3,7 +3,7 @@ package com.cjyfff.dq.task.service.impl;
 import java.util.Date;
 
 import com.cjyfff.dq.election.info.ShardingInfo;
-import com.cjyfff.dq.task.common.TaskStatus;
+import com.cjyfff.dq.task.common.enums.TaskStatus;
 import com.cjyfff.dq.task.mapper.DelayTaskMapper;
 import com.cjyfff.dq.task.model.DelayTask;
 import com.cjyfff.dq.task.queue.QueueTask;

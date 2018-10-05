@@ -7,7 +7,8 @@ CREATE TABLE `delay_task` (
   `task_id` varchar(50) NOT NULL COMMENT '任务id',
   `function_name` varchar(100) NOT NULL COMMENT '任务方法名称',
   `params` varchar(1000) NOT NULL COMMENT '任务方法参数',
-  `status` int(11) NOT NULL DEFAULT '0' COMMENT '状态 0:未开始 100: 执行中 101: 转发中 150: 重试中 200: 执行成功 400：执行失败 500: 重试失败',
+  `status` int(11) NOT NULL DEFAULT '0' COMMENT '状态 0:已接收 100: 执行中 101: 转发中 150: 重试中 200: 执行成功 400：执行失败 410: 重试失败',
+  `delay_time` bigint(20) NOT NULL COMMENT '延时执行时间，单位秒',
   `retry_interval` int(11) DEFAULT NULL COMMENT '重试间隔，单位秒',
   `retry_count` tinyint(4) DEFAULT '0' COMMENT '重试次数',
   `sharding_id` tinyint(4) NOT NULL COMMENT '分片id',
@@ -20,7 +21,7 @@ CREATE TABLE `delay_task` (
 CREATE TABLE `delay_queue_exec_log` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
   `task_id` varchar(50) NOT NULL COMMENT '任务id',
-  `status` int(11) DEFAULT '0' COMMENT '状态 0:未开始 100: 执行中 101: 转发中 150: 重试中 200: 执行成功 400：执行失败 500: 重试失败',
+  `status` int(11) DEFAULT '0' COMMENT '状态 0:已接收 100: 执行中 101: 转发中 150: 重试中 200: 执行成功 400：执行失败 410: 重试失败',
   `sharding` tinyint(4) NOT NULL COMMENT '分片id',
   `function_name` varchar(100) NOT NULL COMMENT '任务方法名',
   `params` varchar(1000) NOT NULL COMMENT '任务参数',

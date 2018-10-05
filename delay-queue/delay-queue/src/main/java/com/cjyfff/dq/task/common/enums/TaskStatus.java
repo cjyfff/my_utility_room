@@ -1,4 +1,4 @@
-package com.cjyfff.dq.task.common;
+package com.cjyfff.dq.task.common.enums;
 
 
 /**
@@ -7,11 +7,11 @@ package com.cjyfff.dq.task.common;
 public enum TaskStatus {
     ACCEPT(0, "已接收"),
     PROCESSING(100, "执行中"),
-    TRANSMITING(101, ""),
-    RETRYING(150, ""),
-    PROCESS_SUCCESS(200, ""),
-    PROCESS_FAIL(400, ""),
-    RETRY_FAIL(500, "");
+    TRANSMITING(101, "转发中"),
+    RETRYING(150, "重试中"),
+    PROCESS_SUCCESS(200, "执行成功"),
+    PROCESS_FAIL(400, "执行失败"),
+    RETRY_FAIL(410, "重试失败");
 
     private Integer status;
 
