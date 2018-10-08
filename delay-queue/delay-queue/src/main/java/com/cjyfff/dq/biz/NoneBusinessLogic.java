@@ -1,4 +1,4 @@
-package com.cjyfff.dq.bl;
+package com.cjyfff.dq.biz;
 
 /**
  * Created by jiashen on 2018/9/9.

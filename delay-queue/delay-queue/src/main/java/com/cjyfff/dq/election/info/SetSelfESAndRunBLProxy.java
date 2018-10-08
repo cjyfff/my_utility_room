@@ -1,6 +1,6 @@
 package com.cjyfff.dq.election.info;
 
-import com.cjyfff.dq.bl.BusinessLogic;
+import com.cjyfff.dq.biz.BusinessLogic;
 import com.cjyfff.dq.election.exception.ElectionException;
 import com.cjyfff.dq.election.info.ElectionStatus.ElectionStatusType;
 import org.springframework.beans.factory.annotation.Autowired;

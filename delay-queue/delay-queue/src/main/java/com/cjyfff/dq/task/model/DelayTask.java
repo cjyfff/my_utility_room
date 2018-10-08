@@ -20,7 +20,11 @@ public class DelayTask {
 
     private Long delayTime;
 
+    private Long executeTime;
+
     private Integer retryInterval;
+
+    private Long retryTime;
 
     private Byte retryCount;
 

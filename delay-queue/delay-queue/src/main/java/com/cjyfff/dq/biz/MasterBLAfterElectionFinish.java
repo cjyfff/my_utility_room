@@ -1,4 +1,4 @@
-package com.cjyfff.dq.bl;
+package com.cjyfff.dq.biz;
 
 import java.util.concurrent.TimeUnit;
 

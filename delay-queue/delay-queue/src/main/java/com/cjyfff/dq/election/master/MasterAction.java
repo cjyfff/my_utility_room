@@ -5,8 +5,8 @@ import java.util.Map;
 
 import com.alibaba.fastjson.JSON;
 
-import com.cjyfff.dq.bl.MasterBLAfterElectionFinish;
-import com.cjyfff.dq.bl.NoneBusinessLogic;
+import com.cjyfff.dq.biz.MasterBLAfterElectionFinish;
+import com.cjyfff.dq.biz.NoneBusinessLogic;
 import com.cjyfff.dq.election.info.ElectionListener;
 import com.cjyfff.dq.election.info.ElectionStatus;
 import com.cjyfff.dq.election.info.ElectionStatus.ElectionStatusType;

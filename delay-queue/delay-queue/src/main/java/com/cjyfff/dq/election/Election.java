@@ -3,7 +3,7 @@ package com.cjyfff.dq.election;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import com.cjyfff.dq.bl.NoneBusinessLogic;
+import com.cjyfff.dq.biz.NoneBusinessLogic;
 import com.cjyfff.dq.election.info.ElectionStatus;
 import com.cjyfff.dq.election.info.ElectionStatus.ElectionStatusType;
 import com.cjyfff.dq.election.info.SetSelfESAndRunBLProxy;

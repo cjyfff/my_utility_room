@@ -8,14 +8,16 @@
     <result column="params" jdbcType="VARCHAR" property="params" />
     <result column="status" jdbcType="INTEGER" property="status" />
     <result column="delay_time" jdbcType="BIGINT" property="delayTime" />
+    <result column="execute_time" jdbcType="BIGINT" property="executeTime" />
     <result column="retry_interval" jdbcType="INTEGER" property="retryInterval" />
+    <result column="retry_time" jdbcType="BIGINT" property="retryTime" />
     <result column="retry_count" jdbcType="TINYINT" property="retryCount" />
     <result column="sharding_id" jdbcType="TINYINT" property="shardingId" />
     <result column="created_at" jdbcType="TIMESTAMP" property="createdAt" />
     <result column="modified_at" jdbcType="TIMESTAMP" property="modifiedAt" />
   </resultMap>
   <sql id="Base_Column_List">
-    id, task_id, function_name, params, status, delay_time, retry_interval, retry_count, sharding_id,
+    id, task_id, function_name, params, status, delay_time, execute_time, retry_interval, retry_time, retry_count, sharding_id,
     created_at, modified_at
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
@@ -30,11 +32,12 @@
   </delete>
   <insert id="insert" parameterType="com.cjyfff.dq.task.model.DelayTask">
     insert into delay_task (id, task_id, function_name, 
-      params, status, delay_time, retry_interval,
+      params, status, delay_time, execute_time, retry_interval, retry_time,
       retry_count, sharding_id, created_at, 
       modified_at)
     values (#{id,jdbcType=BIGINT}, #{taskId,jdbcType=VARCHAR}, #{functionName,jdbcType=VARCHAR}, 
-      #{params,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, #{delayTime,jdbcType=BIGINT}, #{retryInterval,jdbcType=INTEGER},
+      #{params,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, #{delayTime,jdbcType=BIGINT}, #{executeTime,jdbcType=BIGINT},
+      #{retryInterval,jdbcType=INTEGER}, #{retryTime,jdbcType=BIGINT}
       #{retryCount,jdbcType=TINYINT}, #{shardingId,jdbcType=TINYINT}, #{createdAt,jdbcType=TIMESTAMP}, 
       #{modifiedAt,jdbcType=TIMESTAMP})
   </insert>
@@ -59,8 +62,14 @@
       <if test="delayTime != null">
         delay_time,
       </if>
+      <if test="executeTime != null">
+        execute_time,
+      </if>
       <if test="retryInterval != null">
         retry_interval,
+      </if>
+      <if test="retryTime != null">
+        retry_time,
       </if>
       <if test="retryCount != null">
         retry_count,
@@ -94,8 +103,14 @@
       <if test="delayTime != null">
         #{delayTime,jdbcType=BIGINT},
       </if>
+      <if test="executeTime != null">
+        #{executeTime,jdbcType=BIGINT},
+      </if>
       <if test="retryInterval != null">
         #{retryInterval,jdbcType=INTEGER},
+      </if>
+      <if test="retryTime != null">
+        #{retryTime,jdbcType=BIGINT},
       </if>
       <if test="retryCount != null">
         #{retryCount,jdbcType=TINYINT},
@@ -129,8 +144,14 @@
       <if test="delayTime != null">
         delay_time = #{delayTime,jdbcType=BIGINT},
       </if>
+      <if test="executeTime != null">
+        execute_time = #{executeTime,jdbcType=BIGINT},
+      </if>
       <if test="retryInterval != null">
         retry_interval = #{retryInterval,jdbcType=INTEGER},
+      </if>
+      <if test="retryTime != null">
+        retry_time = #{retryTime,jdbcType=BIGINT},
       </if>
       <if test="retryCount != null">
         retry_count = #{retryCount,jdbcType=TINYINT},
@@ -154,7 +175,9 @@
       params = #{params,jdbcType=VARCHAR},
       status = #{status,jdbcType=INTEGER},
       delay_time = #{delayTime,jdbcType=BIGINT},
+      execute_time = #{executeTime,jdbcType=BIGINT},
       retry_interval = #{retryInterval,jdbcType=INTEGER},
+      retry_time = #{retryTime,jdbcType=BIGINT},
       retry_count = #{retryCount,jdbcType=TINYINT},
       sharding_id = #{shardingId,jdbcType=TINYINT},
       created_at = #{createdAt,jdbcType=TIMESTAMP},
