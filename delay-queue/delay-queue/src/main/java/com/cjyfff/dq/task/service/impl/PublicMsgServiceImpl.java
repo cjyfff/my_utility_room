@@ -88,6 +88,7 @@ public class PublicMsgServiceImpl implements PublicMsgService {
         delayTask.setRetryCount(reqDto.getRetryCount());
         delayTask.setRetryInterval(reqDto.getRetryInterval());
         delayTask.setDelayTime(reqDto.getDelayTime());
+        delayTask.setExecuteTime(System.currentTimeMillis() / 1000 + reqDto.getDelayTime());
         delayTask.setStatus(TaskStatus.ACCEPT.getStatus());
         delayTask.setCreatedAt(new Date());
         delayTask.setModifiedAt(new Date());
