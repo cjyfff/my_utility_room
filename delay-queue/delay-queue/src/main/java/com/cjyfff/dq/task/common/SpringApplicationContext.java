@@ -36,11 +36,11 @@ public class SpringApplicationContext implements ApplicationContextAware {
         }
     }
 
-    public static ApplicationContext getApplicationContext() {
+    public ApplicationContext getApplicationContext() {
         return applicationContext;
     }
 
-    public static ITaskHandler getTaskHandler(String name){
+    public ITaskHandler getTaskHandler(String name){
         return taskHandlerMap.get(name);
     }
 }

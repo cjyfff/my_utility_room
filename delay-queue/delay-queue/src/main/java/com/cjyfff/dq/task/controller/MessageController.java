@@ -3,6 +3,7 @@ package com.cjyfff.dq.task.controller;
 import com.cjyfff.dq.task.common.ApiException;
 import com.cjyfff.dq.task.common.DefaultWebApiResult;
 import com.cjyfff.dq.task.service.PublicMsgService;
+import com.cjyfff.dq.task.service.TestService;
 import com.cjyfff.dq.task.vo.dto.AcceptMsgDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,9 @@ public class MessageController {
 
     @Autowired
     private PublicMsgService publicMsgService;
+
+    @Autowired
+    private TestService testService;
 
     /**
      * 接收外部消息
@@ -41,4 +45,10 @@ public class MessageController {
      * 接收内部转发消息
      */
     public void acceptInnerMsg() {}
+
+    @RequestMapping(path = "/test", method={RequestMethod.POST})
+    public DefaultWebApiResult test() {
+        testService.test();
+        return DefaultWebApiResult.success();
+    }
 }
