@@ -3,6 +3,7 @@ package com.cjyfff.dq.task.service.impl;
 import java.util.Date;
 
 import com.cjyfff.dq.election.info.ShardingInfo;
+import com.cjyfff.dq.task.common.ApiException;
 import com.cjyfff.dq.task.common.enums.TaskStatus;
 import com.cjyfff.dq.task.component.ExecLogComponent;
 import com.cjyfff.dq.task.mapper.DelayTaskMapper;
@@ -11,6 +12,7 @@ import com.cjyfff.dq.task.queue.QueueTask;
 import com.cjyfff.dq.task.service.PublicMsgService;
 import com.cjyfff.dq.task.vo.dto.AcceptMsgDto;
 import com.cjyfff.dq.task.component.AcceptTaskComponent;
+import com.cjyfff.dq.task.vo.dto.InnerMsgDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -45,11 +47,15 @@ public class PublicMsgServiceImpl implements PublicMsgService {
 
         DelayTask newDelayTask = createTask(reqDto);
 
-        if (acceptTaskComponent.checkIsMyTask(reqDto.getTaskId())) {
-            if (checkNeedToPushQueueNow(reqDto.getDelayTime())) {
+        // 因为 reqDto 的 task id 和 delayTask 的 task id 不一样，为防止之后的代码取错，
+        // 这里把 reqDto 设为 null
+        reqDto = null;
+
+        if (acceptTaskComponent.checkIsMyTask(newDelayTask.getTaskId())) {
+            if (checkNeedToPushQueueNow(newDelayTask.getDelayTime())) {
                 QueueTask task = new QueueTask(
-                    reqDto.getTaskId(), reqDto.getFunctionName(), reqDto.getParams(),
-                    reqDto.getDelayTime()
+                    newDelayTask.getTaskId(), newDelayTask.getFunctionName(), newDelayTask.getParams(),
+                    newDelayTask.getDelayTime()
                 );
                 acceptTaskComponent.pushToQueue(task);
                 newDelayTask.setStatus(TaskStatus.IN_QUEUE.getStatus());
@@ -62,6 +68,16 @@ public class PublicMsgServiceImpl implements PublicMsgService {
             }
         } else {
             // 转发到对应机器
+            Integer targetShardingId = acceptTaskComponent.getShardingIdFormTaskId(newDelayTask.getTaskId());
+            String targetHost = shardingInfo.getShardingMap().get(targetShardingId);
+
+            if (targetHost == null) {
+                throw new ApiException("-201", String.format("任务转发时找不到对应的分片信息, sharding Id: %s", targetShardingId.toString()));
+            }
+
+            String url = String.format("http://%s/dq/acceptInnerMsg", targetHost);
+            InnerMsgDto innerMsgDto = new InnerMsgDto();
+
         }
 
     }
@@ -78,10 +94,9 @@ public class PublicMsgServiceImpl implements PublicMsgService {
 
     /**
      * 任务持久化
-     * 此处新开事务，外部回滚不影响此方法创建的数据
+     * 为了简化逻辑，createTask不新建事务，出现异常都回滚，由调用方重试
      * @param reqDto
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     private DelayTask createTask(AcceptMsgDto reqDto) {
         DelayTask delayTask = new DelayTask();
         int ranInt = (int)(Math.random() * 90000) + 10000;
