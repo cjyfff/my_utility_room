@@ -26,6 +26,14 @@
     from delay_task
     where id = #{id,jdbcType=BIGINT}
   </select>
+
+  <select id="selectByTaskId" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from delay_task
+    where task_id = #{taskId,jdbcType=BIGINT}
+  </select>
+
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
     delete from delay_task
     where id = #{id,jdbcType=BIGINT}
@@ -168,6 +176,20 @@
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
+
+  <update id="updateStatusByOldStatusAndTaskId">
+    update delay_task
+    set
+    status = #{newStatus,jdbcType=INTEGER},
+    modified_at = now()
+    where
+    task_id = #{taskId,jdbcType=VARCHAR}
+    and
+    sharding_id = #{shardingId,jdbcType=TINYINT}
+    and
+    status = #{oldStatus,jdbcType=INTEGER}
+  </update>
+
   <update id="updateByPrimaryKey" parameterType="com.cjyfff.dq.task.model.DelayTask">
     update delay_task
     set task_id = #{taskId,jdbcType=VARCHAR},

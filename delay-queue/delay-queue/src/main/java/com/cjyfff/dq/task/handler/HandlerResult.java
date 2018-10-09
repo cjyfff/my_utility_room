@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 public class HandlerResult {
 
-    private Integer status;
+    private Integer resultCode;
 
     private String msg;
 

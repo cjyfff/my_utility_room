@@ -1,6 +1,6 @@
 package com.cjyfff.dq.task.service.impl;
 
-import com.cjyfff.dq.task.common.SpringApplicationContext;
+import com.cjyfff.dq.task.common.TaskHandlerContext;
 import com.cjyfff.dq.task.handler.ITaskHandler;
 import com.cjyfff.dq.task.service.TestService;
 import lombok.extern.slf4j.Slf4j;
@@ -14,11 +14,11 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class TestServiceImpl implements TestService {
     @Autowired
-    private SpringApplicationContext springApplicationContext;
+    private TaskHandlerContext taskHandlerContext;
 
     @Override
     public void test() {
-        ITaskHandler exampleHandler = springApplicationContext.getTaskHandler("exampleHandler");
+        ITaskHandler exampleHandler = taskHandlerContext.getTaskHandler("exampleHandler");
         if (exampleHandler == null) {
             log.info("No handler found!");
         } else {

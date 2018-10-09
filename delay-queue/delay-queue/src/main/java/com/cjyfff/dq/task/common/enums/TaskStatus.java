@@ -6,6 +6,8 @@ package com.cjyfff.dq.task.common.enums;
  */
 public enum TaskStatus {
     ACCEPT(0, "已接收"),
+    POLLING(50, "轮询任务处理中"),
+    IN_QUEUE(60, "队列中"),
     PROCESSING(100, "执行中"),
     TRANSMITING(101, "转发中"),
     RETRYING(150, "重试中"),

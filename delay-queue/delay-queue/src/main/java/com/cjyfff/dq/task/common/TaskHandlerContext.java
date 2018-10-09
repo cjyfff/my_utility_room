@@ -13,14 +13,14 @@ import org.springframework.stereotype.Component;
  * Created by jiashen on 18-10-8.
  */
 @Component
-public class SpringApplicationContext implements ApplicationContextAware {
+public class TaskHandlerContext implements ApplicationContextAware {
     private static ApplicationContext applicationContext = null;
 
     private static ConcurrentHashMap<String, ITaskHandler> taskHandlerMap = new ConcurrentHashMap<>();
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
-        SpringApplicationContext.applicationContext = applicationContext;
+        TaskHandlerContext.applicationContext = applicationContext;
 
         Map<String, Object> serviceBeanMap = applicationContext.getBeansWithAnnotation(TaskHandler.class);
 

@@ -1,9 +1,23 @@
 package com.cjyfff.dq.task.queue;
 
+import java.util.Date;
+
+import com.cjyfff.dq.election.info.ShardingInfo;
+import com.cjyfff.dq.task.common.TaskHandlerContext;
+import com.cjyfff.dq.task.common.enums.TaskStatus;
+import com.cjyfff.dq.task.component.ExecLogComponent;
+import com.cjyfff.dq.task.handler.HandlerResult;
+import com.cjyfff.dq.task.handler.ITaskHandler;
+import com.cjyfff.dq.task.mapper.DelayQueueExecLogMapper;
+import com.cjyfff.dq.task.mapper.DelayTaskMapper;
+import com.cjyfff.dq.task.model.DelayQueueExecLog;
+import com.cjyfff.dq.task.model.DelayTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Created by jiashen on 2018/10/3.
@@ -14,6 +28,18 @@ public class TaskConsumer {
 
     @Autowired
     private DelayTaskQueue delayTaskQueue;
+
+    @Autowired
+    private DelayTaskMapper delayTaskMapper;
+
+    @Autowired
+    private ShardingInfo shardingInfo;
+
+    @Autowired
+    private TaskHandlerContext taskHandlerContext;
+
+    @Autowired
+    private ExecLogComponent execLogComponent;
 
     /**
      * delay queue consumer
@@ -32,10 +58,56 @@ public class TaskConsumer {
         while (! delayTaskQueue.queue.isEmpty()) {
             QueueTask task = delayTaskQueue.queue.take();
             log.info(String.format("task %s begin", task.getTaskId()));
-            // 1、乐观锁更新状态
-            // 2、用task id 查出数据
-            // 3、处理
-            // 4、修改状态
+            doConsumer(task);
+        }
+    }
+
+    /**
+     * 异步消费消息
+     * @param task
+     */
+    @Async
+    @Transactional
+    private void doConsumer(QueueTask task) {
+        // 1、乐观锁更新状态
+        // 2、用task id 查出数据
+        // 3、处理
+        // 4、修改状态
+        if (delayTaskMapper.updateStatusByOldStatusAndTaskId(TaskStatus.IN_QUEUE.getStatus(),
+            TaskStatus.PROCESSING.getStatus(), shardingInfo.getNodeId().byteValue(), task.getTaskId()) > 0) {
+
+            DelayTask delayTask = delayTaskMapper.selectByTaskId(task.getTaskId());
+
+            ITaskHandler taskHandler = taskHandlerContext.getTaskHandler(delayTask.getFunctionName());
+            if (taskHandler == null) {
+                // 找不到对应方法时，设置任务失败
+                String errorMsg = String.format("Can not find handler named %s", delayTask.getFunctionName());
+                log.warn(errorMsg);
+                Integer taskStatus = TaskStatus.PROCESS_FAIL.getStatus();
+
+                delayTask.setStatus(taskStatus);
+                delayTask.setModifiedAt(new Date());
+                delayTaskMapper.updateByPrimaryKeySelective(delayTask);
+
+                execLogComponent.insertLog(delayTask, taskStatus, errorMsg);
+
+                return;
+            }
+
+            HandlerResult result = taskHandler.run(delayTask.getParams());
+            // todo: 处理重试逻辑
+            if (Integer.valueOf(0).equals(result.getResultCode())) {
+                Integer taskStatus = TaskStatus.PROCESS_SUCCESS.getStatus();
+
+                delayTask.setStatus(taskStatus);
+                delayTask.setModifiedAt(new Date());
+                delayTaskMapper.updateByPrimaryKeySelective(delayTask);
+
+                execLogComponent.insertLog(delayTask, taskStatus, "success");
+            }
+
+        } else {
+            log.warn(String.format("Task: %s can not consume.", task.getTaskId()));
         }
     }
 }

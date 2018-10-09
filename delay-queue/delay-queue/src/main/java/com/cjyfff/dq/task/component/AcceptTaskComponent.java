@@ -1,4 +1,4 @@
-package com.cjyfff.dq.task.utils;
+package com.cjyfff.dq.task.component;
 
 import java.util.Map;
 

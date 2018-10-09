@@ -20,6 +20,8 @@ public class DelayQueueExecLog {
 
     private String params;
 
+    private String msg;
+
     private Long taskResultId;
 
     private Date createdAt;

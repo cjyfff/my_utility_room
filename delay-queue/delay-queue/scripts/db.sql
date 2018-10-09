@@ -31,6 +31,7 @@ CREATE TABLE `delay_queue_exec_log` (
   `sharding` tinyint(4) NOT NULL COMMENT '分片id',
   `function_name` varchar(100) NOT NULL COMMENT '任务方法名',
   `params` varchar(1000) NOT NULL COMMENT '任务参数',
+  `msg` varchar(500) NOT NULL COMMENT '执行信息',
   `task_result_id` bigint(20) DEFAULT NULL COMMENT '任务结果id，可为空',
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`),

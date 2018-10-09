@@ -9,7 +9,7 @@ import com.cjyfff.dq.task.model.DelayTask;
 import com.cjyfff.dq.task.queue.QueueTask;
 import com.cjyfff.dq.task.service.PublicMsgService;
 import com.cjyfff.dq.task.vo.dto.AcceptMsgDto;
-import com.cjyfff.dq.task.utils.AcceptTaskComponent;
+import com.cjyfff.dq.task.component.AcceptTaskComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

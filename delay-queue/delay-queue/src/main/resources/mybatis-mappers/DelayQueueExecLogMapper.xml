@@ -8,11 +8,12 @@
     <result column="sharding" jdbcType="TINYINT" property="sharding" />
     <result column="function_name" jdbcType="VARCHAR" property="functionName" />
     <result column="params" jdbcType="VARCHAR" property="params" />
+    <result column="msg" jdbcType="VARCHAR" property="msg" />
     <result column="task_result_id" jdbcType="BIGINT" property="taskResultId" />
     <result column="created_at" jdbcType="TIMESTAMP" property="createdAt" />
   </resultMap>
   <sql id="Base_Column_List">
-    id, task_id, status, sharding, function_name, params, task_result_id, created_at
+    id, task_id, status, sharding, function_name, params, msg, task_result_id, created_at
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select 
@@ -26,11 +27,11 @@
   </delete>
   <insert id="insert" parameterType="com.cjyfff.dq.task.model.DelayQueueExecLog">
     insert into delay_queue_exec_log (id, task_id, status, 
-      sharding, function_name, params, 
+      sharding, function_name, params, msg,
       task_result_id, created_at)
     values (#{id,jdbcType=BIGINT}, #{taskId,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER},
       #{sharding,jdbcType=TINYINT}, #{functionName,jdbcType=VARCHAR}, #{params,jdbcType=VARCHAR}, 
-      #{taskResultId,jdbcType=BIGINT}, #{createdAt,jdbcType=TIMESTAMP})
+      #{msg,jdbcType=VARCHAR}, #{taskResultId,jdbcType=BIGINT}, #{createdAt,jdbcType=TIMESTAMP})
   </insert>
   <insert id="insertSelective" parameterType="com.cjyfff.dq.task.model.DelayQueueExecLog">
     insert into delay_queue_exec_log
@@ -52,6 +53,9 @@
       </if>
       <if test="params != null">
         params,
+      </if>
+      <if test="msg != null">
+        msg,
       </if>
       <if test="taskResultId != null">
         task_result_id,
@@ -79,6 +83,9 @@
       <if test="params != null">
         #{params,jdbcType=VARCHAR},
       </if>
+      <if test="msg != null">
+        #{msg,jdbcType=VARCHAR},
+      </if>
       <if test="taskResultId != null">
         #{taskResultId,jdbcType=BIGINT},
       </if>
@@ -105,6 +112,9 @@
       <if test="params != null">
         params = #{params,jdbcType=VARCHAR},
       </if>
+      <if test="msg != null">
+        msg = #{msg,jdbcType=VARCHAR},
+      </if>
       <if test="taskResultId != null">
         task_result_id = #{taskResultId,jdbcType=BIGINT},
       </if>
@@ -121,6 +131,7 @@
       sharding = #{sharding,jdbcType=TINYINT},
       function_name = #{functionName,jdbcType=VARCHAR},
       params = #{params,jdbcType=VARCHAR},
+      msg = #{msg,jdbcType=VARCHAR},
       task_result_id = #{taskResultId,jdbcType=BIGINT},
       created_at = #{createdAt,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=BIGINT}
