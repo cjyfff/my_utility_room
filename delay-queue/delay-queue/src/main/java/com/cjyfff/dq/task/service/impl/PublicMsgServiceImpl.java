@@ -45,7 +45,7 @@ public class PublicMsgServiceImpl implements PublicMsgService {
 
         DelayTask newDelayTask = createTask(reqDto);
 
-        if (checkIsMyTask(reqDto.getTaskId())) {
+        if (acceptTaskComponent.checkIsMyTask(reqDto.getTaskId())) {
             if (checkNeedToPushQueueNow(reqDto.getDelayTime())) {
                 QueueTask task = new QueueTask(
                     reqDto.getTaskId(), reqDto.getFunctionName(), reqDto.getParams(),
@@ -73,15 +73,6 @@ public class PublicMsgServiceImpl implements PublicMsgService {
      */
     private boolean checkNeedToPushQueueNow(Long delayTime) {
         return delayTime.compareTo(criticalPollingTime) <= 0;
-    }
-
-    /**
-     * 根据task id 判断任务是否自己处理
-     * @param taskId
-     * @return
-     */
-    private boolean checkIsMyTask(String taskId) {
-        return taskId.hashCode() % shardingInfo.getShardingMap().size() == shardingInfo.getNodeId();
     }
 
 
