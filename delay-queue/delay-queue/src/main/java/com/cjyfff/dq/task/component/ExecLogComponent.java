@@ -20,6 +20,12 @@ public class ExecLogComponent {
     @Autowired
     private ShardingInfo shardingInfo;
 
+    /**
+     * 插入 delay task 操作日志，任何对 delay task 的状态修改都要插入一条记录
+     * @param delayTask
+     * @param taskStatus
+     * @param msg
+     */
     public void insertLog(DelayTask delayTask, Integer taskStatus, String msg) {
         DelayQueueExecLog delayQueueExecLog = new DelayQueueExecLog();
         delayQueueExecLog.setTaskId(delayTask.getTaskId());

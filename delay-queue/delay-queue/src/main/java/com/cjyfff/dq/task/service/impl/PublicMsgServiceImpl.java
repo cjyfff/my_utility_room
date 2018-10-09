@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.cjyfff.dq.election.info.ShardingInfo;
 import com.cjyfff.dq.task.common.enums.TaskStatus;
+import com.cjyfff.dq.task.component.ExecLogComponent;
 import com.cjyfff.dq.task.mapper.DelayTaskMapper;
 import com.cjyfff.dq.task.model.DelayTask;
 import com.cjyfff.dq.task.queue.QueueTask;
@@ -13,6 +14,7 @@ import com.cjyfff.dq.task.component.AcceptTaskComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -30,6 +32,9 @@ public class PublicMsgServiceImpl implements PublicMsgService {
     @Autowired
     private DelayTaskMapper delayTaskMapper;
 
+    @Autowired
+    private ExecLogComponent execLogComponent;
+
     @Value("${delay_queue.critical_polling_time}")
     private Long criticalPollingTime;
 
@@ -38,7 +43,7 @@ public class PublicMsgServiceImpl implements PublicMsgService {
     public void acceptMsg(AcceptMsgDto reqDto) throws Exception {
         acceptTaskComponent.checkElectionStatus();
 
-        createTask(reqDto);
+        DelayTask newDelayTask = createTask(reqDto);
 
         if (checkIsMyTask(reqDto.getTaskId())) {
             if (checkNeedToPushQueueNow(reqDto.getDelayTime())) {
@@ -47,6 +52,13 @@ public class PublicMsgServiceImpl implements PublicMsgService {
                     reqDto.getDelayTime()
                 );
                 acceptTaskComponent.pushToQueue(task);
+                newDelayTask.setStatus(TaskStatus.IN_QUEUE.getStatus());
+                newDelayTask.setModifiedAt(new Date());
+                delayTaskMapper.updateByPrimaryKeySelective(newDelayTask);
+
+                execLogComponent.insertLog(newDelayTask, TaskStatus.IN_QUEUE.getStatus(),
+                    String.format("In Queue: %s", newDelayTask.getTaskId()));
+
             }
         } else {
             // 转发到对应机器
@@ -75,9 +87,11 @@ public class PublicMsgServiceImpl implements PublicMsgService {
 
     /**
      * 任务持久化
+     * 此处新开事务，外部回滚不影响此方法创建的数据
      * @param reqDto
      */
-    private void  createTask(AcceptMsgDto reqDto) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    private DelayTask createTask(AcceptMsgDto reqDto) {
         DelayTask delayTask = new DelayTask();
         int ranInt = (int)(Math.random() * 90000) + 10000;
 
@@ -95,5 +109,9 @@ public class PublicMsgServiceImpl implements PublicMsgService {
         delayTask.setShardingId(acceptTaskComponent.getShardingIdFormTaskId(finalTaskId).byteValue());
 
         delayTaskMapper.insert(delayTask);
+
+        execLogComponent.insertLog(delayTask, TaskStatus.ACCEPT.getStatus(), String.format("Insert task: %s", finalTaskId));
+
+        return delayTask;
     }
 }
