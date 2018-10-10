@@ -4,8 +4,8 @@ package com.cjyfff.dq.task.common;
  * Created by jiashen on 2018/9/23.
  */
 public class DefaultWebApiResult {
-    private final static String SUCCESS_CODE = "0";
-    private final static String SUCCESS_MSG = "OK";
+    public final static String SUCCESS_CODE = "0";
+    public final static String SUCCESS_MSG = "OK";
 
     private final static DefaultWebApiResult SUCCESS_WITH_NO_RESULT = new DefaultWebApiResult(SUCCESS_MSG, SUCCESS_CODE);
 

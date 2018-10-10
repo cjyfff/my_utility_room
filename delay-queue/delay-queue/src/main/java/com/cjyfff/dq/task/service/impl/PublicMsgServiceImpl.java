@@ -2,8 +2,13 @@ package com.cjyfff.dq.task.service.impl;
 
 import java.util.Date;
 
+import com.alibaba.druid.support.json.JSONUtils;
+import com.alibaba.fastjson.JSON;
+
 import com.cjyfff.dq.election.info.ShardingInfo;
 import com.cjyfff.dq.task.common.ApiException;
+import com.cjyfff.dq.task.common.DefaultWebApiResult;
+import com.cjyfff.dq.task.common.HttpUtils;
 import com.cjyfff.dq.task.common.enums.TaskStatus;
 import com.cjyfff.dq.task.component.ExecLogComponent;
 import com.cjyfff.dq.task.mapper.DelayTaskMapper;
@@ -13,6 +18,7 @@ import com.cjyfff.dq.task.service.PublicMsgService;
 import com.cjyfff.dq.task.vo.dto.AcceptMsgDto;
 import com.cjyfff.dq.task.component.AcceptTaskComponent;
 import com.cjyfff.dq.task.vo.dto.InnerMsgDto;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -22,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Created by jiashen on 2018/9/23.
  */
+@Slf4j
 @Service
 public class PublicMsgServiceImpl implements PublicMsgService {
 
@@ -68,16 +75,29 @@ public class PublicMsgServiceImpl implements PublicMsgService {
             }
         } else {
             // 转发到对应机器
-            Integer targetShardingId = acceptTaskComponent.getShardingIdFormTaskId(newDelayTask.getTaskId());
-            String targetHost = shardingInfo.getShardingMap().get(targetShardingId);
+            try {
+                Integer targetShardingId = acceptTaskComponent.getShardingIdFormTaskId(newDelayTask.getTaskId());
+                String targetHost = shardingInfo.getShardingMap().get(targetShardingId);
 
-            if (targetHost == null) {
-                throw new ApiException("-201", String.format("任务转发时找不到对应的分片信息, sharding Id: %s", targetShardingId.toString()));
+                if (targetHost == null) {
+                    throw new ApiException("-201",
+                        String.format("任务转发时找不到对应的分片信息, sharding Id: %s", targetShardingId.toString()));
+                }
+
+                String url = String.format("http://%s/dq/acceptInnerMsg", targetHost);
+                InnerMsgDto innerMsgDto = new InnerMsgDto();
+
+                String resultJson = HttpUtils.doPost(url, JSON.toJSONString(innerMsgDto));
+                log.info(String.format("Send inner task msg to node id :%s, host: %s, resp is %s",
+                    targetShardingId, targetHost, resultJson));
+                DefaultWebApiResult result = JSON.parseObject(resultJson, DefaultWebApiResult.class);
+                if (!DefaultWebApiResult.SUCCESS_CODE.equals(result.getCode())) {
+                    log.error("Send inner task get error: " + result.getMsg());
+                }
+            } catch (Exception err) {
+                // 转发逻辑即时报错也不抛出异常，由定时任务做补偿操作
+                log.error("Send inner task get error: ", err);
             }
-
-            String url = String.format("http://%s/dq/acceptInnerMsg", targetHost);
-            InnerMsgDto innerMsgDto = new InnerMsgDto();
-
         }
 
     }
