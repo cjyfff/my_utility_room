@@ -6,11 +6,18 @@ import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,21 +34,35 @@ public class HttpUtils {
     private static CloseableHttpClient httpClient;
 
     static {
-        PoolingHttpClientConnectionManager pcm = new PoolingHttpClientConnectionManager();
-        pcm.setMaxTotal(100);
-        pcm.setDefaultMaxPerRoute(20);
+        try {
+            SSLContextBuilder builder = new SSLContextBuilder();
+            builder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
+            SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+                builder.build());
+            // 配置同时支持 HTTP 和 HTTPS
+            Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
+                .register(
+                    "http", PlainConnectionSocketFactory.getSocketFactory()).register(
+                    "https", sslsf).build();
 
-        requestConfig = RequestConfig.custom().setConnectionRequestTimeout(10000)
-            .setSocketTimeout(10000).setConnectTimeout(10000).build();
+            PoolingHttpClientConnectionManager pcm = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
+            pcm.setMaxTotal(100);
+            pcm.setDefaultMaxPerRoute(20);
 
-        httpClient = HttpClients.custom()
-            // 设置连接池管理
-            .setConnectionManager(pcm)
-            // 设置请求配置
-            .setDefaultRequestConfig(requestConfig)
-            // 设置重试次数
-            .setRetryHandler(new DefaultHttpRequestRetryHandler(0, false))
-            .build();
+            requestConfig = RequestConfig.custom().setConnectionRequestTimeout(10000)
+                .setSocketTimeout(10000).setConnectTimeout(10000).build();
+
+            httpClient = HttpClients.custom()
+                // 设置连接池管理
+                .setConnectionManager(pcm)
+                // 设置请求配置
+                .setDefaultRequestConfig(requestConfig)
+                // 设置重试次数
+                .setRetryHandler(new DefaultHttpRequestRetryHandler(0, false))
+                .build();
+        } catch (Exception e) {
+            logger.error("HttpUtils init get error: ", e);
+        }
     }
 
 
@@ -64,6 +85,7 @@ public class HttpUtils {
         } finally {
             if (response != null) {
                 try {
+                    // 调用consume方法就会关闭流
                     EntityUtils.consume(response.getEntity());
                 } catch (IOException e) {
                     logger.error(httpPost.toString(), e);
