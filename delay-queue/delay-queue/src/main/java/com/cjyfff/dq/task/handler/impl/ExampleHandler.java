@@ -18,6 +18,6 @@ public class ExampleHandler implements ITaskHandler {
     public HandlerResult run(String paras) {
         log.info("Run ExampleHandler with paras: " + paras);
 
-        return new HandlerResult();
+        return new HandlerResult(HandlerResult.SUCCESS_CODE, "success");
     }
 }

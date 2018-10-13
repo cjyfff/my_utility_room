@@ -47,9 +47,9 @@ public class TaskConsumer {
      * 不过假如消费过程比较耗时，多个相同时间的元素还是不会同时消费，这种情况应该把消费逻辑放到异步队列中处理
      * @throws Exception
      */
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay = 10)
     public void consumer() throws Exception {
-        log.info("---------------");
+        //log.info("---------------");
         // 这里必须用死循环来取元素，
         // 假如通过Scheduled来控制取元素频率的话
         // 两个任务的时间相隔小于Scheduled delay time时，也会变为相隔Scheduled delay time
@@ -93,8 +93,8 @@ public class TaskConsumer {
             }
 
             HandlerResult result = taskHandler.run(delayTask.getParams());
-            // todo: 处理重试逻辑
-            if (Integer.valueOf(0).equals(result.getResultCode())) {
+
+            if (HandlerResult.SUCCESS_CODE.equals(result.getResultCode())) {
                 Integer taskStatus = TaskStatus.PROCESS_SUCCESS.getStatus();
 
                 delayTask.setStatus(taskStatus);
@@ -102,6 +102,15 @@ public class TaskConsumer {
                 delayTaskMapper.updateByPrimaryKeySelective(delayTask);
 
                 execLogComponent.insertLog(delayTask, taskStatus, "success");
+            } else {
+                // todo: 处理重试逻辑
+                Integer taskStatus = TaskStatus.PROCESS_FAIL.getStatus();
+
+                delayTask.setStatus(taskStatus);
+                delayTask.setModifiedAt(new Date());
+                delayTaskMapper.updateByPrimaryKeySelective(delayTask);
+
+                execLogComponent.insertLog(delayTask, taskStatus, result.getMsg());
             }
 
         } else {

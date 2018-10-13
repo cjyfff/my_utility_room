@@ -36,7 +36,7 @@ public class PollingTaskProducer {
     @Autowired
     private ExecLogComponent execLogComponent;
 
-    @Value("delay_queue.critical_polling_time")
+    @Value("${delay_queue.critical_polling_time}")
     private Long pollingTime;
 
     @Scheduled(fixedRateString = "#{${delay_queue.critical_polling_time} * 1000}")

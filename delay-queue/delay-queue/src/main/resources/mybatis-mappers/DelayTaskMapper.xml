@@ -70,7 +70,7 @@
       modified_at)
     values (#{id,jdbcType=BIGINT}, #{taskId,jdbcType=VARCHAR}, #{functionName,jdbcType=VARCHAR}, 
       #{params,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, #{delayTime,jdbcType=BIGINT}, #{executeTime,jdbcType=BIGINT},
-      #{retryInterval,jdbcType=INTEGER}, #{retryTime,jdbcType=BIGINT}
+      #{retryInterval,jdbcType=INTEGER}, #{retryTime,jdbcType=BIGINT},
       #{retryCount,jdbcType=TINYINT}, #{shardingId,jdbcType=TINYINT}, #{createdAt,jdbcType=TIMESTAMP}, 
       #{modifiedAt,jdbcType=TIMESTAMP})
   </insert>

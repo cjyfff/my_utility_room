@@ -10,6 +10,19 @@ import lombok.Setter;
 @Setter
 public class HandlerResult {
 
+    public static final Integer SUCCESS_CODE = 0;
+
+    public HandlerResult(Integer resultCode, String msg, String result) {
+        this.resultCode = resultCode;
+        this.msg = msg;
+        this.result = result;
+    }
+
+    public HandlerResult(Integer resultCode, String msg) {
+        this.resultCode = resultCode;
+        this.msg = msg;
+    }
+
     private Integer resultCode;
 
     private String msg;
