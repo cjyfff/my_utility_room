@@ -18,8 +18,10 @@ import com.cjyfff.dq.task.vo.dto.AcceptMsgDto;
 import com.cjyfff.dq.task.component.AcceptTaskComponent;
 import com.cjyfff.dq.task.vo.dto.InnerMsgDto;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -85,19 +87,33 @@ public class PublicMsgServiceImpl implements PublicMsgService {
                 String url = String.format("http://%s/dq/acceptInnerMsg", targetHost);
                 InnerMsgDto innerMsgDto = new InnerMsgDto();
 
-                String resultJson = HttpUtils.doPost(url, JSON.toJSONString(innerMsgDto));
-                log.info(String.format("Send inner task msg to node id :%s, host: %s, resp is %s",
-                    targetShardingId, targetHost, resultJson));
-                DefaultWebApiResult result = JSON.parseObject(resultJson, DefaultWebApiResult.class);
-                if (!DefaultWebApiResult.SUCCESS_CODE.equals(result.getCode())) {
-                    log.error("Send inner task get error: " + result.getMsg());
-                }
+                newDelayTask.setStatus(TaskStatus.TRANSMITING.getStatus());
+                newDelayTask.setModifiedAt(new Date());
+                delayTaskMapper.updateByPrimaryKeySelective(newDelayTask);
+
+                BeanUtils.copyProperties(newDelayTask, innerMsgDto);
+
+                sendInnerTaskMsg(url, innerMsgDto, targetShardingId, targetHost);
             } catch (Exception err) {
                 // 转发逻辑即时报错也不抛出异常，由定时任务做补偿操作
                 log.error("Send inner task get error: ", err);
             }
         }
 
+    }
+
+    @Async
+    public void sendInnerTaskMsg(String url, InnerMsgDto innerMsgDto,
+                                 Integer targetShardingId, String targetHost) {
+        String resultJson = HttpUtils.doPost(url, JSON.toJSONString(innerMsgDto));
+
+        log.info(String.format("Send inner task msg to node id :%s, host: %s, resp is %s",
+            targetShardingId, targetHost, resultJson));
+
+        DefaultWebApiResult result = JSON.parseObject(resultJson, DefaultWebApiResult.class);
+        if (!DefaultWebApiResult.SUCCESS_CODE.equals(result.getCode())) {
+            log.error("Send inner task get error: " + result.getMsg());
+        }
     }
 
     /**
@@ -113,6 +129,8 @@ public class PublicMsgServiceImpl implements PublicMsgService {
     /**
      * 任务持久化
      * 为了简化逻辑，createTask不新建事务，出现异常都回滚，由调用方重试
+     * 因为程序总会有概率的出现异常的，假如出现异常时，任务已经创建，并且通知到调用方的话，
+     * 调用方会重复发送请求，这样的话任务就会重复被创建
      * @param reqDto
      */
     private DelayTask createTask(AcceptMsgDto reqDto) {
