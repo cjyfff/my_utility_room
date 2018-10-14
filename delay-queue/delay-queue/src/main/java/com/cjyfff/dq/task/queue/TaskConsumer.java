@@ -45,6 +45,8 @@ public class TaskConsumer {
      * 队列非空时，take方法会阻塞直到队列第一个元素的时间达到，
      * 加入阻塞期间有一个时间更短的元素插入，队列会自动消费更前的那个元素。
      * 不过假如消费过程比较耗时，多个相同时间的元素还是不会同时消费，这种情况应该把消费逻辑放到异步队列中处理
+     *
+     * 这里选择fixedDelay，上一个任务结束后开始计算间隔
      * @throws Exception
      */
     @Scheduled(fixedDelay = 10)

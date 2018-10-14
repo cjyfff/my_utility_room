@@ -36,9 +36,6 @@ public class MasterAction {
     private static final String ELECTION_STATUS_PATH = "/election_status";
 
     @Autowired
-    private ElectionStatus electionStatus;
-
-    @Autowired
     private ElectionListener electionListener;
 
     @Autowired
