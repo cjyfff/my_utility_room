@@ -1,18 +1,16 @@
 package com.cjyfff.dq.election.master;
 
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.alibaba.fastjson.JSON;
 
 import com.cjyfff.dq.biz.MasterBLAfterElectionFinish;
 import com.cjyfff.dq.biz.NoneBusinessLogic;
 import com.cjyfff.dq.election.info.ElectionListener;
-import com.cjyfff.dq.election.info.ElectionStatus;
 import com.cjyfff.dq.election.info.ElectionStatus.ElectionStatusType;
 import com.cjyfff.dq.election.ElectionComponent;
 import com.cjyfff.dq.election.info.SetSelfESAndRunBLProxy;
-import com.google.common.collect.Maps;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.data.Stat;
@@ -55,7 +53,7 @@ public class MasterAction {
     public void masterSetShardingInfo(CuratorFramework client) throws Exception {
         List<String> nodeHostList = client.getChildren().forPath(NODE_INFO_PATH);
         Integer nodeId = 0;
-        Map<Integer, String> shardingMap = Maps.newHashMapWithExpectedSize(15);
+        ConcurrentHashMap<Integer, String> shardingMap = new ConcurrentHashMap<>(20);
         for (String nodeHost : nodeHostList) {
             shardingMap.put(nodeId, nodeHost);
             logger.info("Host: " + nodeHost + ", get nodeId: " + nodeId);

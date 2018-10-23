@@ -2,11 +2,10 @@ package com.cjyfff.dq.election;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-import com.cjyfff.dq.election.exception.ElectionException;
 import com.cjyfff.dq.election.info.ShardingInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +25,7 @@ public class ElectionComponent {
     @Value("${server.port}")
     private String servicePort;
 
-    public void updateSelfShardingInfo(Map<Integer, String> shardingMap) throws Exception {
+    public void updateSelfShardingInfo(ConcurrentHashMap<Integer, String> shardingMap) throws Exception {
         if (shardingMap == null) {
             shardingInfo.setShardingMap(null);
             return;

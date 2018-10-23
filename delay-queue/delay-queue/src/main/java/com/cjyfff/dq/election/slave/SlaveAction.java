@@ -1,6 +1,7 @@
 package com.cjyfff.dq.election.slave;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.alibaba.fastjson.JSON;
 
@@ -56,7 +57,7 @@ public class SlaveAction {
             if (null != data) {
                 String shardingData = new String(cache.getCurrentData().getData());
                 logger.info("Slave get cluster sharding info changed：" + shardingData);
-                Map<Integer, String> shardingMap = JSON.parseObject(shardingData, Map.class);
+                ConcurrentHashMap<Integer, String> shardingMap = JSON.parseObject(shardingData, ConcurrentHashMap.class);
                 electionComponent.updateSelfShardingInfo(shardingMap);
 
             } else {
