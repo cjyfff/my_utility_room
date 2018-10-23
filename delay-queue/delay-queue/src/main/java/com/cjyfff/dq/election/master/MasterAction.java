@@ -61,13 +61,13 @@ public class MasterAction {
         }
 
         Stat stat = client.checkExists().forPath(SHARDING_INFO_PATH);
-        String ShardingInfo = JSON.toJSONString(shardingMap);
+        String shardingInfo = JSON.toJSONString(shardingMap);
         if (stat == null) {
             // SHARDING_INFO_PATH设为临时节点
             client.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL)
-                .forPath(SHARDING_INFO_PATH, ShardingInfo.getBytes());
+                .forPath(SHARDING_INFO_PATH, shardingInfo.getBytes());
         } else {
-            client.setData().forPath(SHARDING_INFO_PATH, ShardingInfo.getBytes());
+            client.setData().forPath(SHARDING_INFO_PATH, shardingInfo.getBytes());
         }
 
         electionComponent.updateSelfShardingInfo(shardingMap);
