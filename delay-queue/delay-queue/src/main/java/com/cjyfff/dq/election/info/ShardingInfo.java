@@ -12,6 +12,11 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 @Component
+/**
+ * ShardingInfo，全局分片信息
+ * 这些全局信息其实可以写成类的静态属性，这样来保证多线程读取到同一份数据，
+ * 不一定要使用单例bean
+ */
 public class ShardingInfo {
     /**
      * 集群所有机器的分片信息，key为node id，value为机器ip，
