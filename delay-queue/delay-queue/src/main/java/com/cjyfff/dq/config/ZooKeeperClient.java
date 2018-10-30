@@ -20,6 +20,12 @@ public class ZooKeeperClient {
     @Value("${delay_queue.zk_host}")
     private String zkHost;
 
+    @Value("${delay_queue.zk_session_timeout_ms}")
+    private Integer zkSessionTimeoutMs;
+
+    @Value("${delay_queue.zk_connection_timeout_ms}")
+    private Integer zkConnectionTimeoutMs;
+
     private CuratorFramework client;
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
@@ -27,7 +33,7 @@ public class ZooKeeperClient {
     public CuratorFramework getClient() {
         if (this.client == null) {
             // todo: 连接不上zk应该直接退出
-            CuratorFramework c = CuratorFrameworkFactory.newClient(zkHost,
+            CuratorFramework c = CuratorFrameworkFactory.newClient(zkHost, zkSessionTimeoutMs, zkConnectionTimeoutMs,
                 new ExponentialBackoffRetry(1000, 3));
             c.start();
             this.client = c;
