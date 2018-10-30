@@ -1,9 +1,11 @@
 package com.cjyfff.dq.task.common.lock;
 
+import org.apache.curator.framework.recipes.locks.InterProcessLock;
+
 /**
  * Created by jiashen on 2018/10/30.
  */
-public interface ZKLock {
+public interface ZkLock {
 
     /**
      * 尝试获得锁，成功返回true，失败返回false，seconds参数代表尝试获得锁所阻塞等待的时间
@@ -23,8 +25,15 @@ public interface ZKLock {
     boolean idempotentLock(String key) throws LockException;
 
     /**
-     * 尝试解锁，即使key所对应的锁不存在也不抛出异常
-     * @param key 锁key
+     * 取得锁的实例，通常用于解锁操作
+     * @return
      */
-    void tryUnlock(String key);
+    InterProcessLock getLockInstance();
+
+    /**
+     * 尝试解锁，即使遇到异常也不抛出
+     * 解锁动作必须基于锁对象，否则有可能会解了别人的锁
+     * @param lock lock对象
+     */
+    void tryUnlock(InterProcessLock lock);
 }
