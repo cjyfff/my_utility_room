@@ -3,6 +3,7 @@ package com.cjyfff.dq.task.controller;
 import com.cjyfff.dq.task.common.ApiException;
 import com.cjyfff.dq.task.common.BeanValidators;
 import com.cjyfff.dq.task.common.DefaultWebApiResult;
+import com.cjyfff.dq.task.common.lock.ZkLock;
 import com.cjyfff.dq.task.service.InnerMsgService;
 import com.cjyfff.dq.task.service.PublicMsgService;
 import com.cjyfff.dq.task.service.TestService;
@@ -31,6 +32,9 @@ public class MessageController extends BaseController {
     @Autowired
     private TestService testService;
 
+    @Autowired
+    private ZkLock zkLock;
+
     /**
      * 接收外部消息
      */
@@ -39,6 +43,10 @@ public class MessageController extends BaseController {
         try {
             BeanValidators.validateWithParameterException(validator, reqDto);
 
+            if (! zkLock.idempotentLock(reqDto.getTaskId())) {
+                return DefaultWebApiResult.failure("-889", "This task is processing...");
+            }
+
             publicMsgService.acceptMsg(reqDto);
             return DefaultWebApiResult.success();
         } catch (ApiException ae) {
@@ -46,6 +54,8 @@ public class MessageController extends BaseController {
         } catch (Exception e) {
             log.error("publicMsgService acceptMsg get error: ", e);
             return DefaultWebApiResult.failure("-1", "system error");
+        } finally {
+            zkLock.tryUnlock(zkLock.getLockInstance());
         }
     }
 
@@ -57,6 +67,10 @@ public class MessageController extends BaseController {
         try {
             BeanValidators.validateWithParameterException(validator, reqDto);
 
+            if (! zkLock.idempotentLock(reqDto.getTaskId())) {
+                return DefaultWebApiResult.failure("-889", "This task is processing...");
+            }
+
             innerMsgService.acceptMsg(reqDto);
             return DefaultWebApiResult.success();
         } catch (ApiException ae) {
@@ -64,6 +78,8 @@ public class MessageController extends BaseController {
         } catch (Exception e) {
             log.error("innerMsgService acceptMsg get error: ", e);
             return DefaultWebApiResult.failure("-1", "system error");
+        } finally {
+            zkLock.tryUnlock(zkLock.getLockInstance());
         }
     }
 
