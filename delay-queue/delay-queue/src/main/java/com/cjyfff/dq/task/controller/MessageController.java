@@ -1,6 +1,7 @@
 package com.cjyfff.dq.task.controller;
 
 import com.cjyfff.dq.task.common.ApiException;
+import com.cjyfff.dq.task.common.BeanValidators;
 import com.cjyfff.dq.task.common.DefaultWebApiResult;
 import com.cjyfff.dq.task.service.InnerMsgService;
 import com.cjyfff.dq.task.service.PublicMsgService;
@@ -19,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @Slf4j
-public class MessageController {
+public class MessageController extends BaseController {
 
     @Autowired
     private PublicMsgService publicMsgService;
@@ -36,6 +37,8 @@ public class MessageController {
     @RequestMapping(path = "/dq/acceptMsg", method={RequestMethod.POST})
     public DefaultWebApiResult acceptMsg(@RequestBody AcceptMsgDto reqDto) {
         try {
+            BeanValidators.validateWithParameterException(validator, reqDto);
+
             publicMsgService.acceptMsg(reqDto);
             return DefaultWebApiResult.success();
         } catch (ApiException ae) {
@@ -52,6 +55,8 @@ public class MessageController {
     @RequestMapping(path = "/dq/acceptInnerMsg", method={RequestMethod.POST})
     public DefaultWebApiResult acceptInnerMsg(@RequestBody InnerMsgDto reqDto) {
         try {
+            BeanValidators.validateWithParameterException(validator, reqDto);
+
             innerMsgService.acceptMsg(reqDto);
             return DefaultWebApiResult.success();
         } catch (ApiException ae) {
