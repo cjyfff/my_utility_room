@@ -24,14 +24,13 @@ public class ZkLockImpl implements ZkLock {
     private final static String LOCK_PATH = "/task_lock";
 
     @Override
-    public boolean tryLock(String key, Integer seconds) {
+    public boolean tryLock(CuratorFramework client, String key, Integer seconds) {
 
         try {
             if (StringUtils.isEmpty(key)) {
                 return false;
             }
 
-            CuratorFramework client = zooKeeperClient.getClient();
             String keyLockPath = getKeyLockPach(key);
             InterProcessLock lock = new InterProcessMutex(client, keyLockPath);
             // 加锁成功后需要把锁对象存入TreadLocal，加锁时根据锁对象来解锁，防止对别的线程
@@ -48,8 +47,8 @@ public class ZkLockImpl implements ZkLock {
     }
 
     @Override
-    public boolean idempotentLock(String key) {
-        return this.tryLock(key, 0);
+    public boolean idempotentLock(CuratorFramework client, String key) {
+        return this.tryLock(client, key, 0);
     }
 
     @Override

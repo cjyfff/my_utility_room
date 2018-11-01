@@ -1,5 +1,6 @@
 package com.cjyfff.dq.task.controller;
 
+import com.cjyfff.dq.config.ZooKeeperClient;
 import com.cjyfff.dq.task.common.ApiException;
 import com.cjyfff.dq.task.common.BeanValidators;
 import com.cjyfff.dq.task.common.DefaultWebApiResult;
@@ -35,6 +36,9 @@ public class MessageController extends BaseController {
     @Autowired
     private ZkLock zkLock;
 
+    @Autowired
+    private ZooKeeperClient zooKeeperClient;
+
     /**
      * 接收外部消息
      */
@@ -43,7 +47,7 @@ public class MessageController extends BaseController {
         try {
             BeanValidators.validateWithParameterException(validator, reqDto);
 
-            if (! zkLock.idempotentLock(reqDto.getTaskId())) {
+            if (! zkLock.idempotentLock(zooKeeperClient.getClient(), reqDto.getTaskId())) {
                 return DefaultWebApiResult.failure("-889", "This task is processing...");
             }
 
@@ -67,7 +71,7 @@ public class MessageController extends BaseController {
         try {
             BeanValidators.validateWithParameterException(validator, reqDto);
 
-            if (! zkLock.idempotentLock(reqDto.getTaskId())) {
+            if (! zkLock.idempotentLock(zooKeeperClient.getClient(), reqDto.getTaskId())) {
                 return DefaultWebApiResult.failure("-889", "This task is processing...");
             }
 
