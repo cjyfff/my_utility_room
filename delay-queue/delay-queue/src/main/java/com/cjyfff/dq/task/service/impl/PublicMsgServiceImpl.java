@@ -8,8 +8,10 @@ import com.cjyfff.dq.election.info.ShardingInfo;
 import com.cjyfff.dq.task.common.ApiException;
 import com.cjyfff.dq.task.common.DefaultWebApiResult;
 import com.cjyfff.dq.task.common.HttpUtils;
+import com.cjyfff.dq.task.common.TaskHandlerContext;
 import com.cjyfff.dq.task.common.enums.TaskStatus;
 import com.cjyfff.dq.task.component.ExecLogComponent;
+import com.cjyfff.dq.task.handler.ITaskHandler;
 import com.cjyfff.dq.task.mapper.DelayTaskMapper;
 import com.cjyfff.dq.task.model.DelayTask;
 import com.cjyfff.dq.task.queue.QueueTask;
@@ -44,6 +46,9 @@ public class PublicMsgServiceImpl implements PublicMsgService {
     @Autowired
     private ExecLogComponent execLogComponent;
 
+    @Autowired
+    private TaskHandlerContext taskHandlerContext;
+
     @Value("${delay_queue.critical_polling_time}")
     private Long criticalPollingTime;
 
@@ -51,6 +56,8 @@ public class PublicMsgServiceImpl implements PublicMsgService {
     @Transactional(rollbackFor = Exception.class)
     public void acceptMsg(AcceptMsgDto reqDto) throws Exception {
         acceptTaskComponent.checkElectionStatus();
+
+        checkFunctionName(reqDto.getFunctionName());
 
         DelayTask newDelayTask = createTask(reqDto);
 
@@ -100,6 +107,13 @@ public class PublicMsgServiceImpl implements PublicMsgService {
             }
         }
 
+    }
+
+    private void checkFunctionName(String functionName) throws ApiException {
+        ITaskHandler taskHandler = taskHandlerContext.getTaskHandler(functionName);
+        if (taskHandler == null) {
+            throw new ApiException("-106", "Can not find handler by specified function name.");
+        }
     }
 
     @Async
