@@ -48,7 +48,7 @@ public class PollingTaskProducer {
 
         Long nowSecond = System.currentTimeMillis() / 1000;
         List<DelayTask> taskList = delayTaskMapper.selectByStatusAndExecuteTimeForUpdate(TaskStatus.ACCEPT.getStatus(),
-            shardingInfo.getNodeId().byteValue(), nowSecond - pollingTime, nowSecond);
+            shardingInfo.getNodeId().byteValue(), nowSecond, nowSecond - pollingTime);
 
         for (DelayTask delayTask : taskList) {
             QueueTask task = new QueueTask(
