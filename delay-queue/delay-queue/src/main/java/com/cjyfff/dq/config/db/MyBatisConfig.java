@@ -66,9 +66,9 @@ public class MyBatisConfig {
     @Bean(initMethod = "init", destroyMethod = "close", name = "druidDataSourceWrite")
     public DruidDataSource druidDataSourceWrite(
         @Value("${jdbc.driverClassName}") String driver,
-        @Value("${jdbc.url}") String url,
-        @Value("${jdbc.username}") String username,
-        @Value("${jdbc.password}") String password) {
+        @Value("${jdbc.write.url}") String url,
+        @Value("${jdbc.write.username}") String username,
+        @Value("${jdbc.write.password}") String password) {
 
         return setDataSourcePrams(driver, url, username, password);
     }
@@ -76,9 +76,9 @@ public class MyBatisConfig {
     @Bean(initMethod = "init", destroyMethod = "close", name = "druidDataSourceRead")
     public DruidDataSource druidDataSourceRead(
         @Value("${jdbc.driverClassName}") String driver,
-        @Value("${jdbc.url}") String url,
-        @Value("${jdbc.username}") String username,
-        @Value("${jdbc.password}") String password) {
+        @Value("${jdbc.read.url}") String url,
+        @Value("${jdbc.read.username}") String username,
+        @Value("${jdbc.read.password}") String password) {
 
         return setDataSourcePrams(driver, url, username, password);
     }
