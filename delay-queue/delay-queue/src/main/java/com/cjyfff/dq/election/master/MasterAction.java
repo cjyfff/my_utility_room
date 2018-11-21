@@ -5,9 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.alibaba.fastjson.JSON;
 
-import com.cjyfff.dq.biz.MasterBeforeUpdateElectionFinishBiz;
-import com.cjyfff.dq.election.biz.ElectionBiz;
-import com.cjyfff.dq.election.biz.NoneBiz;
+import com.cjyfff.dq.election.biz.ElectionBizContainer;
 import com.cjyfff.dq.election.info.ElectionListener;
 import com.cjyfff.dq.election.info.ElectionStatus.ElectionStatusType;
 import com.cjyfff.dq.election.ElectionComponent;
@@ -42,9 +40,6 @@ public class MasterAction {
 
     @Autowired
     private SetSelfESAndRunBLProxy setSelfESAndRunBLProxy;
-
-    @Autowired
-    private MasterBeforeUpdateElectionFinishBiz masterBeforeUpdateElectionFinishBiz;
 
     /**
      * master统计节点，分配node id，写入zk
@@ -108,9 +103,13 @@ public class MasterAction {
 
         if (isFinish) {
             logger.info("*** Election finish. I am master. ***");
-            setSelfESAndRunBLProxy.setFinish(new NoneBiz(), masterBeforeUpdateElectionFinishBiz);
+            setSelfESAndRunBLProxy.setFinish(
+                ElectionBizContainer.masterBeforeUpdateElectionFinishBiz,
+                ElectionBizContainer.masterAfterUpdateElectionFinishBiz);
         } else {
-            setSelfESAndRunBLProxy.setNotYet(new NoneBiz(), new NoneBiz());
+            setSelfESAndRunBLProxy.setNotYet(
+                ElectionBizContainer.masterBeforeUpdateElectionNotYetBiz,
+                ElectionBizContainer.masterAfterUpdateElectionNotYetBiz);
         }
 
     }
