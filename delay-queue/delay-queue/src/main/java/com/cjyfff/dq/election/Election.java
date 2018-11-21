@@ -3,7 +3,7 @@ package com.cjyfff.dq.election;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import com.cjyfff.dq.biz.NoneBusinessLogic;
+import com.cjyfff.dq.election.biz.NoneBiz;
 import com.cjyfff.dq.election.info.ElectionStatus;
 import com.cjyfff.dq.election.info.ElectionStatus.ElectionStatusType;
 import com.cjyfff.dq.election.info.SetSelfESAndRunBLProxy;
@@ -195,7 +195,7 @@ public class Election {
             public void notLeader() {
                 try {
                     logger.warn("Lose master status...");
-                    setSelfESAndRunBLProxy.setNotYet(new NoneBusinessLogic(), new NoneBusinessLogic());
+                    setSelfESAndRunBLProxy.setNotYet(new NoneBiz(), new NoneBiz());
 
                     slaveAction.slaveMonitorShardingInfo(client);
 

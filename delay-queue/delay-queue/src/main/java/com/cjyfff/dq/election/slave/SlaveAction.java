@@ -1,11 +1,10 @@
 package com.cjyfff.dq.election.slave;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.alibaba.fastjson.JSON;
 
-import com.cjyfff.dq.biz.NoneBusinessLogic;
+import com.cjyfff.dq.election.biz.NoneBiz;
 import com.cjyfff.dq.election.info.ElectionListener;
 import com.cjyfff.dq.election.info.ElectionStatus;
 import com.cjyfff.dq.election.info.ElectionStatus.ElectionStatusType;
@@ -87,14 +86,14 @@ public class SlaveAction {
                 logger.info("Slave get election status data changed：" + electionStatusValue);
 
                 if (ElectionStatusType.FINISH.getValue().equals(electionStatusValue)) {
-                    setSelfESAndRunBLProxy.setFinish(new NoneBusinessLogic(), new NoneBusinessLogic());
+                    setSelfESAndRunBLProxy.setFinish(new NoneBiz(), new NoneBiz());
                     logger.info("*** Election finish. I am slave. ***");
                 } else {
-                    setSelfESAndRunBLProxy.setNotYet(new NoneBusinessLogic(), new NoneBusinessLogic());
+                    setSelfESAndRunBLProxy.setNotYet(new NoneBiz(), new NoneBiz());
                 }
 
             } else {
-                setSelfESAndRunBLProxy.setNotYet(new NoneBusinessLogic(), new NoneBusinessLogic());
+                setSelfESAndRunBLProxy.setNotYet(new NoneBiz(), new NoneBiz());
                 logger.info("Slave get election info data has been deleted or not exist..,");
             }
         };
