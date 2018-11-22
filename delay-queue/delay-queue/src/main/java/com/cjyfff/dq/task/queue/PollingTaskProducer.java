@@ -3,6 +3,8 @@ package com.cjyfff.dq.task.queue;
 import java.util.Date;
 import java.util.List;
 
+import com.cjyfff.dq.election.info.ElectionStatus;
+import com.cjyfff.dq.election.info.ElectionStatus.ElectionStatusType;
 import com.cjyfff.dq.election.info.ShardingInfo;
 import com.cjyfff.dq.task.common.enums.TaskStatus;
 import com.cjyfff.dq.task.component.AcceptTaskComponent;
@@ -31,6 +33,9 @@ public class PollingTaskProducer {
     private ShardingInfo shardingInfo;
 
     @Autowired
+    private ElectionStatus electionStatus;
+
+    @Autowired
     private AcceptTaskComponent acceptTaskComponent;
 
     @Autowired
@@ -43,6 +48,12 @@ public class PollingTaskProducer {
     @Transactional(rollbackFor = Exception.class)
     public void run() {
         log.info("begin PollingTaskProducer ------");
+
+        if (! ElectionStatusType.FINISH.equals(electionStatus.getElectionStatus())) {
+            log.warn("Election not finish, PollingTaskProducer can not process...");
+            return;
+        }
+
         // 根据状态、sharding id、执行时间select for update查出数据,
         // 入队，然后update状态（无需再根据状态筛选来更新）
 

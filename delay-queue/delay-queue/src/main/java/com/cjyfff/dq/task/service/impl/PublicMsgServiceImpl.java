@@ -61,10 +61,6 @@ public class PublicMsgServiceImpl implements PublicMsgService {
 
         DelayTask newDelayTask = createTask(reqDto);
 
-        // 因为 reqDto 的 task id 和 delayTask 的 task id 不一样，为防止之后的代码取错，
-        // 这里把 reqDto 设为 null
-        reqDto = null;
-
         if (acceptTaskComponent.checkIsMyTask(newDelayTask.getTaskId())) {
             if (checkNeedToPushQueueNow(newDelayTask.getDelayTime())) {
                 QueueTask task = new QueueTask(
