@@ -138,7 +138,14 @@ public class MasterAction {
             // todo: 处理本机设置选举成功后，node info change listener才回调导致2次分片的问题
             masterUpdateSelfStatus(true);
 
-            masterClaimElectionStatus(client, true);
+            try {
+                masterClaimElectionStatus(client, true);
+            } catch (Exception e) {
+                // 更新远端zk选举状态失败时，把自身选举状态置为未完成
+                masterUpdateSelfStatus(false);
+                throw e;
+            }
+
         } else {
             masterUpdateSelfStatus(false);
 
