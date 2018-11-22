@@ -149,10 +149,8 @@ public class PublicMsgServiceImpl implements PublicMsgService {
      */
     private DelayTask createTask(AcceptMsgDto reqDto) {
         DelayTask delayTask = new DelayTask();
-        int ranInt = (int)(Math.random() * 90000) + 10000;
 
-        final String finalTaskId = reqDto.getTaskId() + "-" + ranInt;
-        delayTask.setTaskId(finalTaskId);
+        delayTask.setTaskId(reqDto.getTaskId());
         delayTask.setFunctionName(reqDto.getFunctionName());
         delayTask.setParams(reqDto.getParams());
         delayTask.setRetryCount(reqDto.getRetryCount());
@@ -162,11 +160,11 @@ public class PublicMsgServiceImpl implements PublicMsgService {
         delayTask.setStatus(TaskStatus.ACCEPT.getStatus());
         delayTask.setCreatedAt(new Date());
         delayTask.setModifiedAt(new Date());
-        delayTask.setShardingId(acceptTaskComponent.getShardingIdFormTaskId(finalTaskId).byteValue());
+        delayTask.setShardingId(acceptTaskComponent.getShardingIdFormTaskId(reqDto.getTaskId()).byteValue());
 
         delayTaskMapper.insert(delayTask);
 
-        execLogComponent.insertLog(delayTask, TaskStatus.ACCEPT.getStatus(), String.format("Insert task: %s", finalTaskId));
+        execLogComponent.insertLog(delayTask, TaskStatus.ACCEPT.getStatus(), String.format("Insert task: %s", reqDto.getTaskId()));
 
         return delayTask;
     }

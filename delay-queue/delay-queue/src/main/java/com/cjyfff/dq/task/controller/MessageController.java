@@ -47,7 +47,7 @@ public class MessageController extends BaseController {
         try {
             BeanValidators.validateWithParameterException(validator, reqDto);
 
-            if (! zkLock.idempotentLock(zooKeeperClient.getClient(), reqDto.getTaskId())) {
+            if (! zkLock.idempotentLock(zooKeeperClient.getClient(), reqDto.getNonceStr())) {
                 return DefaultWebApiResult.failure("-889", "This task is processing...");
             }
 

@@ -26,6 +26,9 @@ public class AcceptMsgDto {
     @NotNull(message = "can not be null")
     private Long delayTime;
 
+    @NotNull(message = "can not be null")
+    private String nonceStr;
+
     private String params;
 
     private Byte retryCount;
