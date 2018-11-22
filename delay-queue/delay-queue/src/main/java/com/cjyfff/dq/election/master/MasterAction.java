@@ -135,14 +135,14 @@ public class MasterAction {
      */
     public void masterUpdateZkAndSelfElectionStatus(CuratorFramework client, boolean isFinish) throws Exception {
         if (isFinish) {
-            masterClaimElectionStatus(client, true);
-
             // todo: 处理本机设置选举成功后，node info change listener才回调导致2次分片的问题
             masterUpdateSelfStatus(true);
-        } else {
-            masterClaimElectionStatus(client, false);
 
+            masterClaimElectionStatus(client, true);
+        } else {
             masterUpdateSelfStatus(false);
+
+            masterClaimElectionStatus(client, false);
         }
     }
 }
