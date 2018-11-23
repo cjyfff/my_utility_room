@@ -108,9 +108,8 @@ public class PublicMsgServiceImpl implements PublicMsgService {
         }
     }
 
-    @Async
-    public void sendInnerTaskMsg(String url, InnerMsgDto innerMsgDto,
-                                 Integer targetShardingId, String targetHost) {
+    private void sendInnerTaskMsg(String url, InnerMsgDto innerMsgDto,
+                                 Integer targetShardingId, String targetHost) throws Exception {
         String resultJson = HttpUtils.doPost(url, JSON.toJSONString(innerMsgDto));
 
         log.info(String.format("Send inner task msg to node id :%s, host: %s, resp is %s",
@@ -119,6 +118,7 @@ public class PublicMsgServiceImpl implements PublicMsgService {
         DefaultWebApiResult result = JSON.parseObject(resultJson, DefaultWebApiResult.class);
         if (!DefaultWebApiResult.SUCCESS_CODE.equals(result.getCode())) {
             log.error("Send inner task get error: " + result.getMsg());
+            throw new ApiException("-120", "Send inner task get error: " + result.getMsg());
         }
     }
 
