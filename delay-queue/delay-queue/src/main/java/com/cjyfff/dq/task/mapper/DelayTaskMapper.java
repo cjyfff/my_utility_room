@@ -18,12 +18,6 @@ public interface DelayTaskMapper {
 
     int updateByPrimaryKeySelective(DelayTask record);
 
-    int updateStatusByOldStatusAndExecuteTime(@Param(value = "oldStatus") Integer oldStatus,
-                                              @Param(value = "newStatus") Integer newStatus,
-                                              @Param(value = "shardingId") Byte shardingId,
-                                              @Param(value = "executeTimeBegin") Long executeTimeBegin,
-                                              @Param(value = "executeTimeEnd") Long executeTimeEnd);
-
     int updateStatusByOldStatusAndTaskId(@Param(value = "oldStatus") Integer oldStatus,
                                          @Param(value = "newStatus") Integer newStatus,
                                          @Param(value = "shardingId") Byte shardingId,
@@ -39,6 +33,8 @@ public interface DelayTaskMapper {
                                                           @Param(value = "shardingId") Byte shardingId,
                                                           @Param(value = "executeTimeBegin") Long executeTimeBegin,
                                                           @Param(value = "executeTimeEnd") Long executeTimeEnd);
+
+    List<DelayTask> selectByStatusForUpdate(@Param(value = "status") Integer status);
 
     int updateByPrimaryKey(DelayTask record);
 }

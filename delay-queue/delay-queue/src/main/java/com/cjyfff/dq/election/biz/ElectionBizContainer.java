@@ -1,14 +1,29 @@
 package com.cjyfff.dq.election.biz;
 
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+
 /**
  * Created by jiashen on 18-11-21.
  */
+@Getter
+@Component
 public class ElectionBizContainer {
-    public static ElectionBiz masterBeforeUpdateElectionFinishBiz = new NoneBiz();
+    @Qualifier(value = "masterBeforeUpdateElectionFinishBiz")
+    @Autowired
+    private ElectionBiz masterBeforeUpdateElectionFinishBiz;
 
-    public static ElectionBiz masterAfterUpdateElectionFinishBiz = new NoneBiz();
+    @Qualifier(value = "masterAfterUpdateElectionFinishBiz")
+    @Autowired
+    private ElectionBiz masterAfterUpdateElectionFinishBiz;
 
-    public static ElectionBiz masterBeforeUpdateElectionNotYetBiz = new NoneBiz();
+    @Qualifier(value = "masterBeforeUpdateElectionNotYetBiz")
+    @Autowired
+    private ElectionBiz masterBeforeUpdateElectionNotYetBiz;
 
-    public static ElectionBiz masterAfterUpdateElectionNotYetBiz = new NoneBiz();
+    @Qualifier(value = "masterAfterUpdateElectionNotYetBiz")
+    @Autowired
+    private ElectionBiz masterAfterUpdateElectionNotYetBiz;
 }

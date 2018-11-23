@@ -41,6 +41,9 @@ public class MasterAction {
     @Autowired
     private SetSelfESAndRunBLProxy setSelfESAndRunBLProxy;
 
+    @Autowired
+    private ElectionBizContainer electionBizContainer;
+
     /**
      * master统计节点，分配node id，写入zk
      * 同时更新本机节点信息
@@ -104,12 +107,12 @@ public class MasterAction {
         if (isFinish) {
             logger.info("*** Election finish. I am master. ***");
             setSelfESAndRunBLProxy.setFinish(
-                ElectionBizContainer.masterBeforeUpdateElectionFinishBiz,
-                ElectionBizContainer.masterAfterUpdateElectionFinishBiz);
+                electionBizContainer.getMasterBeforeUpdateElectionFinishBiz(),
+                electionBizContainer.getMasterAfterUpdateElectionFinishBiz());
         } else {
             setSelfESAndRunBLProxy.setNotYet(
-                ElectionBizContainer.masterBeforeUpdateElectionNotYetBiz,
-                ElectionBizContainer.masterAfterUpdateElectionNotYetBiz);
+                electionBizContainer.getMasterBeforeUpdateElectionNotYetBiz(),
+                electionBizContainer.getMasterAfterUpdateElectionNotYetBiz());
         }
 
     }

@@ -18,8 +18,6 @@ public class ProjectInitialization {
 
     @PostConstruct
     public void init() throws Exception {
-        ElectionBizContainer.masterBeforeUpdateElectionFinishBiz = new MasterBeforeUpdateElectionFinishBiz();
-
         election.start();
     }
 }
