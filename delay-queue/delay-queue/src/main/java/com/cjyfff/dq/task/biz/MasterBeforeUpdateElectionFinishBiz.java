@@ -1,4 +1,4 @@
-package com.cjyfff.dq.biz;
+package com.cjyfff.dq.task.biz;
 
 import java.util.List;
 import com.cjyfff.dq.election.biz.ElectionBiz;
