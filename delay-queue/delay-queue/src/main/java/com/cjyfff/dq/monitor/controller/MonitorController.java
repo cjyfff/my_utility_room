@@ -1,6 +1,8 @@
 package com.cjyfff.dq.monitor.controller;
 
-import com.cjyfff.dq.monitor.controller.vo.NodeInfoVo;
+import com.cjyfff.dq.monitor.controller.vo.MonitorNodeInfoVo;
+import com.cjyfff.dq.monitor.service.MonitorService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,8 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MonitorController {
 
+    @Autowired
+    private MonitorService monitorServicel;
+
     @RequestMapping(path = "/monitor/nodeInfo", method={RequestMethod.GET})
-    public NodeInfoVo getNodeInfoVo() {
-        return new NodeInfoVo();
+    public MonitorNodeInfoVo getNodeInfoVo() {
+        return monitorServicel.getNodeInfoVo();
     }
 }
