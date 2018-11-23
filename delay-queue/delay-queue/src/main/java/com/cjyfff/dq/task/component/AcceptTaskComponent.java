@@ -9,6 +9,7 @@ import com.cjyfff.dq.task.common.ApiException;
 import com.cjyfff.dq.task.queue.QueueTask;
 import com.cjyfff.dq.task.queue.DelayTaskQueue;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -25,6 +26,9 @@ public class AcceptTaskComponent {
 
     @Autowired
     private DelayTaskQueue delayTaskQueue;
+
+    @Value("${delay_queue.critical_polling_time}")
+    private Long criticalPollingTime;
 
     /**
      * 检查选举状态
@@ -65,5 +69,14 @@ public class AcceptTaskComponent {
      */
     public void pushToQueue(QueueTask task) {
         delayTaskQueue.queue.add(task);
+    }
+
+    /**
+     * 根据入参中的delayTime判断任务是不是需要马上入队
+     * @param delayTime
+     * @return
+     */
+    public boolean checkNeedToPushQueueNow(Long delayTime) {
+        return delayTime.compareTo(criticalPollingTime) <= 0;
     }
 }

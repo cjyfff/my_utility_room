@@ -22,7 +22,6 @@ import com.cjyfff.dq.task.vo.dto.InnerMsgDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,9 +48,6 @@ public class PublicMsgServiceImpl implements PublicMsgService {
     @Autowired
     private TaskHandlerContext taskHandlerContext;
 
-    @Value("${delay_queue.critical_polling_time}")
-    private Long criticalPollingTime;
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void acceptMsg(AcceptMsgDto reqDto) throws Exception {
@@ -62,7 +58,7 @@ public class PublicMsgServiceImpl implements PublicMsgService {
         DelayTask newDelayTask = createTask(reqDto);
 
         if (acceptTaskComponent.checkIsMyTask(newDelayTask.getTaskId())) {
-            if (checkNeedToPushQueueNow(newDelayTask.getDelayTime())) {
+            if (acceptTaskComponent.checkNeedToPushQueueNow(newDelayTask.getDelayTime())) {
                 QueueTask task = new QueueTask(
                     newDelayTask.getTaskId(), newDelayTask.getFunctionName(), newDelayTask.getParams(),
                     newDelayTask.getDelayTime()
@@ -124,15 +120,6 @@ public class PublicMsgServiceImpl implements PublicMsgService {
         if (!DefaultWebApiResult.SUCCESS_CODE.equals(result.getCode())) {
             log.error("Send inner task get error: " + result.getMsg());
         }
-    }
-
-    /**
-     * 根据入参中的delayTime判断任务是不是需要马上入队
-     * @param delayTime
-     * @return
-     */
-    private boolean checkNeedToPushQueueNow(Long delayTime) {
-        return delayTime.compareTo(criticalPollingTime) <= 0;
     }
 
 

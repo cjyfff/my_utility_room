@@ -42,23 +42,27 @@ public class InnerMsgServiceImpl implements InnerMsgService {
         acceptTaskComponent.checkElectionStatus();
 
         if (acceptTaskComponent.checkIsMyTask(reqDto.getTaskId())) {
-            DelayTask delayTask = delayTaskMapper.selectByTaskIdAndStatusForUpdate(TaskStatus.TRANSMITING.getStatus(), reqDto.getTaskId(),
-                shardingInfo.getNodeId().byteValue());
-            if (delayTask == null) {
-                throw new ApiException("-101", String.format("Can not find task by task id: %s", reqDto.getTaskId()));
+            if (acceptTaskComponent.checkNeedToPushQueueNow(reqDto.getDelayTime())) {
+                DelayTask delayTask = delayTaskMapper.selectByTaskIdAndStatusForUpdate(
+                    TaskStatus.TRANSMITING.getStatus(), reqDto.getTaskId(),
+                    shardingInfo.getNodeId().byteValue());
+                if (delayTask == null) {
+                    throw new ApiException("-101",
+                        String.format("Can not find task by task id: %s", reqDto.getTaskId()));
+                }
+
+                QueueTask task = new QueueTask(
+                    reqDto.getTaskId(), reqDto.getFunctionName(), reqDto.getParams(),
+                    reqDto.getDelayTime()
+                );
+                acceptTaskComponent.pushToQueue(task);
+                delayTask.setStatus(TaskStatus.IN_QUEUE.getStatus());
+                delayTask.setModifiedAt(new Date());
+                delayTaskMapper.updateByPrimaryKeySelective(delayTask);
+
+                execLogComponent.insertLog(delayTask, TaskStatus.IN_QUEUE.getStatus(),
+                    String.format("In Queue: %s", delayTask.getTaskId()));
             }
-
-            QueueTask task = new QueueTask(
-                reqDto.getTaskId(), reqDto.getFunctionName(), reqDto.getParams(),
-                reqDto.getDelayTime()
-            );
-            acceptTaskComponent.pushToQueue(task);
-            delayTask.setStatus(TaskStatus.IN_QUEUE.getStatus());
-            delayTask.setModifiedAt(new Date());
-            delayTaskMapper.updateByPrimaryKeySelective(delayTask);
-
-            execLogComponent.insertLog(delayTask, TaskStatus.IN_QUEUE.getStatus(),
-                String.format("In Queue: %s", delayTask.getTaskId()));
         } else {
             log.error("This task should not handle by this node.");
         }
