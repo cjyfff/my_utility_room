@@ -17,7 +17,7 @@ CREATE TABLE `delay_task` (
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `modified_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `delay_task_task_id_IDX` (`task_id`) USING BTREE,
+  KEY `delay_task_task_id_IDX` (`task_id`) USING BTREE,
   KEY `delay_task_status_IDX` (`status`) USING BTREE,
   KEY `delay_task_sharding_id_IDX` (`sharding_id`) USING BTREE,
   KEY `delay_task_execute_time_IDX` (`execute_time`) USING BTREE,
