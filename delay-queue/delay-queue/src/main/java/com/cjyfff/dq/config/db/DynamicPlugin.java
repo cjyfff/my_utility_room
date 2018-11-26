@@ -34,7 +34,7 @@ public class DynamicPlugin implements Interceptor {
 
     protected static final Logger logger = LoggerFactory.getLogger(DynamicPlugin.class);
 
-    private static final String REGEX = ".*insert\\u0020.*|.*delete\\u0020.*|.*update\\u0020.*";
+    private static final String REGEX = ".*insert\\u0020.*|.*delete\\u0020.*|.*update\\u0020.*|.*for update.*";
 
     private static final Map<String, DynamicDataSourceGlobal> cacheMap = new ConcurrentHashMap<>();
 
