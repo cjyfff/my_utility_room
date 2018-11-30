@@ -1,0 +1,7 @@
+spring:
+  rabbitmq:
+    addresses: 127.0.0.1:5672
+    publisher-confirms: true #开启发送确认
+    publisher-returns: true #开启发送失败退回
+    listener: 
+      acknowledge-mode: MANUAL #开启消费ACK模式
