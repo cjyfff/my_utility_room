@@ -129,7 +129,12 @@ public class PublicMsgServiceImpl implements PublicMsgService {
      * 调用方会重复发送请求，这样的话任务就会重复被创建
      * @param reqDto
      */
-    private DelayTask createTask(AcceptMsgDto reqDto) {
+    private DelayTask createTask(AcceptMsgDto reqDto) throws Exception {
+        DelayTask oldDelayTask = delayTaskMapper.selectByTaskIdForUpdate(reqDto.getTaskId());
+        if (oldDelayTask != null) {
+            throw new ApiException("-130", "Same task id is exist.");
+        }
+
         DelayTask delayTask = new DelayTask();
 
         delayTask.setTaskId(reqDto.getTaskId());

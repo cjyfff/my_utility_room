@@ -25,6 +25,8 @@ public interface DelayTaskMapper {
 
     DelayTask selectByTaskId(@Param(value = "taskId") String taskId);
 
+    DelayTask selectByTaskIdForUpdate(@Param(value = "taskId") String taskId);
+
     DelayTask selectByTaskIdAndStatusForUpdate(@Param(value = "oldStatus") Integer oldStatus,
                                                @Param(value = "taskId") String taskId,
                                                @Param(value = "shardingId") Byte shardingId);

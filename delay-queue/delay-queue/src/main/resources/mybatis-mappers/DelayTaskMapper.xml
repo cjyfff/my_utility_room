@@ -34,6 +34,14 @@
     where task_id = #{taskId,jdbcType=BIGINT}
   </select>
 
+  <select id="selectByTaskIdForUpdate" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from delay_task
+    where task_id = #{taskId,jdbcType=BIGINT}
+    for update
+  </select>
+
   <select id="selectByTaskIdAndStatusForUpdate" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />

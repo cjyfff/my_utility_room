@@ -14,8 +14,7 @@ import lombok.Setter;
 public class AcceptMsgDto {
 
     /**
-     * 接收对方的taskId 加上一个随机数作为保存到数据库的task id
-     * 以防调用方task id重复
+     * taskId，需要保证唯一
      */
     @NotEmpty(message = "can not be empty")
     private String taskId;
@@ -26,6 +25,9 @@ public class AcceptMsgDto {
     @NotNull(message = "can not be null")
     private Long delayTime;
 
+    /**
+     * 随机字符串，用于保证接口幂等
+     */
     @NotNull(message = "can not be null")
     private String nonceStr;
 
