@@ -64,7 +64,7 @@ public class PollingTaskProducer {
         for (DelayTask delayTask : taskList) {
             QueueTask task = new QueueTask(
                 delayTask.getTaskId(), delayTask.getFunctionName(), delayTask.getParams(),
-                delayTask.getDelayTime()
+                delayTask.getExecuteTime()
             );
             acceptTaskComponent.pushToQueue(task);
 

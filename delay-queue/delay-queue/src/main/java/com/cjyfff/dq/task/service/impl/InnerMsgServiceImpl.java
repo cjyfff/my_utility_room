@@ -51,8 +51,8 @@ public class InnerMsgServiceImpl implements InnerMsgService {
             }
 
             QueueTask task = new QueueTask(
-                reqDto.getTaskId(), reqDto.getFunctionName(), reqDto.getParams(),
-                reqDto.getDelayTime()
+                delayTask.getTaskId(), delayTask.getFunctionName(), delayTask.getParams(),
+                delayTask.getExecuteTime()
             );
             acceptTaskComponent.pushToQueue(task);
             delayTask.setStatus(TaskStatus.IN_QUEUE.getStatus());

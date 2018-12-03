@@ -60,7 +60,7 @@ public class PublicMsgServiceImpl implements PublicMsgService {
             if (acceptTaskComponent.checkNeedToPushQueueNow(newDelayTask.getDelayTime())) {
                 QueueTask task = new QueueTask(
                     newDelayTask.getTaskId(), newDelayTask.getFunctionName(), newDelayTask.getParams(),
-                    newDelayTask.getDelayTime()
+                    newDelayTask.getExecuteTime()
                 );
                 acceptTaskComponent.pushToQueue(task);
                 newDelayTask.setStatus(TaskStatus.IN_QUEUE.getStatus());

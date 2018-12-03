@@ -19,24 +19,18 @@ public class QueueTask implements Delayed {
 
     private String params;
 
-    /**
-     * 延时时间，单位秒
-     */
-    private Long delayTime;
-
     public TimeUnit delayTimeUnit;
 
     public Long executeTime;
 
     private QueueTask() {}
 
-    public QueueTask(String taskId, String functionName, String params, Long delayTime) {
+    public QueueTask(String taskId, String functionName, String params, Long executeTimeSec) {
         this.taskId = taskId;
         this.functionName = functionName;
         this.params = params;
-        this.delayTime = delayTime;
         this.delayTimeUnit = TimeUnit.MILLISECONDS;
-        this.executeTime = System.currentTimeMillis() + delayTimeUnit.toMillis(delayTime * 1000);
+        this.executeTime = executeTimeSec * 1000;
     }
 
     @Override
