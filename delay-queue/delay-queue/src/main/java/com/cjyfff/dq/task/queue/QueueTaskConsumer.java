@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Component
 @Slf4j
-public class TaskConsumer {
+public class QueueTaskConsumer {
 
     @Autowired
     private DelayTaskQueue delayTaskQueue;
