@@ -33,6 +33,6 @@ public class SpringTaskExecutorConfig implements AsyncConfigurer {
 
     @Override
     public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
-        return null;
+        return new SimpleAsyncUncaughtExceptionHandler();
     }
 }
