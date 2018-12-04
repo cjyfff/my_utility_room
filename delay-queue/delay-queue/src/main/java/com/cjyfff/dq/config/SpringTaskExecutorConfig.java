@@ -1,6 +1,7 @@
 package com.cjyfff.dq.config;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
 
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.context.annotation.ComponentScan;
@@ -20,9 +21,12 @@ public class SpringTaskExecutorConfig implements AsyncConfigurer {
     public Executor getAsyncExecutor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
 
-        taskExecutor.setCorePoolSize(5);
-        taskExecutor.setMaxPoolSize(10);
-        taskExecutor.setQueueCapacity(25);
+        taskExecutor.setCorePoolSize(50);
+        taskExecutor.setMaxPoolSize(100);
+        taskExecutor.setQueueCapacity(500);
+        taskExecutor.setKeepAliveSeconds(10);
+        taskExecutor.setRejectedExecutionHandler(new CallerRunsPolicy());
+
         taskExecutor.initialize();
         return taskExecutor;
     }

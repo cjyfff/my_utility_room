@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 /**
- * 订单自动审核节点（demo）
+ * 订单自动审核节点（demo，实际业务逻辑不应放在调度系统，而应该调用业务系统的接口）
  * 创建任务时传入订单id
  * 处理时，根据订单id取出订单
  * 自旋尝试获得锁，获得锁后再检查状态
