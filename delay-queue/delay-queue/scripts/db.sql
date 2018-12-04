@@ -13,6 +13,7 @@ CREATE TABLE `delay_task` (
   `retry_interval` int(11) DEFAULT NULL COMMENT '重试间隔，单位秒',
   `retry_time` bigint(20) DEFAULT NULL COMMENT '重试时间，时间戳，单位秒',
   `retry_count` tinyint(4) DEFAULT '0' COMMENT '重试次数',
+  `already_retry_count` tinyint(4) DEFAULT '0' COMMENT '已经重试次数',
   `sharding_id` tinyint(4) NOT NULL COMMENT '分片id',
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `modified_at` datetime DEFAULT NULL COMMENT '修改时间',

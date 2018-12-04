@@ -28,6 +28,8 @@ public class DelayTask {
 
     private Byte retryCount;
 
+    private Byte alreadyRetryCount;
+
     private Byte shardingId;
 
     private Date createdAt;
