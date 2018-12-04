@@ -5,6 +5,7 @@ import java.util.Date;
 import com.cjyfff.dq.election.info.ShardingInfo;
 import com.cjyfff.dq.task.common.TaskHandlerContext;
 import com.cjyfff.dq.task.common.enums.TaskStatus;
+import com.cjyfff.dq.task.component.AcceptTaskComponent;
 import com.cjyfff.dq.task.component.ExecLogComponent;
 import com.cjyfff.dq.task.handler.HandlerResult;
 import com.cjyfff.dq.task.handler.ITaskHandler;
@@ -38,6 +39,9 @@ public class QueueTaskConsumer {
 
     @Autowired
     private ExecLogComponent execLogComponent;
+
+    @Autowired
+    private AcceptTaskComponent acceptTaskComponent;
 
     /**
      * delay queue consumer
@@ -105,9 +109,18 @@ public class QueueTaskConsumer {
 
                 execLogComponent.insertLog(delayTask, taskStatus, "success");
             } else {
-                // todo: 处理重试逻辑
-                Integer taskStatus = TaskStatus.PROCESS_FAIL.getStatus();
 
+                Integer taskStatus;
+                if (delayTask.getRetryCount() > delayTask.getAlreadyRetryCount()) {
+                    // todo: 完善处理重试逻辑
+                    task.setExecuteTime(System.currentTimeMillis() * 1000 + delayTask.getDelayTime());
+                    acceptTaskComponent.pushToQueue(task);
+                    taskStatus = TaskStatus.RETRYING.getStatus();
+                } else if (delayTask.getRetryCount() == 0) {
+                    taskStatus = TaskStatus.PROCESS_FAIL.getStatus();
+                } else {
+                    taskStatus = TaskStatus.RETRY_FAIL.getStatus();
+                }
                 delayTask.setStatus(taskStatus);
                 delayTask.setModifiedAt(new Date());
                 delayTaskMapper.updateByPrimaryKeySelective(delayTask);
