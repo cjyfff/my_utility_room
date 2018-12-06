@@ -80,6 +80,7 @@ public class Election {
             // 同时也根据SHARDING_INFO_PATH和ELECTION_STATUS_PATH是否存在来判断master是否已经选举出来
             while (client.checkExists().forPath(SHARDING_INFO_PATH) == null ||
                    client.checkExists().forPath(ELECTION_STATUS_PATH) == null) {
+                logger.info("Wait for ZK path initialization...");
                 TimeUnit.SECONDS.sleep(1);
             }
 

@@ -26,7 +26,7 @@ public class ZkLockImpl implements ZkLock {
                 return false;
             }
 
-            String keyLockPath = getKeyLockPach(key);
+            String keyLockPath = getKeyLockPath(key);
             InterProcessLock lock = new InterProcessSemaphoreMutex(client, keyLockPath);
             // 加锁成功后需要把锁对象存入TreadLocal，加锁时根据锁对象来解锁，防止对别的线程
             // 所加的锁进行解锁操作
@@ -68,7 +68,7 @@ public class ZkLockImpl implements ZkLock {
         }
     }
 
-    private String getKeyLockPach(String key) {
+    private String getKeyLockPath(String key) {
         return LOCK_PATH + "/" + key;
     }
 }
