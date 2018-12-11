@@ -77,6 +77,17 @@
     for update
   </select>
 
+  <select id="selectByStatusAndShardingIdForUpdate" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from delay_task
+    where
+    status = #{status,jdbcType=INTEGER}
+    and
+    sharding_id = #{shardingId,jdbcType=TINYINT}
+    for update
+  </select>
+
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
     delete from delay_task
     where id = #{id,jdbcType=BIGINT}

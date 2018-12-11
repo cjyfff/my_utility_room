@@ -1,0 +1,80 @@
+package com.cjyfff.dq.task.biz.component;
+
+import java.util.List;
+
+import com.cjyfff.dq.config.ZooKeeperClient;
+import com.cjyfff.dq.election.info.ShardingInfo;
+import com.cjyfff.dq.task.common.SysStatus;
+import com.cjyfff.dq.task.common.enums.TaskStatus;
+import com.cjyfff.dq.task.common.lock.ZkLock;
+import com.cjyfff.dq.task.component.AcceptTaskComponent;
+import com.cjyfff.dq.task.component.ExecLogComponent;
+import com.cjyfff.dq.task.mapper.DelayTaskMapper;
+import com.cjyfff.dq.task.model.DelayTask;
+import com.cjyfff.dq.task.queue.QueueTask;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * Created by jiashen on 18-12-11.
+ */
+@Component
+@Slf4j
+public class CommonBiz {
+
+    @Autowired
+    private DelayTaskMapper delayTaskMapper;
+
+    @Autowired
+    private ShardingInfo shardingInfo;
+
+    @Autowired
+    private ZkLock zkLock;
+
+    @Autowired
+    private ZooKeeperClient zooKeeperClient;
+
+    @Autowired
+    private AcceptTaskComponent acceptTaskComponent;
+
+    @Autowired
+    private ExecLogComponent execLogComponent;
+
+    @Autowired
+    private SysStatus sysStatus;
+
+    @Transactional
+    public void pushTaskInQueueWhenInit() throws Exception {
+        if (sysStatus.isInitCompleted()) {
+            return;
+        }
+
+        log.info("Begin pushTaskInQueueWhenInit...");
+
+        List<DelayTask> delayTaskList = delayTaskMapper.selectByStatusAndShardingIdForUpdate(
+            TaskStatus.IN_QUEUE.getStatus(),
+            shardingInfo.getNodeId().byteValue());
+        try {
+            for (DelayTask delayTask : delayTaskList) {
+                if (zkLock.idempotentLock(zooKeeperClient.getClient(), delayTask.getTaskId())) {
+                    QueueTask task = new QueueTask(
+                        delayTask.getTaskId(), delayTask.getFunctionName(), delayTask.getParams(),
+                        delayTask.getExecuteTime()
+                    );
+                    acceptTaskComponent.pushToQueue(task);
+
+                    execLogComponent.insertLog(delayTask, TaskStatus.IN_QUEUE.getStatus(),
+                        String.format("push task in queue when init: %s", delayTask.getTaskId()));
+                }
+            }
+        } catch (Exception e) {
+            log.error("pushTaskInQueueWhenInit get error: ", e);
+            throw e;
+        } finally {
+            zkLock.tryUnlock(zkLock.getLockInstance());
+        }
+
+    }
+}

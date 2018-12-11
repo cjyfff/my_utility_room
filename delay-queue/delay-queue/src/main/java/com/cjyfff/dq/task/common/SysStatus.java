@@ -14,5 +14,5 @@ public class SysStatus {
     /**
      * 标记系统是不是初始启动（第一次运行或者重启）
      */
-    private boolean isSysInit;
+    private volatile boolean initCompleted = false;
 }

@@ -38,5 +38,8 @@ public interface DelayTaskMapper {
 
     List<DelayTask> selectByStatusForUpdate(@Param(value = "status") Integer status);
 
+    List<DelayTask> selectByStatusAndShardingIdForUpdate(@Param(value = "status") Integer status,
+                                                         @Param(value = "shardingId") Byte shardingId);
+
     int updateByPrimaryKey(DelayTask record);
 }
