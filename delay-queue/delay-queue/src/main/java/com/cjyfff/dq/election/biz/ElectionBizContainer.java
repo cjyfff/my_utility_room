@@ -26,4 +26,20 @@ public class ElectionBizContainer {
     @Qualifier(value = "masterAfterUpdateElectionNotYetBiz")
     @Autowired
     private ElectionBiz masterAfterUpdateElectionNotYetBiz;
+
+    @Qualifier(value = "slaveBeforeUpdateElectionFinishBiz")
+    @Autowired
+    private ElectionBiz slaveBeforeUpdateElectionFinishBiz;
+
+    @Qualifier(value = "slaveAfterUpdateElectionFinishBiz")
+    @Autowired
+    private ElectionBiz slaveAfterUpdateElectionFinishBiz;
+
+    @Qualifier(value = "slaveBeforeUpdateElectionNotYetBiz")
+    @Autowired
+    private ElectionBiz slaveBeforeUpdateElectionNotYetBiz;
+
+    @Qualifier(value = "slaveAfterUpdateElectionNotYetBiz")
+    @Autowired
+    private ElectionBiz slaveAfterUpdateElectionNotYetBiz;
 }

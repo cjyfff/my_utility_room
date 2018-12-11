@@ -4,6 +4,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.alibaba.fastjson.JSON;
 
+import com.cjyfff.dq.election.biz.ElectionBizContainer;
 import com.cjyfff.dq.election.biz.NoneBiz;
 import com.cjyfff.dq.election.info.ElectionListener;
 import com.cjyfff.dq.election.info.ElectionStatus;
@@ -32,9 +33,6 @@ public class SlaveAction {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private ElectionStatus electionStatus;
-
-    @Autowired
     private ElectionListener electionListener;
 
     @Autowired
@@ -42,6 +40,9 @@ public class SlaveAction {
 
     @Autowired
     private SetSelfESAndRunBLProxy setSelfESAndRunBLProxy;
+
+    @Autowired
+    private ElectionBizContainer electionBizContainer;
 
     /**
      * slave监听并保存集群分片信息
@@ -86,14 +87,20 @@ public class SlaveAction {
                 logger.info("Slave get election status data changed：" + electionStatusValue);
 
                 if (ElectionStatusType.FINISH.getValue().equals(electionStatusValue)) {
-                    setSelfESAndRunBLProxy.setFinish(new NoneBiz(), new NoneBiz());
+                    setSelfESAndRunBLProxy.setFinish(
+                        electionBizContainer.getSlaveBeforeUpdateElectionFinishBiz(),
+                        electionBizContainer.getSlaveAfterUpdateElectionFinishBiz());
                     logger.info("*** Election finish. I am slave. ***");
                 } else {
-                    setSelfESAndRunBLProxy.setNotYet(new NoneBiz(), new NoneBiz());
+                    setSelfESAndRunBLProxy.setNotYet(
+                        electionBizContainer.getSlaveBeforeUpdateElectionNotYetBiz(),
+                        electionBizContainer.getSlaveAfterUpdateElectionNotYetBiz());
                 }
 
             } else {
-                setSelfESAndRunBLProxy.setNotYet(new NoneBiz(), new NoneBiz());
+                setSelfESAndRunBLProxy.setNotYet(
+                    electionBizContainer.getSlaveBeforeUpdateElectionNotYetBiz(),
+                    electionBizContainer.getSlaveAfterUpdateElectionNotYetBiz());
                 logger.info("Slave get election info data has been deleted or not exist..,");
             }
         };
