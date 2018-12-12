@@ -4,6 +4,7 @@ import com.cjyfff.dq.config.ZooKeeperClient;
 import com.cjyfff.dq.task.common.ApiException;
 import com.cjyfff.dq.task.common.BeanValidators;
 import com.cjyfff.dq.task.common.DefaultWebApiResult;
+import com.cjyfff.dq.task.common.TaskConfig;
 import com.cjyfff.dq.task.common.lock.ZkLock;
 import com.cjyfff.dq.task.service.InnerMsgService;
 import com.cjyfff.dq.task.service.PublicMsgService;
@@ -47,7 +48,8 @@ public class MessageController extends BaseController {
         try {
             BeanValidators.validateWithParameterException(validator, reqDto);
 
-            if (! zkLock.idempotentLock(zooKeeperClient.getClient(), reqDto.getNonceStr())) {
+            if (! zkLock.idempotentLock(zooKeeperClient.getClient(),
+                zkLock.getKeyLockKey(TaskConfig.ACCEPT_TASK_LOCK_PATH, reqDto.getNonceStr()))) {
                 return DefaultWebApiResult.failure("-889", "This task is processing...");
             }
 
@@ -71,7 +73,8 @@ public class MessageController extends BaseController {
         try {
             BeanValidators.validateWithParameterException(validator, reqDto);
 
-            if (! zkLock.idempotentLock(zooKeeperClient.getClient(), reqDto.getTaskId())) {
+            if (! zkLock.idempotentLock(zooKeeperClient.getClient(),
+                    zkLock.getKeyLockKey(TaskConfig.ACCEPT_TASK_LOCK_PATH, reqDto.getNonceStr()))) {
                 return DefaultWebApiResult.failure("-889", "This task is processing...");
             }
 

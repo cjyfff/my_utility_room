@@ -1,15 +1,19 @@
 package com.cjyfff.dq.task.service.impl;
 
 import java.util.Date;
+import java.util.UUID;
 
 import com.alibaba.fastjson.JSON;
 
+import com.cjyfff.dq.config.ZooKeeperClient;
 import com.cjyfff.dq.election.info.ShardingInfo;
 import com.cjyfff.dq.task.common.ApiException;
 import com.cjyfff.dq.task.common.DefaultWebApiResult;
 import com.cjyfff.dq.task.common.HttpUtils;
+import com.cjyfff.dq.task.common.TaskConfig;
 import com.cjyfff.dq.task.common.TaskHandlerContext;
 import com.cjyfff.dq.task.common.enums.TaskStatus;
+import com.cjyfff.dq.task.common.lock.ZkLock;
 import com.cjyfff.dq.task.component.ExecLogComponent;
 import com.cjyfff.dq.task.handler.ITaskHandler;
 import com.cjyfff.dq.task.mapper.DelayTaskMapper;
@@ -47,6 +51,12 @@ public class PublicMsgServiceImpl implements PublicMsgService {
     @Autowired
     private TaskHandlerContext taskHandlerContext;
 
+    @Autowired
+    private ZkLock zkLock;
+
+    @Autowired
+    private ZooKeeperClient zooKeeperClient;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void acceptMsg(AcceptMsgDto reqDto) throws Exception {
@@ -58,17 +68,31 @@ public class PublicMsgServiceImpl implements PublicMsgService {
 
         if (acceptTaskComponent.checkIsMyTask(newDelayTask.getTaskId())) {
             if (acceptTaskComponent.checkNeedToPushQueueNow(newDelayTask.getDelayTime())) {
-                QueueTask task = new QueueTask(
-                    newDelayTask.getTaskId(), newDelayTask.getFunctionName(), newDelayTask.getParams(),
-                    newDelayTask.getExecuteTime()
-                );
-                acceptTaskComponent.pushToQueue(task);
-                newDelayTask.setStatus(TaskStatus.IN_QUEUE.getStatus());
-                newDelayTask.setModifiedAt(new Date());
-                delayTaskMapper.updateByPrimaryKeySelective(newDelayTask);
 
-                execLogComponent.insertLog(newDelayTask, TaskStatus.IN_QUEUE.getStatus(),
-                    String.format("In Queue: %s", newDelayTask.getTaskId()));
+                if (zkLock.idempotentLock(zooKeeperClient.getClient(),
+                    zkLock.getKeyLockKey(TaskConfig.IN_QUEUE_LOCK_PATH, newDelayTask.getTaskId()))) {
+                    try {
+                        QueueTask task = new QueueTask(
+                            newDelayTask.getTaskId(), newDelayTask.getFunctionName(), newDelayTask.getParams(),
+                            newDelayTask.getExecuteTime()
+                        );
+                        acceptTaskComponent.pushToQueue(task);
+                        newDelayTask.setStatus(TaskStatus.IN_QUEUE.getStatus());
+                        newDelayTask.setModifiedAt(new Date());
+                        delayTaskMapper.updateByPrimaryKeySelective(newDelayTask);
+
+                        execLogComponent.insertLog(newDelayTask, TaskStatus.IN_QUEUE.getStatus(),
+                            String.format("In Queue: %s", newDelayTask.getTaskId()));
+                    } catch (Exception e) {
+                        zkLock.tryUnlock(zkLock.getLockInstance());
+                        throw e;
+                    }
+                } else {
+                    log.error(String.format("Task can not get in queue lock : %s", newDelayTask.getTaskId()));
+                    execLogComponent.insertLog(newDelayTask, TaskStatus.ACCEPT.getStatus(),
+                        String.format("Task can not get in queue lock : %s", newDelayTask.getTaskId()));
+
+                }
 
             }
         } else {
@@ -83,6 +107,7 @@ public class PublicMsgServiceImpl implements PublicMsgService {
                 }
 
                 String url = String.format("http://%s/dq/acceptInnerMsg", targetHost);
+                String nonceStr = UUID.randomUUID().toString();
                 InnerMsgDto innerMsgDto = new InnerMsgDto();
 
                 newDelayTask.setStatus(TaskStatus.TRANSMITING.getStatus());
@@ -90,7 +115,7 @@ public class PublicMsgServiceImpl implements PublicMsgService {
                 delayTaskMapper.updateByPrimaryKeySelective(newDelayTask);
 
                 BeanUtils.copyProperties(newDelayTask, innerMsgDto);
-
+                innerMsgDto.setNonceStr(nonceStr);
                 sendInnerTaskMsg(url, innerMsgDto, targetShardingId, targetHost);
             } catch (Exception err) {
                 // 转发逻辑即时报错也不抛出异常，由定时任务做补偿操作

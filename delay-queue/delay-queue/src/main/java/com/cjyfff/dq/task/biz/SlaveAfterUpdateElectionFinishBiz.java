@@ -6,6 +6,7 @@ import com.cjyfff.dq.config.ZooKeeperClient;
 import com.cjyfff.dq.election.biz.ElectionBiz;
 import com.cjyfff.dq.election.info.ShardingInfo;
 import com.cjyfff.dq.task.common.SysStatus;
+import com.cjyfff.dq.task.common.TaskConfig;
 import com.cjyfff.dq.task.common.enums.TaskStatus;
 import com.cjyfff.dq.task.common.lock.ZkLock;
 import com.cjyfff.dq.task.component.AcceptTaskComponent;
@@ -73,9 +74,10 @@ public class SlaveAfterUpdateElectionFinishBiz implements ElectionBiz {
         List<DelayTask> delayTaskList = delayTaskMapper.selectByStatusAndShardingIdForUpdate(
             TaskStatus.IN_QUEUE.getStatus(),
             shardingInfo.getNodeId().byteValue());
-        try {
-            for (DelayTask delayTask : delayTaskList) {
-                if (zkLock.idempotentLock(zooKeeperClient.getClient(), delayTask.getTaskId())) {
+        for (DelayTask delayTask : delayTaskList) {
+            if (zkLock.idempotentLock(zooKeeperClient.getClient(),
+                    zkLock.getKeyLockKey(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId()))) {
+                try {
                     QueueTask task = new QueueTask(
                         delayTask.getTaskId(), delayTask.getFunctionName(), delayTask.getParams(),
                         delayTask.getExecuteTime()
@@ -84,13 +86,14 @@ public class SlaveAfterUpdateElectionFinishBiz implements ElectionBiz {
 
                     execLogComponent.insertLog(delayTask, TaskStatus.IN_QUEUE.getStatus(),
                         String.format("push task in queue when init: %s", delayTask.getTaskId()));
+                } catch (Exception e) {
+                    zkLock.tryUnlock(zkLock.getLockInstance());
+                    throw e;
                 }
+
+            } else {
+                log.error(String.format("Task can not get in queue lock : %s", delayTask.getTaskId()));
             }
-        } catch (Exception e) {
-            log.error("pushTaskInQueueWhenInit get error: ", e);
-            throw e;
-        } finally {
-            zkLock.tryUnlock(zkLock.getLockInstance());
         }
     }
 }

@@ -16,7 +16,7 @@ import org.springframework.util.StringUtils;
 @Slf4j
 public class ZkLockImpl implements ZkLock {
 
-    private final static String LOCK_PATH = "/task_lock";
+    private final static String DEFAULT_LOCK_PATH = "/task_lock";
 
     @Override
     public boolean tryLock(CuratorFramework client, String key, Integer seconds) throws LockException {
@@ -26,8 +26,7 @@ public class ZkLockImpl implements ZkLock {
                 return false;
             }
 
-            String keyLockPath = getKeyLockPath(key);
-            InterProcessLock lock = new InterProcessSemaphoreMutex(client, keyLockPath);
+            InterProcessLock lock = new InterProcessSemaphoreMutex(client, key);
             // 加锁成功后需要把锁对象存入TreadLocal，加锁时根据锁对象来解锁，防止对别的线程
             // 所加的锁进行解锁操作
             if (lock.acquire(seconds, TimeUnit.SECONDS)) {
@@ -68,7 +67,20 @@ public class ZkLockImpl implements ZkLock {
         }
     }
 
-    private String getKeyLockPath(String key) {
-        return LOCK_PATH + "/" + key;
+    @Override
+    public String getKeyLockKey(String lockPath, String key) throws LockException {
+        if (StringUtils.isEmpty(lockPath)) {
+            lockPath = DEFAULT_LOCK_PATH;
+        }
+
+        if (StringUtils.isEmpty(key)) {
+            throw new LockException("lock key can not be none!");
+        }
+        return lockPath + "/" + key;
+    }
+
+    @Override
+    public String getKeyLockKey(String key) throws LockException {
+        return this.getKeyLockKey(DEFAULT_LOCK_PATH, key);
     }
 }

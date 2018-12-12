@@ -2,9 +2,12 @@ package com.cjyfff.dq.task.service.impl;
 
 import java.util.Date;
 
+import com.cjyfff.dq.config.ZooKeeperClient;
 import com.cjyfff.dq.election.info.ShardingInfo;
 import com.cjyfff.dq.task.common.ApiException;
+import com.cjyfff.dq.task.common.TaskConfig;
 import com.cjyfff.dq.task.common.enums.TaskStatus;
+import com.cjyfff.dq.task.common.lock.ZkLock;
 import com.cjyfff.dq.task.component.AcceptTaskComponent;
 import com.cjyfff.dq.task.component.ExecLogComponent;
 import com.cjyfff.dq.task.mapper.DelayTaskMapper;
@@ -36,6 +39,12 @@ public class InnerMsgServiceImpl implements InnerMsgService {
     @Autowired
     private ExecLogComponent execLogComponent;
 
+    @Autowired
+    private ZooKeeperClient zooKeeperClient;
+
+    @Autowired
+    private ZkLock zkLock;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void acceptMsg(InnerMsgDto reqDto) throws Exception {
@@ -50,17 +59,29 @@ public class InnerMsgServiceImpl implements InnerMsgService {
                     String.format("Can not find task by task id: %s", reqDto.getTaskId()));
             }
 
-            QueueTask task = new QueueTask(
-                delayTask.getTaskId(), delayTask.getFunctionName(), delayTask.getParams(),
-                delayTask.getExecuteTime()
-            );
-            acceptTaskComponent.pushToQueue(task);
-            delayTask.setStatus(TaskStatus.IN_QUEUE.getStatus());
-            delayTask.setModifiedAt(new Date());
-            delayTaskMapper.updateByPrimaryKeySelective(delayTask);
+            if (zkLock.idempotentLock(zooKeeperClient.getClient(),
+                zkLock.getKeyLockKey(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId()))) {
+                try {
+                    QueueTask task = new QueueTask(
+                        delayTask.getTaskId(), delayTask.getFunctionName(), delayTask.getParams(),
+                        delayTask.getExecuteTime()
+                    );
+                    acceptTaskComponent.pushToQueue(task);
+                    delayTask.setStatus(TaskStatus.IN_QUEUE.getStatus());
+                    delayTask.setModifiedAt(new Date());
+                    delayTaskMapper.updateByPrimaryKeySelective(delayTask);
 
-            execLogComponent.insertLog(delayTask, TaskStatus.IN_QUEUE.getStatus(),
-                String.format("In Queue: %s", delayTask.getTaskId()));
+                    execLogComponent.insertLog(delayTask, TaskStatus.IN_QUEUE.getStatus(),
+                        String.format("In Queue: %s", delayTask.getTaskId()));
+                } catch (Exception e) {
+                    zkLock.tryUnlock(zkLock.getLockInstance());
+                    throw e;
+                }
+            } else {
+                log.error(String.format("Task can not get in queue lock : %s", delayTask.getTaskId()));
+                execLogComponent.insertLog(delayTask, TaskStatus.TRANSMITING.getStatus(),
+                    String.format("Task can not get in queue lock : %s", delayTask.getTaskId()));
+            }
         }
     }
 }

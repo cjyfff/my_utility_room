@@ -39,4 +39,19 @@ public interface ZkLock {
      * @param lock lock对象
      */
     void tryUnlock(InterProcessLock lock);
+
+    /**
+     * 获取lock key，需要指定lockPath
+     * @param lockPath lock所指定的目录
+     * @param key 锁key
+     * @return
+     */
+    String getKeyLockKey(String lockPath, String key) throws LockException;
+
+    /**
+     * 获取lock key，不指定lockPath，使用默认lockPath
+     * @param key 锁key
+     * @return
+     */
+    String getKeyLockKey(String key) throws LockException;
 }
