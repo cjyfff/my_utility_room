@@ -68,7 +68,7 @@ public class LockTests {
                         try {
                             zkLock.tryLock(client, lockKey, 60);
                             a[0]++;
-                            zkLock.tryUnlock(zkLock.getLockInstance());
+                            zkLock.tryUnlock(lockKey);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }

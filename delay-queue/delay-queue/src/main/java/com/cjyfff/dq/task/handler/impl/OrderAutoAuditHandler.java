@@ -32,6 +32,8 @@ public class OrderAutoAuditHandler implements ITaskHandler {
 
     private static final Integer AUDIT_COMPLETED = 500;
 
+    private static final String ORDER_LOCK_PAHT = "order_lock";
+
     @Autowired
     private ZkLock zkLock;
 
@@ -40,7 +42,7 @@ public class OrderAutoAuditHandler implements ITaskHandler {
 
     @Override
     public HandlerResult run(String paras) {
-        try {
+
             log.info("Run OrderAutoAuditHandler with paras: " + paras);
 
             OrderAutoAuditHandlerParaVo paraVo = JSON.parseObject(paras, OrderAutoAuditHandlerParaVo.class);
@@ -50,9 +52,9 @@ public class OrderAutoAuditHandler implements ITaskHandler {
             if (StringUtils.isEmpty(orderId)) {
                 return new HandlerResult(HandlerResult.DEFAULT_FAIL_CODE, "orderId不能为空");
             }
-
+        try {
             // 一张订单同一时间只可能进行一个操作，因此直接用order id作为lock key，不用考虑状态
-            if (zkLock.tryLock(zooKeeperClient.getClient(), orderId, 30)) {
+            if (zkLock.tryLock(zooKeeperClient.getClient(), zkLock.getKeyLockKey(ORDER_LOCK_PAHT, orderId), 30)) {
                 if (checkOrderIsInitStatus(orderId)) {
                     updateOrderStatus(orderId, AUDIT_COMPLETED);
                     return new HandlerResult(HandlerResult.SUCCESS_CODE, String.format("订单%s自动客审成功", orderId));
@@ -68,7 +70,7 @@ public class OrderAutoAuditHandler implements ITaskHandler {
             log.error("OrderAutoAuditHandler get error:", e);
             return new HandlerResult(HandlerResult.DEFAULT_FAIL_CODE, String.format("订单自动客审时发生错误：%s", e.getMessage()));
         } finally {
-            zkLock.tryUnlock(zkLock.getLockInstance());
+            zkLock.tryUnlock(zkLock.getKeyLockKey(ORDER_LOCK_PAHT, orderId));
         }
     }
 

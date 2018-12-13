@@ -61,7 +61,7 @@ public class MessageController extends BaseController {
             log.error("publicMsgService acceptMsg get error: ", e);
             return DefaultWebApiResult.failure("-1", "system error");
         } finally {
-            zkLock.tryUnlock(zkLock.getLockInstance());
+            zkLock.tryUnlock(zkLock.getKeyLockKey(TaskConfig.ACCEPT_TASK_LOCK_PATH, reqDto.getNonceStr()));
         }
     }
 
@@ -86,7 +86,7 @@ public class MessageController extends BaseController {
             log.error("innerMsgService acceptMsg get error: ", e);
             return DefaultWebApiResult.failure("-1", "system error");
         } finally {
-            zkLock.tryUnlock(zkLock.getLockInstance());
+            zkLock.tryUnlock(zkLock.getKeyLockKey(TaskConfig.ACCEPT_TASK_LOCK_PATH, reqDto.getNonceStr()));
         }
     }
 

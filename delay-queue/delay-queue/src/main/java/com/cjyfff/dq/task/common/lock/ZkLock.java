@@ -28,17 +28,11 @@ public interface ZkLock {
     boolean idempotentLock(CuratorFramework client, String key) throws LockException;
 
     /**
-     * 取得锁的实例，通常用于解锁操作
-     * @return
-     */
-    InterProcessLock getLockInstance();
-
-    /**
      * 尝试解锁，即使遇到异常也不抛出
      * 解锁动作必须基于锁对象，否则有可能会解了别人的锁
-     * @param lock lock对象
+     * @param key 锁 key
      */
-    void tryUnlock(InterProcessLock lock);
+    void tryUnlock(String key);
 
     /**
      * 获取lock key，需要指定lockPath
@@ -46,7 +40,7 @@ public interface ZkLock {
      * @param key 锁key
      * @return
      */
-    String getKeyLockKey(String lockPath, String key) throws LockException;
+    String getKeyLockKey(String lockPath, String key);
 
     /**
      * 获取lock key，不指定lockPath，使用默认lockPath

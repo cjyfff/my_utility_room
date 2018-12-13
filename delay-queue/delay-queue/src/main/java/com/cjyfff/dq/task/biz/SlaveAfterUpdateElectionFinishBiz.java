@@ -87,7 +87,7 @@ public class SlaveAfterUpdateElectionFinishBiz implements ElectionBiz {
                     execLogComponent.insertLog(delayTask, TaskStatus.IN_QUEUE.getStatus(),
                         String.format("push task in queue when init: %s", delayTask.getTaskId()));
                 } catch (Exception e) {
-                    zkLock.tryUnlock(zkLock.getLockInstance());
+                    zkLock.tryUnlock(zkLock.getKeyLockKey(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId()));
                     throw e;
                 }
 

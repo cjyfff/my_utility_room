@@ -74,7 +74,7 @@ public class InnerMsgServiceImpl implements InnerMsgService {
                     execLogComponent.insertLog(delayTask, TaskStatus.IN_QUEUE.getStatus(),
                         String.format("In Queue: %s", delayTask.getTaskId()));
                 } catch (Exception e) {
-                    zkLock.tryUnlock(zkLock.getLockInstance());
+                    zkLock.tryUnlock(zkLock.getKeyLockKey(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId()));
                     throw e;
                 }
             } else {

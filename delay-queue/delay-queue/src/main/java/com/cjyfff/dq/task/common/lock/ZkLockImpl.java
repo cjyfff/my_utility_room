@@ -18,6 +18,8 @@ public class ZkLockImpl implements ZkLock {
 
     private final static String DEFAULT_LOCK_PATH = "/task_lock";
 
+    private final static String DEFAULT_LOCK_KEY = "/default_lock_key";
+
     @Override
     public boolean tryLock(CuratorFramework client, String key, Integer seconds) throws LockException {
 
@@ -27,10 +29,10 @@ public class ZkLockImpl implements ZkLock {
             }
 
             InterProcessLock lock = new InterProcessSemaphoreMutex(client, key);
-            // 加锁成功后需要把锁对象存入TreadLocal，加锁时根据锁对象来解锁，防止对别的线程
+            // 加锁成功后需要把锁对象存入TreadLocal，解锁时根据锁对象来解锁，防止对别的线程
             // 所加的锁进行解锁操作
             if (lock.acquire(seconds, TimeUnit.SECONDS)) {
-                ZkLockHolder.setHolder(lock);
+                ZkLockHolder.setLockKeySet(key, lock);
                 return true;
             }
             return false;
@@ -47,13 +49,13 @@ public class ZkLockImpl implements ZkLock {
     }
 
     @Override
-    public InterProcessLock getLockInstance() {
-        return ZkLockHolder.getHolder();
-    }
+    public void tryUnlock(String key) {
+        if (StringUtils.isEmpty(key)) {
+            return;
+        }
 
-    @Override
-    public void tryUnlock(InterProcessLock lock) {
         try {
+            InterProcessLock lock = ZkLockHolder.getLockByKey(key);
 
             if (lock == null) {
                 return;
@@ -61,20 +63,21 @@ public class ZkLockImpl implements ZkLock {
 
             lock.release();
 
-            ZkLockHolder.clearHolder();
+            ZkLockHolder.removeLockByKey(key);
         } catch (Exception e) {
             log.error("ZkLock tryUnlock method get error.", e);
         }
     }
 
     @Override
-    public String getKeyLockKey(String lockPath, String key) throws LockException {
+    public String getKeyLockKey(String lockPath, String key) {
         if (StringUtils.isEmpty(lockPath)) {
             lockPath = DEFAULT_LOCK_PATH;
         }
 
         if (StringUtils.isEmpty(key)) {
-            throw new LockException("lock key can not be none!");
+            log.warn("lock key should not be null.");
+            key = DEFAULT_LOCK_KEY;
         }
         return lockPath + "/" + key;
     }

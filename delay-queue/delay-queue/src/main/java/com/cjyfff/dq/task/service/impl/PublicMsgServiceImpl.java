@@ -84,7 +84,7 @@ public class PublicMsgServiceImpl implements PublicMsgService {
                         execLogComponent.insertLog(newDelayTask, TaskStatus.IN_QUEUE.getStatus(),
                             String.format("In Queue: %s", newDelayTask.getTaskId()));
                     } catch (Exception e) {
-                        zkLock.tryUnlock(zkLock.getLockInstance());
+                        zkLock.tryUnlock(zkLock.getKeyLockKey(TaskConfig.IN_QUEUE_LOCK_PATH, newDelayTask.getTaskId()));
                         throw e;
                     }
                 } else {
