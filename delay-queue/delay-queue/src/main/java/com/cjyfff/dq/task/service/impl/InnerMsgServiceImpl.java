@@ -79,7 +79,7 @@ public class InnerMsgServiceImpl implements InnerMsgService {
                 }
             } else {
                 log.error(String.format("Task can not get in queue lock : %s", delayTask.getTaskId()));
-                execLogComponent.insertLog(delayTask, TaskStatus.TRANSMITING.getStatus(),
+                execLogComponent.insertLog(delayTask, TaskStatus.PROCESS_FAIL.getStatus(),
                     String.format("Task can not get in queue lock : %s", delayTask.getTaskId()));
             }
         }

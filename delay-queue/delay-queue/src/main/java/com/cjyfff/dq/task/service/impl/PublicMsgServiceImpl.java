@@ -89,7 +89,7 @@ public class PublicMsgServiceImpl implements PublicMsgService {
                     }
                 } else {
                     log.error(String.format("Task can not get in queue lock : %s", newDelayTask.getTaskId()));
-                    execLogComponent.insertLog(newDelayTask, TaskStatus.ACCEPT.getStatus(),
+                    execLogComponent.insertLog(newDelayTask, TaskStatus.PROCESS_FAIL.getStatus(),
                         String.format("Task can not get in queue lock : %s", newDelayTask.getTaskId()));
 
                 }
