@@ -6,7 +6,9 @@ import com.cjyfff.dq.config.ZooKeeperClient;
 import com.cjyfff.dq.election.info.ShardingInfo;
 import com.cjyfff.dq.task.common.TaskConfig;
 import com.cjyfff.dq.task.common.TaskHandlerContext;
+import com.cjyfff.dq.task.common.aop.UnlockAfterDbCommit;
 import com.cjyfff.dq.task.common.enums.TaskStatus;
+import com.cjyfff.dq.task.common.lock.UnlockAfterDbCommitInfoHolder;
 import com.cjyfff.dq.task.common.lock.ZkLock;
 import com.cjyfff.dq.task.component.AcceptTaskComponent;
 import com.cjyfff.dq.task.component.ExecLogComponent;
@@ -16,6 +18,7 @@ import com.cjyfff.dq.task.mapper.DelayTaskMapper;
 import com.cjyfff.dq.task.model.DelayTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Ordered;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -79,6 +82,7 @@ public class QueueTaskConsumer {
      * @param task
      */
     @Async
+    @UnlockAfterDbCommit
     @Transactional(rollbackFor = Exception.class)
     public void doConsumer(QueueTask task) {
         // 1、乐观锁更新状态
@@ -94,6 +98,8 @@ public class QueueTaskConsumer {
 
             boolean needUnlock;
 
+            String inQueueLockKey = zkLock.getKeyLockKey(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId());
+
             if (taskHandler == null) {
                 // 找不到对应方法时，设置任务失败
                 String errorMsg = String.format("Can not find handler named %s", delayTask.getFunctionName());
@@ -106,7 +112,7 @@ public class QueueTaskConsumer {
 
                 execLogComponent.insertLog(delayTask, taskStatus, errorMsg);
 
-                needUnlock = true;
+                UnlockAfterDbCommitInfoHolder.setInfo2Holder(inQueueLockKey);
             } else {
                 HandlerResult result = taskHandler.run(delayTask.getParams());
 
@@ -119,7 +125,7 @@ public class QueueTaskConsumer {
 
                     execLogComponent.insertLog(delayTask, taskStatus, "success");
 
-                    needUnlock = true;
+                    UnlockAfterDbCommitInfoHolder.setInfo2Holder(inQueueLockKey);
                 } else {
 
                     Integer taskStatus;
@@ -129,16 +135,16 @@ public class QueueTaskConsumer {
                         acceptTaskComponent.pushToQueue(task);
                         taskStatus = TaskStatus.RETRYING.getStatus();
 
-                        needUnlock = false;
+                        UnlockAfterDbCommitInfoHolder.setInfo2Holder(inQueueLockKey, false);
 
                     } else if (delayTask.getRetryCount() == 0) {
                         taskStatus = TaskStatus.PROCESS_FAIL.getStatus();
 
-                        needUnlock = true;
+                        UnlockAfterDbCommitInfoHolder.setInfo2Holder(inQueueLockKey);
                     } else {
                         taskStatus = TaskStatus.RETRY_FAIL.getStatus();
 
-                        needUnlock = true;
+                        UnlockAfterDbCommitInfoHolder.setInfo2Holder(inQueueLockKey);
                     }
                     delayTask.setStatus(taskStatus);
                     delayTask.setModifiedAt(new Date());
@@ -146,10 +152,6 @@ public class QueueTaskConsumer {
 
                     execLogComponent.insertLog(delayTask, taskStatus, result.getMsg());
                 }
-            }
-
-            if (needUnlock) {
-                zkLock.tryUnlock(zkLock.getKeyLockKey(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId()));
             }
 
         } else {

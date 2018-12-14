@@ -3,6 +3,8 @@ package com.cjyfff.dq.task.handler.impl;
 import com.alibaba.fastjson.JSON;
 
 import com.cjyfff.dq.config.ZooKeeperClient;
+import com.cjyfff.dq.task.common.aop.UnlockAfterDbCommit;
+import com.cjyfff.dq.task.common.lock.UnlockAfterDbCommitInfoHolder;
 import com.cjyfff.dq.task.common.lock.ZkLock;
 import com.cjyfff.dq.task.handler.HandlerResult;
 import com.cjyfff.dq.task.handler.ITaskHandler;
@@ -13,6 +15,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 /**
@@ -41,6 +44,8 @@ public class OrderAutoAuditHandler implements ITaskHandler {
     private ZooKeeperClient zooKeeperClient;
 
     @Override
+    @UnlockAfterDbCommit
+    @Transactional
     public HandlerResult run(String paras) {
 
             log.info("Run OrderAutoAuditHandler with paras: " + paras);
@@ -70,7 +75,7 @@ public class OrderAutoAuditHandler implements ITaskHandler {
             log.error("OrderAutoAuditHandler get error:", e);
             return new HandlerResult(HandlerResult.DEFAULT_FAIL_CODE, String.format("订单自动客审时发生错误：%s", e.getMessage()));
         } finally {
-            zkLock.tryUnlock(zkLock.getKeyLockKey(ORDER_LOCK_PAHT, orderId));
+            UnlockAfterDbCommitInfoHolder.setInfo2Holder(zkLock.getKeyLockKey(ORDER_LOCK_PAHT, orderId));
         }
     }
 
