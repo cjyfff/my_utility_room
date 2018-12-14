@@ -2,9 +2,12 @@ package com.cjyfff.dq.task.queue;
 
 import java.util.Date;
 
+import com.cjyfff.dq.config.ZooKeeperClient;
 import com.cjyfff.dq.election.info.ShardingInfo;
+import com.cjyfff.dq.task.common.TaskConfig;
 import com.cjyfff.dq.task.common.TaskHandlerContext;
 import com.cjyfff.dq.task.common.enums.TaskStatus;
+import com.cjyfff.dq.task.common.lock.ZkLock;
 import com.cjyfff.dq.task.component.AcceptTaskComponent;
 import com.cjyfff.dq.task.component.ExecLogComponent;
 import com.cjyfff.dq.task.handler.HandlerResult;
@@ -42,6 +45,12 @@ public class QueueTaskConsumer {
 
     @Autowired
     private AcceptTaskComponent acceptTaskComponent;
+
+    @Autowired
+    private ZkLock zkLock;
+
+    @Autowired
+    private ZooKeeperClient zooKeeperClient;
 
     /**
      * delay queue consumer
@@ -82,6 +91,9 @@ public class QueueTaskConsumer {
             DelayTask delayTask = delayTaskMapper.selectByTaskId(task.getTaskId());
 
             ITaskHandler taskHandler = taskHandlerContext.getTaskHandler(delayTask.getFunctionName());
+
+            boolean needUnlock;
+
             if (taskHandler == null) {
                 // 找不到对应方法时，设置任务失败
                 String errorMsg = String.format("Can not find handler named %s", delayTask.getFunctionName());
@@ -94,37 +106,50 @@ public class QueueTaskConsumer {
 
                 execLogComponent.insertLog(delayTask, taskStatus, errorMsg);
 
-                return;
+                needUnlock = true;
+            } else {
+                HandlerResult result = taskHandler.run(delayTask.getParams());
+
+                if (HandlerResult.SUCCESS_CODE.equals(result.getResultCode())) {
+                    Integer taskStatus = TaskStatus.PROCESS_SUCCESS.getStatus();
+
+                    delayTask.setStatus(taskStatus);
+                    delayTask.setModifiedAt(new Date());
+                    delayTaskMapper.updateByPrimaryKeySelective(delayTask);
+
+                    execLogComponent.insertLog(delayTask, taskStatus, "success");
+
+                    needUnlock = true;
+                } else {
+
+                    Integer taskStatus;
+                    if (delayTask.getRetryCount() > delayTask.getAlreadyRetryCount()) {
+                        // todo: 完善处理重试逻辑
+                        task.setExecuteTime(System.currentTimeMillis() * 1000 + delayTask.getDelayTime());
+                        acceptTaskComponent.pushToQueue(task);
+                        taskStatus = TaskStatus.RETRYING.getStatus();
+
+                        needUnlock = false;
+
+                    } else if (delayTask.getRetryCount() == 0) {
+                        taskStatus = TaskStatus.PROCESS_FAIL.getStatus();
+
+                        needUnlock = true;
+                    } else {
+                        taskStatus = TaskStatus.RETRY_FAIL.getStatus();
+
+                        needUnlock = true;
+                    }
+                    delayTask.setStatus(taskStatus);
+                    delayTask.setModifiedAt(new Date());
+                    delayTaskMapper.updateByPrimaryKeySelective(delayTask);
+
+                    execLogComponent.insertLog(delayTask, taskStatus, result.getMsg());
+                }
             }
 
-            HandlerResult result = taskHandler.run(delayTask.getParams());
-
-            if (HandlerResult.SUCCESS_CODE.equals(result.getResultCode())) {
-                Integer taskStatus = TaskStatus.PROCESS_SUCCESS.getStatus();
-
-                delayTask.setStatus(taskStatus);
-                delayTask.setModifiedAt(new Date());
-                delayTaskMapper.updateByPrimaryKeySelective(delayTask);
-
-                execLogComponent.insertLog(delayTask, taskStatus, "success");
-            } else {
-
-                Integer taskStatus;
-                if (delayTask.getRetryCount() > delayTask.getAlreadyRetryCount()) {
-                    // todo: 完善处理重试逻辑
-                    task.setExecuteTime(System.currentTimeMillis() * 1000 + delayTask.getDelayTime());
-                    acceptTaskComponent.pushToQueue(task);
-                    taskStatus = TaskStatus.RETRYING.getStatus();
-                } else if (delayTask.getRetryCount() == 0) {
-                    taskStatus = TaskStatus.PROCESS_FAIL.getStatus();
-                } else {
-                    taskStatus = TaskStatus.RETRY_FAIL.getStatus();
-                }
-                delayTask.setStatus(taskStatus);
-                delayTask.setModifiedAt(new Date());
-                delayTaskMapper.updateByPrimaryKeySelective(delayTask);
-
-                execLogComponent.insertLog(delayTask, taskStatus, result.getMsg());
+            if (needUnlock) {
+                zkLock.tryUnlock(zkLock.getKeyLockKey(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId()));
             }
 
         } else {
