@@ -30,26 +30,23 @@ public class MasterBeforeUpdateElectionFinishBiz implements ElectionBiz {
     private AcceptTaskComponent acceptTaskComponent;
 
     @Override
+    //@Transactional
     public void run() throws Exception {
         logger.info("MasterBeforeElectionFinishBiz begin...");
         try {
-            doBiz();
+            List<DelayTask> delayTasks = delayTaskMapper.selectByStatusForUpdate(TaskStatus.ACCEPT.getStatus());
+
+            for (DelayTask delayTask : delayTasks) {
+                Byte newShardingId = acceptTaskComponent.getShardingIdFormTaskId(delayTask.getTaskId()).byteValue();
+                if (! newShardingId.equals(delayTask.getShardingId())) {
+                    delayTask.setShardingId(newShardingId);
+                    delayTaskMapper.updateByPrimaryKeySelective(delayTask);
+                }
+            }
         } catch (Exception e) {
             logger.error("MasterBeforeUpdateElectionFinishBiz get error:", e);
         }
         logger.info("MasterBeforeElectionFinishBiz end...");
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    private void doBiz() {
-        List<DelayTask> delayTasks = delayTaskMapper.selectByStatusForUpdate(TaskStatus.ACCEPT.getStatus());
-
-        for (DelayTask delayTask : delayTasks) {
-            Byte newShardingId = acceptTaskComponent.getShardingIdFormTaskId(delayTask.getTaskId()).byteValue();
-            if (! newShardingId.equals(delayTask.getShardingId())) {
-                delayTask.setShardingId(newShardingId);
-                delayTaskMapper.updateByPrimaryKeySelective(delayTask);
-            }
-        }
-    }
 }

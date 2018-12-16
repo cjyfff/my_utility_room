@@ -2,7 +2,6 @@ package com.cjyfff.dq.task.queue;
 
 import java.util.Date;
 
-import com.cjyfff.dq.config.ZooKeeperClient;
 import com.cjyfff.dq.election.info.ShardingInfo;
 import com.cjyfff.dq.task.common.TaskConfig;
 import com.cjyfff.dq.task.common.TaskHandlerContext;
@@ -17,8 +16,8 @@ import com.cjyfff.dq.task.handler.ITaskHandler;
 import com.cjyfff.dq.task.mapper.DelayTaskMapper;
 import com.cjyfff.dq.task.model.DelayTask;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.Ordered;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -52,9 +51,6 @@ public class QueueTaskConsumer {
     @Autowired
     private ZkLock zkLock;
 
-    @Autowired
-    private ZooKeeperClient zooKeeperClient;
-
     /**
      * delay queue consumer
      * 对于这个consumer，实际只需要一个线程，
@@ -73,14 +69,10 @@ public class QueueTaskConsumer {
         while (! delayTaskQueue.queue.isEmpty()) {
             QueueTask task = delayTaskQueue.queue.take();
             log.info(String.format("task %s begin", task.getTaskId()));
-            doConsumer(task);
+            ((QueueTaskConsumer) AopContext.currentProxy()).doConsumer(task);
         }
     }
 
-    /**
-     * 异步消费消息
-     * @param task
-     */
     @Async
     @UnlockAfterDbCommit
     @Transactional(rollbackFor = Exception.class)

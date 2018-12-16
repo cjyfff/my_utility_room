@@ -49,10 +49,40 @@ public class SlaveAfterUpdateElectionFinishBiz implements ElectionBiz {
     private SysStatus sysStatus;
 
     @Override
+    //@Transactional
     public void run() throws Exception {
         log.info("SlaveAfterUpdateElectionFinishBiz begin...");
         try {
-            pushTaskInQueueWhenInit();
+            if (sysStatus.isInitCompleted()) {
+                return;
+            }
+
+            log.info("Begin pushTaskInQueueWhenInit...");
+
+            List<DelayTask> delayTaskList = delayTaskMapper.selectByStatusAndShardingIdForUpdate(
+                TaskStatus.IN_QUEUE.getStatus(),
+                shardingInfo.getNodeId().byteValue());
+            for (DelayTask delayTask : delayTaskList) {
+                if (zkLock.idempotentLock(zooKeeperClient.getClient(),
+                    zkLock.getKeyLockKey(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId()))) {
+                    try {
+                        QueueTask task = new QueueTask(
+                            delayTask.getTaskId(), delayTask.getFunctionName(), delayTask.getParams(),
+                            delayTask.getExecuteTime()
+                        );
+                        acceptTaskComponent.pushToQueue(task);
+
+                        execLogComponent.insertLog(delayTask, TaskStatus.IN_QUEUE.getStatus(),
+                            String.format("push task in queue when init: %s", delayTask.getTaskId()));
+                    } catch (Exception e) {
+                        zkLock.tryUnlock(zkLock.getKeyLockKey(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId()));
+                        throw e;
+                    }
+
+                } else {
+                    log.error(String.format("Task can not get in queue lock : %s", delayTask.getTaskId()));
+                }
+            }
 
             if (!sysStatus.isInitCompleted()) {
                 sysStatus.setInitCompleted(true);
@@ -61,39 +91,5 @@ public class SlaveAfterUpdateElectionFinishBiz implements ElectionBiz {
             log.error("SlaveAfterUpdateElectionFinishBiz get error:", e);
         }
         log.info("SlaveAfterUpdateElectionFinishBiz end...");
-    }
-
-    @Transactional
-    private void pushTaskInQueueWhenInit() throws Exception {
-        if (sysStatus.isInitCompleted()) {
-            return;
-        }
-
-        log.info("Begin pushTaskInQueueWhenInit...");
-
-        List<DelayTask> delayTaskList = delayTaskMapper.selectByStatusAndShardingIdForUpdate(
-            TaskStatus.IN_QUEUE.getStatus(),
-            shardingInfo.getNodeId().byteValue());
-        for (DelayTask delayTask : delayTaskList) {
-            if (zkLock.idempotentLock(zooKeeperClient.getClient(),
-                    zkLock.getKeyLockKey(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId()))) {
-                try {
-                    QueueTask task = new QueueTask(
-                        delayTask.getTaskId(), delayTask.getFunctionName(), delayTask.getParams(),
-                        delayTask.getExecuteTime()
-                    );
-                    acceptTaskComponent.pushToQueue(task);
-
-                    execLogComponent.insertLog(delayTask, TaskStatus.IN_QUEUE.getStatus(),
-                        String.format("push task in queue when init: %s", delayTask.getTaskId()));
-                } catch (Exception e) {
-                    zkLock.tryUnlock(zkLock.getKeyLockKey(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId()));
-                    throw e;
-                }
-
-            } else {
-                log.error(String.format("Task can not get in queue lock : %s", delayTask.getTaskId()));
-            }
-        }
     }
 }
