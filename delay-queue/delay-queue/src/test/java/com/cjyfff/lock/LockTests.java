@@ -40,7 +40,7 @@ public class LockTests {
     public void testLock() {
         try {
 
-            String lockKey = "testLock";
+            String lockKey = "/testLock";
 
             CuratorFramework client = zooKeeperClient.getClient();
 

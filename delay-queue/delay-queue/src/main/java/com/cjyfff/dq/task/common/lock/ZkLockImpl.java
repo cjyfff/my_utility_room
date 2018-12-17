@@ -5,7 +5,6 @@ import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.locks.InterProcessLock;
-import org.apache.curator.framework.recipes.locks.InterProcessSemaphoreMutex;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -28,7 +27,7 @@ public class ZkLockImpl implements ZkLock {
                 return false;
             }
 
-            InterProcessLock lock = new InterProcessSemaphoreMutex(client, key);
+            InterProcessLock lock = new MyInterProcessSemaphoreMutex(client, key);
             // 加锁成功后需要把锁对象存入TreadLocal，解锁时根据锁对象来解锁，防止对别的线程
             // 所加的锁进行解锁操作
             if (lock.acquire(seconds, TimeUnit.SECONDS)) {
