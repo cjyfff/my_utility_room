@@ -88,10 +88,6 @@ public class QueueTaskConsumer {
 
             ITaskHandler taskHandler = taskHandlerContext.getTaskHandler(delayTask.getFunctionName());
 
-            boolean needUnlock;
-
-            String inQueueLockKey = zkLock.getKeyLockKey(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId());
-
             if (taskHandler == null) {
                 // 找不到对应方法时，设置任务失败
                 String errorMsg = String.format("Can not find handler named %s", delayTask.getFunctionName());
@@ -104,7 +100,7 @@ public class QueueTaskConsumer {
 
                 execLogComponent.insertLog(delayTask, taskStatus, errorMsg);
 
-                UnlockAfterDbCommitInfoHolder.setInfo2Holder(inQueueLockKey);
+                UnlockAfterDbCommitInfoHolder.setInfo2Holder(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId());
             } else {
                 HandlerResult result = taskHandler.run(delayTask.getParams());
 
@@ -117,7 +113,7 @@ public class QueueTaskConsumer {
 
                     execLogComponent.insertLog(delayTask, taskStatus, "success");
 
-                    UnlockAfterDbCommitInfoHolder.setInfo2Holder(inQueueLockKey);
+                    UnlockAfterDbCommitInfoHolder.setInfo2Holder(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId());
                 } else {
 
                     Integer taskStatus;
@@ -127,16 +123,16 @@ public class QueueTaskConsumer {
                         acceptTaskComponent.pushToQueue(task);
                         taskStatus = TaskStatus.RETRYING.getStatus();
 
-                        UnlockAfterDbCommitInfoHolder.setInfo2Holder(inQueueLockKey, false);
+                        UnlockAfterDbCommitInfoHolder.setInfo2Holder(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId(), false);
 
                     } else if (delayTask.getRetryCount() == 0) {
                         taskStatus = TaskStatus.PROCESS_FAIL.getStatus();
 
-                        UnlockAfterDbCommitInfoHolder.setInfo2Holder(inQueueLockKey);
+                        UnlockAfterDbCommitInfoHolder.setInfo2Holder(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId());
                     } else {
                         taskStatus = TaskStatus.RETRY_FAIL.getStatus();
 
-                        UnlockAfterDbCommitInfoHolder.setInfo2Holder(inQueueLockKey);
+                        UnlockAfterDbCommitInfoHolder.setInfo2Holder(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId());
                     }
                     delayTask.setStatus(taskStatus);
                     delayTask.setModifiedAt(new Date());

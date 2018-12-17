@@ -40,7 +40,9 @@ public class LockTests {
     public void testLock() {
         try {
 
-            String lockKey = "/testLock";
+            String lockKey = "test_lock";
+
+            String lockPath = "/test_lock_path";
 
             CuratorFramework client = zooKeeperClient.getClient();
 
@@ -66,9 +68,9 @@ public class LockTests {
                 pool.submit(() -> {
                     for (int j = 0; j < 1000; j++) {
                         try {
-                            zkLock.tryLock(client, lockKey, 60);
+                            zkLock.tryLock(client, lockPath, lockKey, 60);
                             a[0]++;
-                            zkLock.tryUnlock(lockKey);
+                            zkLock.tryUnlock(lockPath, lockKey);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }

@@ -11,6 +11,10 @@ import org.apache.zookeeper.KeeperException.NodeExistsException;
 import org.springframework.util.StringUtils;
 
 /**
+ * curator的InterProcessLock实现，
+ * 在锁目录建立时，假如zk不支持container模式的话，目录会设置为persistent模式
+ * 锁释放时不会删除这些目录，会造成性能问题
+ * 因此自己实现InterProcessLock逻辑
  * Created by jiashen on 18-12-17.
  */
 public class MyInterProcessSemaphoreMutex implements InterProcessLock {

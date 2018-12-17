@@ -20,18 +20,20 @@ public class ZkLockImpl implements ZkLock {
     private final static String DEFAULT_LOCK_KEY = "/default_lock_key";
 
     @Override
-    public boolean tryLock(CuratorFramework client, String key, Integer seconds) throws LockException {
+    public boolean tryLock(CuratorFramework client, String lockPath, String lockKey, Integer seconds) throws LockException {
+
+        String k = getKeyLockKey(lockPath, lockKey);
 
         try {
-            if (StringUtils.isEmpty(key)) {
+            if (StringUtils.isEmpty(k)) {
                 return false;
             }
 
-            InterProcessLock lock = new MyInterProcessSemaphoreMutex(client, key);
+            InterProcessLock lock = new MyInterProcessSemaphoreMutex(client, k);
             // 加锁成功后需要把锁对象存入TreadLocal，解锁时根据锁对象来解锁，防止对别的线程
             // 所加的锁进行解锁操作
             if (lock.acquire(seconds, TimeUnit.SECONDS)) {
-                ZkLockHolder.setLockKeySet(key, lock);
+                ZkLockHolder.setLockKeySet(k, lock);
                 return true;
             }
             return false;
@@ -43,18 +45,20 @@ public class ZkLockImpl implements ZkLock {
     }
 
     @Override
-    public boolean idempotentLock(CuratorFramework client, String key) throws LockException {
-        return this.tryLock(client, key, 0);
+    public boolean idempotentLock(CuratorFramework client, String lockPath, String lockKey) throws LockException {
+        return this.tryLock(client, lockPath, lockKey, 0);
     }
 
     @Override
-    public void tryUnlock(String key) {
-        if (StringUtils.isEmpty(key)) {
+    public void tryUnlock(String lockPath, String lockKey) {
+        String k = getKeyLockKey(lockPath, lockKey);
+
+        if (StringUtils.isEmpty(k)) {
             return;
         }
 
         try {
-            InterProcessLock lock = ZkLockHolder.getLockByKey(key);
+            InterProcessLock lock = ZkLockHolder.getLockByKey(k);
 
             if (lock == null) {
                 return;
@@ -62,27 +66,22 @@ public class ZkLockImpl implements ZkLock {
 
             lock.release();
 
-            ZkLockHolder.removeLockByKey(key);
+            ZkLockHolder.removeLockByKey(k);
         } catch (Exception e) {
             log.error("ZkLock tryUnlock method get error.", e);
         }
     }
 
     @Override
-    public String getKeyLockKey(String lockPath, String key) {
+    public String getKeyLockKey(String lockPath, String lockKey) {
         if (StringUtils.isEmpty(lockPath)) {
             lockPath = DEFAULT_LOCK_PATH;
         }
 
-        if (StringUtils.isEmpty(key)) {
+        if (StringUtils.isEmpty(lockKey)) {
             log.warn("lock key should not be null.");
-            key = DEFAULT_LOCK_KEY;
+            lockKey = DEFAULT_LOCK_KEY;
         }
-        return lockPath + "/" + key;
-    }
-
-    @Override
-    public String getKeyLockKey(String key) throws LockException {
-        return this.getKeyLockKey(DEFAULT_LOCK_PATH, key);
+        return lockPath + "/" + lockKey;
     }
 }

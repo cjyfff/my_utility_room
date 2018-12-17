@@ -19,10 +19,17 @@ public class UnlockAfterDbCommitInfoHolder {
      */
     private static final Integer INFO_MAP_INIT_SIZE = 1024;
 
-    public static void setInfo2Holder(String key, boolean needUnlock) {
-        if (StringUtils.isEmpty(key)) {
-            throw new IllegalArgumentException("Parameters key and lock can not be null");
+    public static void setInfo2Holder(String lockPath, String lockKey, boolean needUnlock) {
+
+        if (StringUtils.isEmpty(lockPath) || StringUtils.isEmpty(lockKey)) {
+            throw new IllegalArgumentException("Parameters lockPath and LockKey can not be null");
         }
+
+        if (! lockPath.startsWith("/")) {
+            throw new IllegalArgumentException("Parameters lockPath must start with '/'.");
+        }
+
+        String k = lockPath + "/" + lockKey;
 
         Map<String, UnlockAfterDbCommitInfo> infoMap;
         if (HOLDER.get() == null) {
@@ -33,15 +40,23 @@ public class UnlockAfterDbCommitInfoHolder {
 
         UnlockAfterDbCommitInfo info = new UnlockAfterDbCommitInfo();
         info.setNeedUnlock(needUnlock);
-        infoMap.put(key, info);
+        info.setLockPath(lockPath);
+        info.setLockKey(lockKey);
+        infoMap.put(k, info);
+        HOLDER.set(infoMap);
     }
 
-    public static void setInfo2Holder(String key) {
-        setInfo2Holder(key, true);
+    public static void setInfo2Holder(String lockPath, String lockKey) {
+        setInfo2Holder(lockPath, lockKey, true);
     }
 
-    public static UnlockAfterDbCommitInfo getInfoByKey(String key) {
-        if (StringUtils.isEmpty(key)) {
+    /**
+     * 根据 k 获取 HOLDER 中对应的 item
+     * @param k 锁目录 + 锁key
+     * @return
+     */
+    public static UnlockAfterDbCommitInfo getInfoByKey(String k) {
+        if (StringUtils.isEmpty(k)) {
             throw new IllegalArgumentException("Parameters key and lock can not be null");
         }
 
@@ -51,7 +66,7 @@ public class UnlockAfterDbCommitInfoHolder {
             return null;
         }
 
-        return HOLDER.get().get(key);
+        return HOLDER.get().get(k);
     }
 
     public static Map<String, UnlockAfterDbCommitInfo> getAllInfoMap() {
@@ -63,20 +78,28 @@ public class UnlockAfterDbCommitInfoHolder {
         return HOLDER.get();
     }
 
-    public static void removeInfoByKey(String key) {
-        if (StringUtils.isEmpty(key)) {
-            throw new IllegalArgumentException("Parameters key and lock can not be null");
+    /**
+     * HOLDER中删除k对应的item
+     * @param k 锁目录 + 锁key
+     */
+    public static void removeInfoByKey(String k) {
+        if (StringUtils.isEmpty(k)) {
+            throw new IllegalArgumentException("Parameters k and lock can not be null");
         }
         if (HOLDER.get() == null) {
             return;
         }
 
-        HOLDER.get().remove(key);
+        HOLDER.get().remove(k);
     }
 
     @Getter
     @Setter
     public static class UnlockAfterDbCommitInfo {
         private boolean needUnlock = true;
+
+        private String lockPath;
+
+        private String lockKey;
     }
 }

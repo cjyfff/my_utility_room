@@ -31,13 +31,13 @@ public class UnlockAfterDbCommitAspect {
         }
 
         for (Entry entry : unlockInfoMap.entrySet()) {
-            String lockKey = (String) entry.getKey();
+            String k = (String) entry.getKey();
             UnlockAfterDbCommitInfo info = (UnlockAfterDbCommitInfo) entry.getValue();
             if (info.isNeedUnlock()) {
-                zkLock.tryUnlock(lockKey);
+                zkLock.tryUnlock(info.getLockPath(), info.getLockKey());
             }
 
-            UnlockAfterDbCommitInfoHolder.removeInfoByKey(lockKey);
+            UnlockAfterDbCommitInfoHolder.removeInfoByKey(k);
         }
     }
 }

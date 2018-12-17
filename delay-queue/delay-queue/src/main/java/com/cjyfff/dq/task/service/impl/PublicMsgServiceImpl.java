@@ -69,8 +69,7 @@ public class PublicMsgServiceImpl implements PublicMsgService {
         if (acceptTaskComponent.checkIsMyTask(newDelayTask.getTaskId())) {
             if (acceptTaskComponent.checkNeedToPushQueueNow(newDelayTask.getDelayTime())) {
 
-                if (zkLock.idempotentLock(zooKeeperClient.getClient(),
-                    zkLock.getKeyLockKey(TaskConfig.IN_QUEUE_LOCK_PATH, newDelayTask.getTaskId()))) {
+                if (zkLock.idempotentLock(zooKeeperClient.getClient(), TaskConfig.IN_QUEUE_LOCK_PATH, newDelayTask.getTaskId())) {
                     try {
                         QueueTask task = new QueueTask(
                             newDelayTask.getTaskId(), newDelayTask.getFunctionName(), newDelayTask.getParams(),
@@ -84,7 +83,7 @@ public class PublicMsgServiceImpl implements PublicMsgService {
                         execLogComponent.insertLog(newDelayTask, TaskStatus.IN_QUEUE.getStatus(),
                             String.format("In Queue: %s", newDelayTask.getTaskId()));
                     } catch (Exception e) {
-                        zkLock.tryUnlock(zkLock.getKeyLockKey(TaskConfig.IN_QUEUE_LOCK_PATH, newDelayTask.getTaskId()));
+                        zkLock.tryUnlock(TaskConfig.IN_QUEUE_LOCK_PATH, newDelayTask.getTaskId());
                         throw e;
                     }
                 } else {

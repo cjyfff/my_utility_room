@@ -55,16 +55,16 @@ public class ElectionComponent {
      * @return
      */
     public String getHost() throws Exception {
-        InetAddress addr = null;
-        while (addr == null) {
-            try {
-                addr = InetAddress.getLocalHost();
-            } catch (UnknownHostException ue) {
-                log.warn("Can not get local ip info, retrying...");
-                TimeUnit.SECONDS.sleep(5);
-            }
-
-        }
-        return addr.getHostAddress() + ":" + servicePort;
+        //InetAddress addr = null;
+        //while (addr == null) {
+        //    try {
+        //        addr = InetAddress.getLocalHost();
+        //    } catch (UnknownHostException ue) {
+        //        log.warn("Can not get local ip info, retrying...");
+        //        TimeUnit.SECONDS.sleep(5);
+        //    }
+        //
+        //}
+        return "192.168.220.132" + ":" + servicePort;
     }
 }

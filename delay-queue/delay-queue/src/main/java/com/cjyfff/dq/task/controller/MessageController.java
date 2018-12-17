@@ -48,8 +48,7 @@ public class MessageController extends BaseController {
         try {
             BeanValidators.validateWithParameterException(validator, reqDto);
 
-            if (! zkLock.idempotentLock(zooKeeperClient.getClient(),
-                zkLock.getKeyLockKey(TaskConfig.ACCEPT_TASK_LOCK_PATH, reqDto.getNonceStr()))) {
+            if (! zkLock.idempotentLock(zooKeeperClient.getClient(), TaskConfig.ACCEPT_TASK_LOCK_PATH, reqDto.getNonceStr())) {
                 return DefaultWebApiResult.failure("-889", "This task is processing...");
             }
 
@@ -61,7 +60,7 @@ public class MessageController extends BaseController {
             log.error("publicMsgService acceptMsg get error: ", e);
             return DefaultWebApiResult.failure("-1", "system error");
         } finally {
-            zkLock.tryUnlock(zkLock.getKeyLockKey(TaskConfig.ACCEPT_TASK_LOCK_PATH, reqDto.getNonceStr()));
+            zkLock.tryUnlock(TaskConfig.ACCEPT_TASK_LOCK_PATH, reqDto.getNonceStr());
         }
     }
 
@@ -73,8 +72,7 @@ public class MessageController extends BaseController {
         try {
             BeanValidators.validateWithParameterException(validator, reqDto);
 
-            if (! zkLock.idempotentLock(zooKeeperClient.getClient(),
-                    zkLock.getKeyLockKey(TaskConfig.ACCEPT_TASK_LOCK_PATH, reqDto.getNonceStr()))) {
+            if (! zkLock.idempotentLock(zooKeeperClient.getClient(), TaskConfig.ACCEPT_TASK_LOCK_PATH, reqDto.getNonceStr())) {
                 return DefaultWebApiResult.failure("-889", "This task is processing...");
             }
 
@@ -86,7 +84,7 @@ public class MessageController extends BaseController {
             log.error("innerMsgService acceptMsg get error: ", e);
             return DefaultWebApiResult.failure("-1", "system error");
         } finally {
-            zkLock.tryUnlock(zkLock.getKeyLockKey(TaskConfig.ACCEPT_TASK_LOCK_PATH, reqDto.getNonceStr()));
+            zkLock.tryUnlock(TaskConfig.ACCEPT_TASK_LOCK_PATH, reqDto.getNonceStr());
         }
     }
 

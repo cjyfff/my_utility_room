@@ -64,8 +64,7 @@ public class SlaveAfterUpdateElectionFinishBiz implements ElectionBiz {
                 TaskStatus.IN_QUEUE.getStatus(),
                 shardingInfo.getNodeId().byteValue());
             for (DelayTask delayTask : delayTaskList) {
-                if (zkLock.idempotentLock(zooKeeperClient.getClient(),
-                    zkLock.getKeyLockKey(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId()))) {
+                if (zkLock.idempotentLock(zooKeeperClient.getClient(), TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId())) {
                     try {
                         QueueTask task = new QueueTask(
                             delayTask.getTaskId(), delayTask.getFunctionName(), delayTask.getParams(),
@@ -76,7 +75,7 @@ public class SlaveAfterUpdateElectionFinishBiz implements ElectionBiz {
                         execLogComponent.insertLog(delayTask, TaskStatus.IN_QUEUE.getStatus(),
                             String.format("push task in queue when init: %s", delayTask.getTaskId()));
                     } catch (Exception e) {
-                        zkLock.tryUnlock(zkLock.getKeyLockKey(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId()));
+                        zkLock.tryUnlock(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId());
                         throw e;
                     }
 

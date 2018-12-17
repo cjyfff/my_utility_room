@@ -59,8 +59,7 @@ public class InnerMsgServiceImpl implements InnerMsgService {
                     String.format("Can not find task by task id: %s", reqDto.getTaskId()));
             }
 
-            if (zkLock.idempotentLock(zooKeeperClient.getClient(),
-                zkLock.getKeyLockKey(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId()))) {
+            if (zkLock.idempotentLock(zooKeeperClient.getClient(), TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId())) {
                 try {
                     QueueTask task = new QueueTask(
                         delayTask.getTaskId(), delayTask.getFunctionName(), delayTask.getParams(),
@@ -74,7 +73,7 @@ public class InnerMsgServiceImpl implements InnerMsgService {
                     execLogComponent.insertLog(delayTask, TaskStatus.IN_QUEUE.getStatus(),
                         String.format("In Queue: %s", delayTask.getTaskId()));
                 } catch (Exception e) {
-                    zkLock.tryUnlock(zkLock.getKeyLockKey(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId()));
+                    zkLock.tryUnlock(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId());
                     throw e;
                 }
             } else {

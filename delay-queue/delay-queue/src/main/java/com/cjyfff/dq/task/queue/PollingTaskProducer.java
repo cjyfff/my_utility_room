@@ -71,8 +71,7 @@ public class PollingTaskProducer {
             shardingInfo.getNodeId().byteValue(), nowSecond, nowSecond + pollingTime);
 
         for (DelayTask delayTask : taskList) {
-            if (zkLock.idempotentLock(zooKeeperClient.getClient(),
-                    zkLock.getKeyLockKey(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId()))) {
+            if (zkLock.idempotentLock(zooKeeperClient.getClient(), TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId())) {
                 try {
                     QueueTask task = new QueueTask(
                         delayTask.getTaskId(), delayTask.getFunctionName(), delayTask.getParams(),
@@ -88,7 +87,7 @@ public class PollingTaskProducer {
                         String.format("polling task in queue: %s", delayTask.getTaskId()));
                 } catch (Exception e) {
                     // 入队列锁只在队列执行后才解锁，此处不应解锁，除非入队列，写操作日志过程中出现异常
-                    zkLock.tryUnlock(zkLock.getKeyLockKey(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId()));
+                    zkLock.tryUnlock(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId());
                     throw e;
                 }
 
