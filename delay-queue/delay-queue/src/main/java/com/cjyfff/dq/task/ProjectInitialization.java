@@ -1,13 +1,10 @@
 package com.cjyfff.dq.task;
 
-import javax.annotation.PostConstruct;
-
 import com.cjyfff.dq.election.Election;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 /**
