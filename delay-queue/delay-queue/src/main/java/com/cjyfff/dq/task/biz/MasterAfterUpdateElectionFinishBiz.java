@@ -50,11 +50,12 @@ public class MasterAfterUpdateElectionFinishBiz implements ElectionBiz {
     private SysStatus sysStatus;
 
     @Override
-    //@Transactional
+    @Transactional
     public void run() throws Exception {
         log.info("MasterAfterUpdateElectionFinishBiz begin...");
         try {
             if (sysStatus.isInitCompleted()) {
+                log.info("MasterAfterUpdateElectionFinishBiz end...");
                 return;
             }
 

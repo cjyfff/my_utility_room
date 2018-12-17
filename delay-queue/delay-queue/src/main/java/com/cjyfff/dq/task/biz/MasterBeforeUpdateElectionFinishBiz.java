@@ -30,7 +30,7 @@ public class MasterBeforeUpdateElectionFinishBiz implements ElectionBiz {
     private AcceptTaskComponent acceptTaskComponent;
 
     @Override
-    //@Transactional
+    @Transactional
     public void run() throws Exception {
         logger.info("MasterBeforeElectionFinishBiz begin...");
         try {

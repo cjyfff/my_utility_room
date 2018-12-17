@@ -49,11 +49,12 @@ public class SlaveAfterUpdateElectionFinishBiz implements ElectionBiz {
     private SysStatus sysStatus;
 
     @Override
-    //@Transactional
+    @Transactional
     public void run() throws Exception {
         log.info("SlaveAfterUpdateElectionFinishBiz begin...");
         try {
             if (sysStatus.isInitCompleted()) {
+                log.info("SlaveAfterUpdateElectionFinishBiz end...");
                 return;
             }
 
