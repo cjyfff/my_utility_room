@@ -66,7 +66,7 @@ public class LockTests {
 
             for (int i = 0; i < 5; i++) {
                 pool.submit(() -> {
-                    for (int j = 0; j < 1000; j++) {
+                    for (int j = 0; j < 100; j++) {
                         try {
                             zkLock.tryLock(client, lockPath, lockKey, 60);
                             a[0]++;
@@ -86,7 +86,7 @@ public class LockTests {
 
             System.out.println("a: " + a[0]);
 
-            Assert.assertTrue(a[0] == 5000);
+            Assert.assertTrue(a[0] == 500);
         } catch (Exception e) {
             e.printStackTrace();
         }
