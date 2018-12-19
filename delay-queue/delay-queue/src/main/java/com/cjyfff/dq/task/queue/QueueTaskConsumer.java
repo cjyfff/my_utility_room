@@ -8,7 +8,6 @@ import com.cjyfff.dq.task.common.TaskHandlerContext;
 import com.cjyfff.dq.task.common.aop.UnlockAfterDbCommit;
 import com.cjyfff.dq.task.common.enums.TaskStatus;
 import com.cjyfff.dq.task.common.lock.UnlockAfterDbCommitInfoHolder;
-import com.cjyfff.dq.task.common.lock.ZkLock;
 import com.cjyfff.dq.task.component.AcceptTaskComponent;
 import com.cjyfff.dq.task.component.ExecLogComponent;
 import com.cjyfff.dq.task.handler.HandlerResult;
@@ -47,9 +46,6 @@ public class QueueTaskConsumer {
 
     @Autowired
     private AcceptTaskComponent acceptTaskComponent;
-
-    @Autowired
-    private ZkLock zkLock;
 
     /**
      * delay queue consumer

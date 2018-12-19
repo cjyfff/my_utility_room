@@ -50,15 +50,14 @@ public class InnerMsgServiceImpl implements InnerMsgService {
     public void acceptMsg(InnerMsgDto reqDto) throws Exception {
         acceptTaskComponent.checkElectionStatus();
 
-        if (acceptTaskComponent.checkNeedToPushQueueNow(reqDto.getDelayTime())) {
-            DelayTask delayTask = delayTaskMapper.selectByTaskIdAndStatusForUpdate(
-                TaskStatus.TRANSMITING.getStatus(), reqDto.getTaskId(),
-                shardingInfo.getNodeId().byteValue());
-            if (delayTask == null) {
-                throw new ApiException("-101",
-                    String.format("Can not find task by task id: %s", reqDto.getTaskId()));
-            }
+        DelayTask delayTask = delayTaskMapper.selectByTaskIdAndStatusForUpdate(
+            TaskStatus.TRANSMITING.getStatus(), reqDto.getTaskId(), shardingInfo.getNodeId().byteValue());
+        if (delayTask == null) {
+            throw new ApiException("-101",
+                String.format("Can not find task by task id: %s", reqDto.getTaskId()));
+        }
 
+        if (acceptTaskComponent.checkNeedToPushQueueNow(reqDto.getDelayTime())) {
             if (zkLock.idempotentLock(zooKeeperClient.getClient(), TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId())) {
                 try {
                     QueueTask task = new QueueTask(
@@ -81,6 +80,10 @@ public class InnerMsgServiceImpl implements InnerMsgService {
                 execLogComponent.insertLog(delayTask, TaskStatus.PROCESS_FAIL.getStatus(),
                     String.format("Task can not get in queue lock : %s", delayTask.getTaskId()));
             }
+        } else {
+            delayTask.setStatus(TaskStatus.POLLING.getStatus());
+            delayTask.setModifiedAt(new Date());
+            delayTaskMapper.updateByPrimaryKeySelective(delayTask);
         }
     }
 }

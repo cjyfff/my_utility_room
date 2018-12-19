@@ -93,6 +93,10 @@ public class PublicMsgServiceImpl implements PublicMsgService {
 
                 }
 
+            } else {
+                newDelayTask.setStatus(TaskStatus.POLLING.getStatus());
+                newDelayTask.setModifiedAt(new Date());
+                delayTaskMapper.updateByPrimaryKeySelective(newDelayTask);
             }
         } else {
             // 转发到对应机器

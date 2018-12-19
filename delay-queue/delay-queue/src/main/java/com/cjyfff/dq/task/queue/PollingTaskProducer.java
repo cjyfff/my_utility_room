@@ -67,7 +67,7 @@ public class PollingTaskProducer {
         // 入队，然后update状态（无需再根据状态筛选来更新）
 
         Long nowSecond = System.currentTimeMillis() / 1000;
-        List<DelayTask> taskList = delayTaskMapper.selectByStatusAndExecuteTimeForUpdate(TaskStatus.ACCEPT.getStatus(),
+        List<DelayTask> taskList = delayTaskMapper.selectByStatusAndExecuteTimeForUpdate(TaskStatus.POLLING.getStatus(),
             shardingInfo.getNodeId().byteValue(), nowSecond, nowSecond + pollingTime);
 
         for (DelayTask delayTask : taskList) {
