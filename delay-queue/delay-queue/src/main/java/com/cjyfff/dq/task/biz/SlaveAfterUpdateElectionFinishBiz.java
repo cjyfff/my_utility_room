@@ -2,13 +2,10 @@ package com.cjyfff.dq.task.biz;
 
 import java.util.List;
 
-import com.cjyfff.dq.config.ZooKeeperClient;
 import com.cjyfff.dq.election.biz.ElectionBiz;
 import com.cjyfff.dq.election.info.ShardingInfo;
 import com.cjyfff.dq.task.common.SysStatus;
-import com.cjyfff.dq.task.common.TaskConfig;
 import com.cjyfff.dq.task.common.enums.TaskStatus;
-import com.cjyfff.dq.task.common.lock.ZkLock;
 import com.cjyfff.dq.task.component.AcceptTaskComponent;
 import com.cjyfff.dq.task.component.ExecLogComponent;
 import com.cjyfff.dq.task.mapper.DelayTaskMapper;
@@ -32,12 +29,6 @@ public class SlaveAfterUpdateElectionFinishBiz implements ElectionBiz {
 
     @Autowired
     private ShardingInfo shardingInfo;
-
-    @Autowired
-    private ZkLock zkLock;
-
-    @Autowired
-    private ZooKeeperClient zooKeeperClient;
 
     @Autowired
     private AcceptTaskComponent acceptTaskComponent;
@@ -64,24 +55,15 @@ public class SlaveAfterUpdateElectionFinishBiz implements ElectionBiz {
                 TaskStatus.IN_QUEUE.getStatus(),
                 shardingInfo.getNodeId().byteValue());
             for (DelayTask delayTask : delayTaskList) {
-                if (zkLock.idempotentLock(zooKeeperClient.getClient(), TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId())) {
-                    try {
-                        QueueTask task = new QueueTask(
-                            delayTask.getTaskId(), delayTask.getFunctionName(), delayTask.getParams(),
-                            delayTask.getExecuteTime()
-                        );
-                        acceptTaskComponent.pushToQueue(task);
 
-                        execLogComponent.insertLog(delayTask, TaskStatus.IN_QUEUE.getStatus(),
-                            String.format("push task in queue when init: %s", delayTask.getTaskId()));
-                    } catch (Exception e) {
-                        zkLock.tryUnlock(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId());
-                        throw e;
-                    }
+                QueueTask task = new QueueTask(
+                    delayTask.getTaskId(), delayTask.getFunctionName(), delayTask.getParams(),
+                    delayTask.getExecuteTime()
+                );
+                acceptTaskComponent.pushToQueue(task);
 
-                } else {
-                    log.error(String.format("Task can not get in queue lock : %s", delayTask.getTaskId()));
-                }
+                execLogComponent.insertLog(delayTask, TaskStatus.IN_QUEUE.getStatus(),
+                    String.format("push task in queue when init: %s", delayTask.getTaskId()));
             }
 
             if (!sysStatus.isInitCompleted()) {

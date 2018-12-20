@@ -5,20 +5,16 @@ import java.util.UUID;
 
 import com.alibaba.fastjson.JSON;
 
-import com.cjyfff.dq.config.ZooKeeperClient;
 import com.cjyfff.dq.election.info.ShardingInfo;
 import com.cjyfff.dq.task.common.ApiException;
 import com.cjyfff.dq.task.common.DefaultWebApiResult;
 import com.cjyfff.dq.task.common.HttpUtils;
-import com.cjyfff.dq.task.common.TaskConfig;
 import com.cjyfff.dq.task.common.TaskHandlerContext;
 import com.cjyfff.dq.task.common.enums.TaskStatus;
-import com.cjyfff.dq.task.common.lock.ZkLock;
 import com.cjyfff.dq.task.component.ExecLogComponent;
 import com.cjyfff.dq.task.handler.ITaskHandler;
 import com.cjyfff.dq.task.mapper.DelayTaskMapper;
 import com.cjyfff.dq.task.model.DelayTask;
-import com.cjyfff.dq.task.queue.QueueTask;
 import com.cjyfff.dq.task.service.PublicMsgService;
 import com.cjyfff.dq.task.vo.dto.AcceptMsgDto;
 import com.cjyfff.dq.task.component.AcceptTaskComponent;
@@ -52,10 +48,7 @@ public class PublicMsgServiceImpl implements PublicMsgService {
     private TaskHandlerContext taskHandlerContext;
 
     @Autowired
-    private ZkLock zkLock;
-
-    @Autowired
-    private ZooKeeperClient zooKeeperClient;
+    private MsgServiceComponent msgServiceComponent;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -68,35 +61,9 @@ public class PublicMsgServiceImpl implements PublicMsgService {
 
         if (acceptTaskComponent.checkIsMyTask(newDelayTask.getTaskId())) {
             if (acceptTaskComponent.checkNeedToPushQueueNow(newDelayTask.getDelayTime())) {
-
-                if (zkLock.idempotentLock(zooKeeperClient.getClient(), TaskConfig.IN_QUEUE_LOCK_PATH, newDelayTask.getTaskId())) {
-                    try {
-                        QueueTask task = new QueueTask(
-                            newDelayTask.getTaskId(), newDelayTask.getFunctionName(), newDelayTask.getParams(),
-                            newDelayTask.getExecuteTime()
-                        );
-                        acceptTaskComponent.pushToQueue(task);
-                        newDelayTask.setStatus(TaskStatus.IN_QUEUE.getStatus());
-                        newDelayTask.setModifiedAt(new Date());
-                        delayTaskMapper.updateByPrimaryKeySelective(newDelayTask);
-
-                        execLogComponent.insertLog(newDelayTask, TaskStatus.IN_QUEUE.getStatus(),
-                            String.format("In Queue: %s", newDelayTask.getTaskId()));
-                    } catch (Exception e) {
-                        zkLock.tryUnlock(TaskConfig.IN_QUEUE_LOCK_PATH, newDelayTask.getTaskId());
-                        throw e;
-                    }
-                } else {
-                    log.error(String.format("Task can not get in queue lock : %s", newDelayTask.getTaskId()));
-                    execLogComponent.insertLog(newDelayTask, TaskStatus.PROCESS_FAIL.getStatus(),
-                        String.format("Task can not get in queue lock : %s", newDelayTask.getTaskId()));
-
-                }
-
+                msgServiceComponent.doPush2Queue(newDelayTask);
             } else {
-                newDelayTask.setStatus(TaskStatus.POLLING.getStatus());
-                newDelayTask.setModifiedAt(new Date());
-                delayTaskMapper.updateByPrimaryKeySelective(newDelayTask);
+                msgServiceComponent.doPush2Polling(newDelayTask);
             }
         } else {
             // 转发到对应机器

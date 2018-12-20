@@ -3,11 +3,8 @@ package com.cjyfff.dq.task.queue;
 import java.util.Date;
 
 import com.cjyfff.dq.election.info.ShardingInfo;
-import com.cjyfff.dq.task.common.TaskConfig;
 import com.cjyfff.dq.task.common.TaskHandlerContext;
-import com.cjyfff.dq.task.common.aop.UnlockAfterDbCommit;
 import com.cjyfff.dq.task.common.enums.TaskStatus;
-import com.cjyfff.dq.task.common.lock.UnlockAfterDbCommitInfoHolder;
 import com.cjyfff.dq.task.component.AcceptTaskComponent;
 import com.cjyfff.dq.task.component.ExecLogComponent;
 import com.cjyfff.dq.task.handler.HandlerResult;
@@ -70,7 +67,6 @@ public class QueueTaskConsumer {
     }
 
     @Async
-    @UnlockAfterDbCommit
     @Transactional(rollbackFor = Exception.class)
     public void doConsumer(QueueTask task) {
         // 1、乐观锁更新状态
@@ -96,7 +92,6 @@ public class QueueTaskConsumer {
 
                 execLogComponent.insertLog(delayTask, taskStatus, errorMsg);
 
-                UnlockAfterDbCommitInfoHolder.setInfo2Holder(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId());
             } else {
                 HandlerResult result = taskHandler.run(delayTask.getParams());
 
@@ -109,7 +104,6 @@ public class QueueTaskConsumer {
 
                     execLogComponent.insertLog(delayTask, taskStatus, "success");
 
-                    UnlockAfterDbCommitInfoHolder.setInfo2Holder(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId());
                 } else {
 
                     Integer taskStatus;
@@ -119,16 +113,12 @@ public class QueueTaskConsumer {
                         acceptTaskComponent.pushToQueue(task);
                         taskStatus = TaskStatus.RETRYING.getStatus();
 
-                        UnlockAfterDbCommitInfoHolder.setInfo2Holder(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId(), false);
-
                     } else if (delayTask.getRetryCount() == 0) {
                         taskStatus = TaskStatus.PROCESS_FAIL.getStatus();
 
-                        UnlockAfterDbCommitInfoHolder.setInfo2Holder(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId());
                     } else {
                         taskStatus = TaskStatus.RETRY_FAIL.getStatus();
 
-                        UnlockAfterDbCommitInfoHolder.setInfo2Holder(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId());
                     }
                     delayTask.setStatus(taskStatus);
                     delayTask.setModifiedAt(new Date());

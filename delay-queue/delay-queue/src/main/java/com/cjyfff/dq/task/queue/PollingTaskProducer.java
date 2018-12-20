@@ -3,13 +3,10 @@ package com.cjyfff.dq.task.queue;
 import java.util.Date;
 import java.util.List;
 
-import com.cjyfff.dq.config.ZooKeeperClient;
 import com.cjyfff.dq.election.info.ElectionStatus;
 import com.cjyfff.dq.election.info.ElectionStatus.ElectionStatusType;
 import com.cjyfff.dq.election.info.ShardingInfo;
-import com.cjyfff.dq.task.common.TaskConfig;
 import com.cjyfff.dq.task.common.enums.TaskStatus;
-import com.cjyfff.dq.task.common.lock.ZkLock;
 import com.cjyfff.dq.task.component.AcceptTaskComponent;
 import com.cjyfff.dq.task.component.ExecLogComponent;
 import com.cjyfff.dq.task.mapper.DelayTaskMapper;
@@ -44,12 +41,6 @@ public class PollingTaskProducer {
     @Autowired
     private ExecLogComponent execLogComponent;
 
-    @Autowired
-    private ZkLock zkLock;
-
-    @Autowired
-    private ZooKeeperClient zooKeeperClient;
-
     @Value("${delay_queue.critical_polling_time}")
     private Long pollingTime;
 
@@ -71,33 +62,18 @@ public class PollingTaskProducer {
             shardingInfo.getNodeId().byteValue(), nowSecond, nowSecond + pollingTime);
 
         for (DelayTask delayTask : taskList) {
-            if (zkLock.idempotentLock(zooKeeperClient.getClient(), TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId())) {
-                try {
-                    QueueTask task = new QueueTask(
-                        delayTask.getTaskId(), delayTask.getFunctionName(), delayTask.getParams(),
-                        delayTask.getExecuteTime()
-                    );
-                    acceptTaskComponent.pushToQueue(task);
+            QueueTask task = new QueueTask(
+                delayTask.getTaskId(), delayTask.getFunctionName(), delayTask.getParams(),
+                delayTask.getExecuteTime()
+            );
+            acceptTaskComponent.pushToQueue(task);
 
-                    delayTask.setStatus(TaskStatus.IN_QUEUE.getStatus());
-                    delayTask.setModifiedAt(new Date());
-                    delayTaskMapper.updateByPrimaryKeySelective(delayTask);
+            delayTask.setStatus(TaskStatus.IN_QUEUE.getStatus());
+            delayTask.setModifiedAt(new Date());
+            delayTaskMapper.updateByPrimaryKeySelective(delayTask);
 
-                    execLogComponent.insertLog(delayTask, TaskStatus.IN_QUEUE.getStatus(),
-                        String.format("polling task in queue: %s", delayTask.getTaskId()));
-                } catch (Exception e) {
-                    // 入队列锁只在队列执行后才解锁，此处不应解锁，除非入队列，写操作日志过程中出现异常
-                    zkLock.tryUnlock(TaskConfig.IN_QUEUE_LOCK_PATH, delayTask.getTaskId());
-                    throw e;
-                }
-
-            } else {
-                log.error(String.format("Task can not get in queue lock : %s", delayTask.getTaskId()));
-                execLogComponent.insertLog(delayTask, TaskStatus.ACCEPT.getStatus(),
-                    String.format("Task can not get in queue lock : %s", delayTask.getTaskId()));
-            }
+            execLogComponent.insertLog(delayTask, TaskStatus.IN_QUEUE.getStatus(),
+                String.format("polling task in queue: %s", delayTask.getTaskId()));
         }
-
-
     }
 }
