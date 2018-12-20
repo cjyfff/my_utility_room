@@ -29,23 +29,27 @@ public class MasterBeforeUpdateElectionFinishBiz implements ElectionBiz {
     @Autowired
     private AcceptTaskComponent acceptTaskComponent;
 
+    @Autowired
+    private BizComponent bizComponent;
+
     @Override
     @Transactional
-    public void run() throws Exception {
+    public void run() {
         logger.info("MasterBeforeElectionFinishBiz begin...");
-        try {
-            List<DelayTask> delayTasks = delayTaskMapper.selectByStatusForUpdate(TaskStatus.ACCEPT.getStatus());
+        acceptTaskComponent.clearQueue();
 
-            for (DelayTask delayTask : delayTasks) {
-                Byte newShardingId = acceptTaskComponent.getShardingIdFormTaskId(delayTask.getTaskId()).byteValue();
-                if (! newShardingId.equals(delayTask.getShardingId())) {
-                    delayTask.setShardingId(newShardingId);
-                    delayTaskMapper.updateByPrimaryKeySelective(delayTask);
-                }
+        List<DelayTask> delayTasks = delayTaskMapper.selectByStatusForUpdate(TaskStatus.ACCEPT.getStatus());
+
+        for (DelayTask delayTask : delayTasks) {
+            Byte newShardingId = acceptTaskComponent.getShardingIdFormTaskId(delayTask.getTaskId()).byteValue();
+            if (! newShardingId.equals(delayTask.getShardingId())) {
+                delayTask.setShardingId(newShardingId);
+                delayTaskMapper.updateByPrimaryKeySelective(delayTask);
             }
-        } catch (Exception e) {
-            logger.error("MasterBeforeUpdateElectionFinishBiz get error:", e);
         }
+
+        bizComponent.rePushTaskToQueue();
+
         logger.info("MasterBeforeElectionFinishBiz end...");
     }
 
