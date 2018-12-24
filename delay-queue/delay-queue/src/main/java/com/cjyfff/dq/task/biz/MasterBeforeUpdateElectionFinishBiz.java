@@ -3,7 +3,7 @@ package com.cjyfff.dq.task.biz;
 import java.util.List;
 import com.cjyfff.dq.election.biz.ElectionBiz;
 import com.cjyfff.dq.task.common.enums.TaskStatus;
-import com.cjyfff.dq.task.component.AcceptTaskComponent;
+import com.cjyfff.dq.task.common.component.AcceptTaskComponent;
 import com.cjyfff.dq.task.mapper.DelayTaskMapper;
 import com.cjyfff.dq.task.model.DelayTask;
 import org.slf4j.Logger;

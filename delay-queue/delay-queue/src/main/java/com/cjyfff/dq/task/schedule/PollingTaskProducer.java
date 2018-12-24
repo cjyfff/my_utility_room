@@ -1,4 +1,4 @@
-package com.cjyfff.dq.task.queue;
+package com.cjyfff.dq.task.schedule;
 
 import java.util.Date;
 import java.util.List;
@@ -7,10 +7,11 @@ import com.cjyfff.dq.election.info.ElectionStatus;
 import com.cjyfff.dq.election.info.ElectionStatus.ElectionStatusType;
 import com.cjyfff.dq.election.info.ShardingInfo;
 import com.cjyfff.dq.task.common.enums.TaskStatus;
-import com.cjyfff.dq.task.component.AcceptTaskComponent;
-import com.cjyfff.dq.task.component.ExecLogComponent;
+import com.cjyfff.dq.task.common.component.AcceptTaskComponent;
+import com.cjyfff.dq.task.common.component.ExecLogComponent;
 import com.cjyfff.dq.task.mapper.DelayTaskMapper;
 import com.cjyfff.dq.task.model.DelayTask;
+import com.cjyfff.dq.task.queue.QueueTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

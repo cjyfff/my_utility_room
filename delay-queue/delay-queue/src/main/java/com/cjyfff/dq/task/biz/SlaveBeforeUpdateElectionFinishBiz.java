@@ -1,7 +1,7 @@
 package com.cjyfff.dq.task.biz;
 
 import com.cjyfff.dq.election.biz.NoneBiz;
-import com.cjyfff.dq.task.component.AcceptTaskComponent;
+import com.cjyfff.dq.task.common.component.AcceptTaskComponent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

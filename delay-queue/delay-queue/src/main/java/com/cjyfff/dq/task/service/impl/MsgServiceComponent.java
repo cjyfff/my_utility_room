@@ -3,8 +3,8 @@ package com.cjyfff.dq.task.service.impl;
 import java.util.Date;
 
 import com.cjyfff.dq.task.common.enums.TaskStatus;
-import com.cjyfff.dq.task.component.AcceptTaskComponent;
-import com.cjyfff.dq.task.component.ExecLogComponent;
+import com.cjyfff.dq.task.common.component.AcceptTaskComponent;
+import com.cjyfff.dq.task.common.component.ExecLogComponent;
 import com.cjyfff.dq.task.mapper.DelayTaskMapper;
 import com.cjyfff.dq.task.model.DelayTask;
 import com.cjyfff.dq.task.queue.QueueTask;

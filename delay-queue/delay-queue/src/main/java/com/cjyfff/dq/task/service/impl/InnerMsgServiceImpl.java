@@ -4,7 +4,7 @@ package com.cjyfff.dq.task.service.impl;
 import com.cjyfff.dq.election.info.ShardingInfo;
 import com.cjyfff.dq.task.common.ApiException;
 import com.cjyfff.dq.task.common.enums.TaskStatus;
-import com.cjyfff.dq.task.component.AcceptTaskComponent;
+import com.cjyfff.dq.task.common.component.AcceptTaskComponent;
 import com.cjyfff.dq.task.mapper.DelayTaskMapper;
 import com.cjyfff.dq.task.model.DelayTask;
 import com.cjyfff.dq.task.service.InnerMsgService;

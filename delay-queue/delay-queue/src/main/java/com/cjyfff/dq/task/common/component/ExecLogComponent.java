@@ -1,4 +1,4 @@
-package com.cjyfff.dq.task.component;
+package com.cjyfff.dq.task.common.component;
 
 import java.util.Date;
 
