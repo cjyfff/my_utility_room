@@ -31,14 +31,14 @@ public interface DelayTaskMapper {
                                                @Param(value = "taskId") String taskId,
                                                @Param(value = "shardingId") Byte shardingId);
 
-    List<DelayTask> selectByStatusAndExecuteTimeForUpdate(@Param(value = "oldStatus") Integer oldStatus,
-                                                          @Param(value = "shardingId") Byte shardingId,
-                                                          @Param(value = "executeTimeBegin") Long executeTimeBegin,
-                                                          @Param(value = "executeTimeEnd") Long executeTimeEnd);
+    List<DelayTask> selectByStatusAndExecuteTime(@Param(value = "oldStatus") Integer oldStatus,
+                                                 @Param(value = "shardingId") Byte shardingId,
+                                                 @Param(value = "executeTimeBegin") Long executeTimeBegin,
+                                                 @Param(value = "executeTimeEnd") Long executeTimeEnd);
 
     List<DelayTask> selectByStatusForUpdate(@Param(value = "status") Integer status);
 
-    List<DelayTask> selectByStatusAndShardingIdForUpdate(@Param(value = "status") Integer status,
+    List<DelayTask> selectByStatusAndShardingId(@Param(value = "status") Integer status,
                                                          @Param(value = "shardingId") Byte shardingId);
 
     int updateByPrimaryKey(DelayTask record);

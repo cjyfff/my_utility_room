@@ -31,7 +31,7 @@ public class BizComponent {
     private ExecLogComponent execLogComponent;
 
     public void rePushTaskToQueue() {
-        List<DelayTask> myDelayTaskList = delayTaskMapper.selectByStatusAndShardingIdForUpdate(
+        List<DelayTask> myDelayTaskList = delayTaskMapper.selectByStatusAndShardingId(
             TaskStatus.IN_QUEUE.getStatus(),
             shardingInfo.getNodeId().byteValue());
 

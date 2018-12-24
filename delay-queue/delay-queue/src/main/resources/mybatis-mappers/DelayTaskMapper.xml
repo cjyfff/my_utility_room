@@ -55,7 +55,7 @@
     for update
   </select>
 
-  <select id="selectByStatusAndExecuteTimeForUpdate" resultMap="BaseResultMap">
+  <select id="selectByStatusAndExecuteTime" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
     from delay_task
@@ -65,7 +65,6 @@
     sharding_id = #{shardingId,jdbcType=TINYINT}
     and
     execute_time between #{executeTimeBegin,jdbcType=BIGINT} and #{executeTimeEnd,jdbcType=BIGINT}
-    for update
   </select>
 
   <select id="selectByStatusForUpdate" resultMap="BaseResultMap">
@@ -77,7 +76,7 @@
     for update
   </select>
 
-  <select id="selectByStatusAndShardingIdForUpdate" resultMap="BaseResultMap">
+  <select id="selectByStatusAndShardingId" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
     from delay_task
@@ -85,7 +84,6 @@
     status = #{status,jdbcType=INTEGER}
     and
     sharding_id = #{shardingId,jdbcType=TINYINT}
-    for update
   </select>
 
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">

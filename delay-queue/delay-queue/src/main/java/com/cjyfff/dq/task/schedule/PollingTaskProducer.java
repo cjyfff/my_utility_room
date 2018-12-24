@@ -55,11 +55,13 @@ public class PollingTaskProducer {
             return;
         }
 
-        // 根据状态、sharding id、执行时间select for update查出数据,
-        // 入队，然后update状态（无需再根据状态筛选来更新）
-
         Long nowSecond = System.currentTimeMillis() / 1000;
-        List<DelayTask> taskList = delayTaskMapper.selectByStatusAndExecuteTimeForUpdate(TaskStatus.POLLING.getStatus(),
+        // 这里不能使用 select for update 修改数据，会锁全表。
+        // 考虑到已经使用 sharding id 筛选出自己的数据，sharding id 在选举完成后不会出现同一个id被多个节点分配的问题
+        // 唯一可能出现任务被重复消费的情况是，同一个节点上，一次定时任务没跑完，第二次定时任务又开始跑。因为定时任务已经配置为fixedRate，
+        // 所以也不会出现这种可能。
+        // 因此这里的数据查询不用加锁。
+        List<DelayTask> taskList = delayTaskMapper.selectByStatusAndExecuteTime(TaskStatus.POLLING.getStatus(),
             shardingInfo.getNodeId().byteValue(), nowSecond, nowSecond + pollingTime);
 
         for (DelayTask delayTask : taskList) {
