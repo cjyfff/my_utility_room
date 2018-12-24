@@ -34,7 +34,7 @@ public class MasterBeforeUpdateElectionFinishBiz implements ElectionBiz {
     private BizComponent bizComponent;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void run() {
         logger.info("MasterBeforeElectionFinishBiz begin...");
         acceptTaskComponent.clearQueue();

@@ -43,7 +43,7 @@
     for update
   </select>
 
-  <select id="selectByTaskIdAndStatusForUpdate" resultMap="BaseResultMap">
+  <select id="selectByTaskIdAndStatus" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
     from delay_task
@@ -52,7 +52,6 @@
     status = #{oldStatus,jdbcType=INTEGER}
     and
     sharding_id = #{shardingId,jdbcType=TINYINT}
-    for update
   </select>
 
   <select id="selectByStatusAndExecuteTime" resultMap="BaseResultMap">

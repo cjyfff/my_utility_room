@@ -38,7 +38,7 @@ public class InnerMsgServiceImpl implements InnerMsgService {
     public void acceptMsg(InnerMsgDto reqDto) throws Exception {
         acceptTaskComponent.checkElectionStatus();
 
-        DelayTask delayTask = delayTaskMapper.selectByTaskIdAndStatusForUpdate(
+        DelayTask delayTask = delayTaskMapper.selectByTaskIdAndStatus(
             TaskStatus.TRANSMITING.getStatus(), reqDto.getTaskId(), shardingInfo.getNodeId().byteValue());
         if (delayTask == null) {
             throw new ApiException("-101",
