@@ -19,10 +19,10 @@ CREATE TABLE `delay_task` (
   `modified_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `delay_task_task_id_IDX` (`task_id`) USING BTREE,
-  KEY `delay_task_status_IDX` (`status`) USING BTREE,
   KEY `delay_task_sharding_id_IDX` (`sharding_id`) USING BTREE,
   KEY `delay_task_execute_time_IDX` (`execute_time`) USING BTREE,
-  KEY `delay_task_retry_time_IDX` (`retry_time`) USING BTREE
+  KEY `delay_task_retry_time_IDX` (`retry_time`) USING BTREE,
+  KEY `status_and_sharding_id` (`status`, `sharding_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=69 DEFAULT CHARSET=utf8;
 
 CREATE TABLE `delay_queue_exec_log` (
