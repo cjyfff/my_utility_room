@@ -37,13 +37,15 @@ public class HttpUtils {
         try {
             SSLContextBuilder builder = new SSLContextBuilder();
             builder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
-            SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
+            SSLConnectionSocketFactory sslFactory = new SSLConnectionSocketFactory(
                 builder.build());
+
             // 配置同时支持 HTTP 和 HTTPS
             Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
                 .register(
-                    "http", PlainConnectionSocketFactory.getSocketFactory()).register(
-                    "https", sslsf).build();
+                    "http", PlainConnectionSocketFactory.getSocketFactory())
+                .register(
+                    "https", sslFactory).build();
 
             PoolingHttpClientConnectionManager pcm = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
             pcm.setMaxTotal(100);
