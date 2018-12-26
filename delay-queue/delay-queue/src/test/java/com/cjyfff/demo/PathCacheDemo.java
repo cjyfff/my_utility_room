@@ -1,4 +1,4 @@
-package com.cjyfff.dq.demo;
+package com.cjyfff.demo;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;

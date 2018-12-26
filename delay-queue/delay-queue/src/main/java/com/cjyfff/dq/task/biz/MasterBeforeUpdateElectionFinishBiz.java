@@ -42,7 +42,7 @@ public class MasterBeforeUpdateElectionFinishBiz implements ElectionBiz {
         List<DelayTask> delayTasks = delayTaskMapper.selectByStatusForUpdate(TaskStatus.ACCEPT.getStatus());
 
         for (DelayTask delayTask : delayTasks) {
-            Byte newShardingId = acceptTaskComponent.getShardingIdFormTaskId(delayTask.getTaskId()).byteValue();
+            Byte newShardingId = acceptTaskComponent.getShardingIdByTaskId(delayTask.getTaskId()).byteValue();
             if (! newShardingId.equals(delayTask.getShardingId())) {
                 delayTask.setShardingId(newShardingId);
                 delayTaskMapper.updateByPrimaryKeySelective(delayTask);

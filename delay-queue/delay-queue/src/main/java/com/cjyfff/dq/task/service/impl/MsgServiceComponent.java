@@ -73,7 +73,7 @@ public class MsgServiceComponent {
         delayTask.setStatus(TaskStatus.ACCEPT.getStatus());
         delayTask.setCreatedAt(new Date());
         delayTask.setModifiedAt(new Date());
-        delayTask.setShardingId(acceptTaskComponent.getShardingIdFormTaskId(reqDto.getTaskId()).byteValue());
+        delayTask.setShardingId(acceptTaskComponent.getShardingIdByTaskId(reqDto.getTaskId()).byteValue());
 
         delayTaskMapper.insert(delayTask);
 

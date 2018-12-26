@@ -1,4 +1,4 @@
-package com.cjyfff.dq.demo;
+package com.cjyfff.demo;
 
 import java.util.List;
 

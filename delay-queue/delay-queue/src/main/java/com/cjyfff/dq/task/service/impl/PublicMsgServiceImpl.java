@@ -57,12 +57,13 @@ public class PublicMsgServiceImpl implements PublicMsgService {
         } else {
             // 转发到对应机器
             try {
-                Integer targetShardingId = acceptTaskComponent.getShardingIdFormTaskId(reqDto.getTaskId());
+                Integer targetShardingId = acceptTaskComponent.getShardingIdByTaskId(reqDto.getTaskId());
                 String targetHost = shardingInfo.getShardingMap().get(targetShardingId);
 
                 if (targetHost == null) {
                     throw new ApiException("-201",
-                        String.format("任务转发时找不到对应的分片信息, sharding Id: %s", targetShardingId.toString()));
+                        String.format("Can not get sharding info, sharding id: %s, task id: %s",
+                            targetShardingId.toString(), reqDto.getTaskId()));
                 }
 
                 String url = String.format("http://%s/dq/acceptInnerMsg", targetHost);

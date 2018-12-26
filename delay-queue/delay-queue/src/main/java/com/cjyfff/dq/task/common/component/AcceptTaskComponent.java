@@ -47,13 +47,14 @@ public class AcceptTaskComponent {
      * @param taskId
      * @return
      */
-    public Integer getShardingIdFormTaskId(String taskId) {
+    public Integer getShardingIdByTaskId(String taskId) {
         Map<Integer, String> shardingMap = shardingInfo.getShardingMap();
 
         // 分片数量
         int shardingAmount = shardingMap.size();
 
-        return taskId.hashCode() % shardingAmount;
+        // hashCode有可能是负数，需要处理一下
+        return (taskId.hashCode() & 0x7FFFFFFF) % shardingAmount;
     }
 
     /**
