@@ -1,6 +1,5 @@
 package com.cjyfff.dq.task.service.impl;
 
-import java.util.Date;
 import java.util.UUID;
 
 import com.alibaba.fastjson.JSON;
@@ -10,10 +9,7 @@ import com.cjyfff.dq.task.common.ApiException;
 import com.cjyfff.dq.task.common.DefaultWebApiResult;
 import com.cjyfff.dq.task.common.HttpUtils;
 import com.cjyfff.dq.task.common.TaskHandlerContext;
-import com.cjyfff.dq.task.common.enums.TaskStatus;
-import com.cjyfff.dq.task.common.component.ExecLogComponent;
 import com.cjyfff.dq.task.handler.ITaskHandler;
-import com.cjyfff.dq.task.mapper.DelayTaskMapper;
 import com.cjyfff.dq.task.model.DelayTask;
 import com.cjyfff.dq.task.service.PublicMsgService;
 import com.cjyfff.dq.task.vo.dto.AcceptMsgDto;
@@ -39,12 +35,6 @@ public class PublicMsgServiceImpl implements PublicMsgService {
     private AcceptTaskComponent acceptTaskComponent;
 
     @Autowired
-    private DelayTaskMapper delayTaskMapper;
-
-    @Autowired
-    private ExecLogComponent execLogComponent;
-
-    @Autowired
     private TaskHandlerContext taskHandlerContext;
 
     @Autowired
@@ -57,9 +47,8 @@ public class PublicMsgServiceImpl implements PublicMsgService {
 
         checkFunctionName(reqDto.getFunctionName());
 
-        DelayTask newDelayTask = createTask(reqDto);
-
-        if (acceptTaskComponent.checkIsMyTask(newDelayTask.getTaskId())) {
+        if (acceptTaskComponent.checkIsMyTask(reqDto.getTaskId())) {
+            DelayTask newDelayTask = msgServiceComponent.createTask(reqDto);
             if (acceptTaskComponent.checkNeedToPushQueueNow(newDelayTask.getDelayTime())) {
                 msgServiceComponent.doPush2Queue(newDelayTask);
             } else {
@@ -68,7 +57,7 @@ public class PublicMsgServiceImpl implements PublicMsgService {
         } else {
             // 转发到对应机器
             try {
-                Integer targetShardingId = acceptTaskComponent.getShardingIdFormTaskId(newDelayTask.getTaskId());
+                Integer targetShardingId = acceptTaskComponent.getShardingIdFormTaskId(reqDto.getTaskId());
                 String targetHost = shardingInfo.getShardingMap().get(targetShardingId);
 
                 if (targetHost == null) {
@@ -80,16 +69,12 @@ public class PublicMsgServiceImpl implements PublicMsgService {
                 String nonceStr = UUID.randomUUID().toString();
                 InnerMsgDto innerMsgDto = new InnerMsgDto();
 
-                newDelayTask.setStatus(TaskStatus.TRANSMITING.getStatus());
-                newDelayTask.setModifiedAt(new Date());
-                delayTaskMapper.updateByPrimaryKeySelective(newDelayTask);
-
-                BeanUtils.copyProperties(newDelayTask, innerMsgDto);
+                BeanUtils.copyProperties(reqDto, innerMsgDto);
                 innerMsgDto.setNonceStr(nonceStr);
                 sendInnerTaskMsg(url, innerMsgDto, targetShardingId, targetHost);
             } catch (Exception err) {
-                // 转发逻辑即时报错也不抛出异常，由定时任务做补偿操作
                 log.error("Send inner task get error: ", err);
+                throw err;
             }
         }
 
@@ -114,40 +99,5 @@ public class PublicMsgServiceImpl implements PublicMsgService {
             log.error("Send inner task get error: " + result.getMsg());
             throw new ApiException("-120", "Send inner task get error: " + result.getMsg());
         }
-    }
-
-
-    /**
-     * 任务持久化
-     * 为了简化逻辑，createTask不新建事务，出现异常都回滚，由调用方重试
-     * 因为程序总会有概率的出现异常的，假如出现异常时，任务已经创建，并且通知到调用方的话，
-     * 调用方会重复发送请求，这样的话任务就会重复被创建
-     * @param reqDto
-     */
-    private DelayTask createTask(AcceptMsgDto reqDto) throws Exception {
-        DelayTask oldDelayTask = delayTaskMapper.selectByTaskIdForUpdate(reqDto.getTaskId());
-        if (oldDelayTask != null) {
-            throw new ApiException("-130", "Same task id is exist.");
-        }
-
-        DelayTask delayTask = new DelayTask();
-
-        delayTask.setTaskId(reqDto.getTaskId());
-        delayTask.setFunctionName(reqDto.getFunctionName());
-        delayTask.setParams(reqDto.getParams());
-        delayTask.setRetryCount(reqDto.getRetryCount());
-        delayTask.setRetryInterval(reqDto.getRetryInterval());
-        delayTask.setDelayTime(reqDto.getDelayTime());
-        delayTask.setExecuteTime(System.currentTimeMillis() / 1000 + reqDto.getDelayTime());
-        delayTask.setStatus(TaskStatus.ACCEPT.getStatus());
-        delayTask.setCreatedAt(new Date());
-        delayTask.setModifiedAt(new Date());
-        delayTask.setShardingId(acceptTaskComponent.getShardingIdFormTaskId(reqDto.getTaskId()).byteValue());
-
-        delayTaskMapper.insert(delayTask);
-
-        execLogComponent.insertLog(delayTask, TaskStatus.ACCEPT.getStatus(), String.format("Insert task: %s", reqDto.getTaskId()));
-
-        return delayTask;
     }
 }
