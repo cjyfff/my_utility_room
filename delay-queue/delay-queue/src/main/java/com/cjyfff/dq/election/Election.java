@@ -3,6 +3,7 @@ package com.cjyfff.dq.election;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import com.cjyfff.dq.election.biz.ElectionBizContainer;
 import com.cjyfff.dq.election.biz.NoneBiz;
 import com.cjyfff.dq.election.info.ElectionStatus;
 import com.cjyfff.dq.election.info.ElectionStatus.ElectionStatusType;
@@ -63,11 +64,16 @@ public class Election {
     @Autowired
     private ElectionComponent electionComponent;
 
+    @Autowired
+    private ElectionBizContainer electionBizContainer;
+
     @Value("${server.port}")
     private String servicePort;
 
     public void start() {
         try {
+            electionBizContainer.setContainer();
+
             CuratorFramework client = zooKeeperClient.getClient();
 
             writeNodeInfo(client);

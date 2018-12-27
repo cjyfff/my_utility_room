@@ -2,7 +2,7 @@ package com.cjyfff.dq.election.biz;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 /**
@@ -11,35 +11,78 @@ import org.springframework.stereotype.Component;
 @Getter
 @Component
 public class ElectionBizContainer {
-    @Qualifier(value = "masterBeforeUpdateElectionFinishBiz")
-    @Autowired
-    private ElectionBiz masterBeforeUpdateElectionFinishBiz;
 
-    @Qualifier(value = "masterAfterUpdateElectionFinishBiz")
-    @Autowired
-    private ElectionBiz masterAfterUpdateElectionFinishBiz;
+    private static final String MBUEFB_NAME = "masterBeforeUpdateElectionFinishBiz";
 
-    @Qualifier(value = "masterBeforeUpdateElectionNotYetBiz")
-    @Autowired
-    private ElectionBiz masterBeforeUpdateElectionNotYetBiz;
+    private static final String MAUEFB_NAME = "masterAfterUpdateElectionFinishBiz";
 
-    @Qualifier(value = "masterAfterUpdateElectionNotYetBiz")
-    @Autowired
-    private ElectionBiz masterAfterUpdateElectionNotYetBiz;
+    private static final String MBUENYB_NAME = "masterBeforeUpdateElectionNotYetBiz";
 
-    @Qualifier(value = "slaveBeforeUpdateElectionFinishBiz")
-    @Autowired
-    private ElectionBiz slaveBeforeUpdateElectionFinishBiz;
+    private static final String MAUENYB_NAME = "masterAfterUpdateElectionNotYetBiz";
 
-    @Qualifier(value = "slaveAfterUpdateElectionFinishBiz")
-    @Autowired
-    private ElectionBiz slaveAfterUpdateElectionFinishBiz;
+    private static final String SBUEFB_NAME = "slaveBeforeUpdateElectionFinishBiz";
 
-    @Qualifier(value = "slaveBeforeUpdateElectionNotYetBiz")
-    @Autowired
-    private ElectionBiz slaveBeforeUpdateElectionNotYetBiz;
+    private static final String SAUEFB_NAME = "slaveAfterUpdateElectionFinishBiz";
 
-    @Qualifier(value = "slaveAfterUpdateElectionNotYetBiz")
+    private static final String SBUENYB_NAME = "slaveBeforeUpdateElectionNotYetBiz";
+
+    private static final String SAUENYB_NAME = "slaveAfterUpdateElectionNotYetBiz";
+
+    private ElectionBiz masterBeforeUpdateElectionFinishBiz = new NoneBiz();
+
+    private ElectionBiz masterAfterUpdateElectionFinishBiz = new NoneBiz();
+
+    private ElectionBiz masterBeforeUpdateElectionNotYetBiz = new NoneBiz();
+
+    private ElectionBiz masterAfterUpdateElectionNotYetBiz = new NoneBiz();
+
+    private ElectionBiz slaveBeforeUpdateElectionFinishBiz = new NoneBiz();
+
+    private ElectionBiz slaveAfterUpdateElectionFinishBiz = new NoneBiz();
+
+    private ElectionBiz slaveBeforeUpdateElectionNotYetBiz = new NoneBiz();
+
+    private ElectionBiz slaveAfterUpdateElectionNotYetBiz = new NoneBiz();
+
     @Autowired
-    private ElectionBiz slaveAfterUpdateElectionNotYetBiz;
+    private ApplicationContext applicationContext;
+
+    public void setContainer() {
+        String[] allBeansNames = applicationContext.getBeanDefinitionNames();
+
+        for (String name : allBeansNames) {
+
+            if (MBUEFB_NAME.equals(name)) {
+                masterBeforeUpdateElectionFinishBiz = (ElectionBiz) applicationContext.getBean(MBUEFB_NAME);
+            }
+
+            if (MAUEFB_NAME.equals(name)) {
+                masterAfterUpdateElectionFinishBiz = (ElectionBiz) applicationContext.getBean(MAUEFB_NAME);
+            }
+
+            if (MBUENYB_NAME.equals(name)) {
+                masterBeforeUpdateElectionNotYetBiz = (ElectionBiz) applicationContext.getBean(MBUENYB_NAME);
+            }
+
+            if (MAUENYB_NAME.equals(name)) {
+                masterAfterUpdateElectionNotYetBiz = (ElectionBiz) applicationContext.getBean(MAUENYB_NAME);
+            }
+
+            if (SBUEFB_NAME.equals(name)) {
+                slaveBeforeUpdateElectionFinishBiz = (ElectionBiz) applicationContext.getBean(SBUEFB_NAME);
+            }
+
+            if (SAUEFB_NAME.equals(name)) {
+                slaveAfterUpdateElectionFinishBiz = (ElectionBiz) applicationContext.getBean(SAUEFB_NAME);
+            }
+
+            if (SBUENYB_NAME.equals(name)) {
+                slaveBeforeUpdateElectionNotYetBiz = (ElectionBiz) applicationContext.getBean(SBUENYB_NAME);
+            }
+
+            if (SAUENYB_NAME.equals(name)) {
+                slaveAfterUpdateElectionNotYetBiz = (ElectionBiz) applicationContext.getBean(SAUENYB_NAME);
+            }
+        }
+    }
 }

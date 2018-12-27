@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
+ * 宣告选举完成前的操作：
+ * 1、把数据库中，“队列中”状态，自己处理的任务放入队列
  * Created by jiashen on 18-12-11.
  */
 @Component
@@ -21,7 +23,7 @@ public class SlaveBeforeUpdateElectionFinishBiz extends NoneBiz{
     private BizComponent bizComponent;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void run() {
         log.info("SlaveBeforeUpdateElectionFinishBiz begin...");
         acceptTaskComponent.clearQueue();
