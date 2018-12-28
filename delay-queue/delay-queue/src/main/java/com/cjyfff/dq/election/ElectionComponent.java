@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 /**
  * Created by jiashen on 2018/9/8.
@@ -24,6 +25,9 @@ public class ElectionComponent {
 
     @Value("${server.port}")
     private String servicePort;
+
+    @Value("l_election.specified_local_ip")
+    private String localIp;
 
     public void updateSelfShardingInfo(ConcurrentHashMap<Integer, String> shardingMap) throws Exception {
         if (shardingMap == null) {
@@ -55,16 +59,21 @@ public class ElectionComponent {
      * @return
      */
     public String getHost() throws Exception {
-        InetAddress addr = null;
-        while (addr == null) {
-            try {
-                addr = InetAddress.getLocalHost();
-            } catch (UnknownHostException ue) {
-                log.warn("Can not get local ip info, retrying...");
-                TimeUnit.SECONDS.sleep(5);
-            }
 
+        if (StringUtils.isEmpty(localIp)) {
+            InetAddress addr = null;
+            while (addr == null) {
+                try {
+                    addr = InetAddress.getLocalHost();
+                } catch (UnknownHostException ue) {
+                    log.warn("Can not get local ip info, retrying...");
+                    TimeUnit.SECONDS.sleep(5);
+                }
+
+            }
+            localIp = addr.getHostAddress();
         }
-        return addr.getHostAddress() + ":" + servicePort;
+
+        return localIp + ":" + servicePort;
     }
 }
