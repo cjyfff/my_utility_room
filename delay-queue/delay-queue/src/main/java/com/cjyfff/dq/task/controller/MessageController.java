@@ -1,6 +1,6 @@
 package com.cjyfff.dq.task.controller;
 
-import com.cjyfff.dq.config.ZooKeeperClient;
+import com.cjyfff.dq.election.config.ZooKeeperClient;
 import com.cjyfff.dq.task.common.ApiException;
 import com.cjyfff.dq.task.common.BeanValidators;
 import com.cjyfff.dq.task.common.DefaultWebApiResult;

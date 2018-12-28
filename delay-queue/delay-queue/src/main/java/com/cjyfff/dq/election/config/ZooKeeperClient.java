@@ -1,4 +1,4 @@
-package com.cjyfff.dq.config;
+package com.cjyfff.dq.election.config;
 
 import javax.annotation.PreDestroy;
 
@@ -17,19 +17,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class ZooKeeperClient {
 
-    @Value("${delay_queue.zk_host}")
+    @Value("${l_election.zk_host}")
     private String zkHost;
 
-    @Value("${delay_queue.zk_session_timeout_ms}")
+    @Value("${l_election.zk_session_timeout_ms}")
     private Integer zkSessionTimeoutMs;
 
-    @Value("${delay_queue.zk_connection_timeout_ms}")
+    @Value("${l_election.zk_connection_timeout_ms}")
     private Integer zkConnectionTimeoutMs;
 
-    @Value("${delay_queue.zk_base_sleep_time_ms}")
+    @Value("${l_election.zk_base_sleep_time_ms}")
     private Integer zkBaseSleepTimeMs;
 
-    @Value("${delay_queue.zk_max_retries}")
+    @Value("${l_election.zk_max_retries}")
     private Integer zkMaxRetries;
 
     private CuratorFramework client;

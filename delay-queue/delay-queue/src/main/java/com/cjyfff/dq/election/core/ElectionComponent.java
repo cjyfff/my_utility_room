@@ -1,4 +1,4 @@
-package com.cjyfff.dq.election;
+package com.cjyfff.dq.election.core;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

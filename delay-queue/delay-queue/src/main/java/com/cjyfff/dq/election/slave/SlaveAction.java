@@ -5,11 +5,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.alibaba.fastjson.JSON;
 
 import com.cjyfff.dq.election.biz.ElectionBizContainer;
-import com.cjyfff.dq.election.biz.NoneBiz;
 import com.cjyfff.dq.election.info.ElectionListener;
-import com.cjyfff.dq.election.info.ElectionStatus;
 import com.cjyfff.dq.election.info.ElectionStatus.ElectionStatusType;
-import com.cjyfff.dq.election.ElectionComponent;
+import com.cjyfff.dq.election.core.ElectionComponent;
 import com.cjyfff.dq.election.info.SetSelfESAndRunBLProxy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.ChildData;

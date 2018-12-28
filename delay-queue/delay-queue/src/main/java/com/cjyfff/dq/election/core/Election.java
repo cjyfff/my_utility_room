@@ -1,4 +1,4 @@
-package com.cjyfff.dq.election;
+package com.cjyfff.dq.election.core;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -10,7 +10,7 @@ import com.cjyfff.dq.election.info.ElectionStatus.ElectionStatusType;
 import com.cjyfff.dq.election.info.SetSelfESAndRunBLProxy;
 import com.cjyfff.dq.election.master.MasterAction;
 import com.cjyfff.dq.election.slave.SlaveAction;
-import com.cjyfff.dq.config.ZooKeeperClient;
+import com.cjyfff.dq.election.config.ZooKeeperClient;
 import com.google.common.collect.Lists;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.recipes.cache.PathChildrenCache;
