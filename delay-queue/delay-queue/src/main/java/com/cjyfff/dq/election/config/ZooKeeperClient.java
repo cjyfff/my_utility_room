@@ -1,7 +1,5 @@
 package com.cjyfff.dq.election.config;
 
-import javax.annotation.PreDestroy;
-
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.imps.CuratorFrameworkState;
@@ -9,13 +7,15 @@ import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.stereotype.Component;
 
 /**
  * Created by jiashen on 2018/8/18.
  */
 @Component
-public class ZooKeeperClient {
+public class ZooKeeperClient implements ApplicationListener<ContextClosedEvent> {
 
     @Value("${l_election.zk_host}")
     private String zkHost;
@@ -46,8 +46,8 @@ public class ZooKeeperClient {
         return this.client;
     }
 
-    @PreDestroy
-    public void closeClient() {
+    @Override
+    public void onApplicationEvent(ContextClosedEvent closedEvent) {
         if (! CuratorFrameworkState.STOPPED.equals(this.client.getState())) {
             this.client.close();
         }
