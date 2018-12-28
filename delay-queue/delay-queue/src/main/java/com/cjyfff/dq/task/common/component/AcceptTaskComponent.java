@@ -2,9 +2,9 @@ package com.cjyfff.dq.task.common.component;
 
 import java.util.Map;
 
-import com.cjyfff.dq.election.info.ElectionStatus;
-import com.cjyfff.dq.election.info.ElectionStatus.ElectionStatusType;
-import com.cjyfff.dq.election.info.ShardingInfo;
+import com.cjyfff.election.info.ElectionStatus;
+import com.cjyfff.election.info.ElectionStatus.ElectionStatusType;
+import com.cjyfff.election.info.ShardingInfo;
 import com.cjyfff.dq.task.common.ApiException;
 import com.cjyfff.dq.task.queue.QueueTask;
 import com.cjyfff.dq.task.queue.DelayTaskQueue;

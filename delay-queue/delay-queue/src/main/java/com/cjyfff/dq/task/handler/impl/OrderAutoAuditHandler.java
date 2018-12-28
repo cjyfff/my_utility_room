@@ -2,7 +2,7 @@ package com.cjyfff.dq.task.handler.impl;
 
 import com.alibaba.fastjson.JSON;
 
-import com.cjyfff.dq.election.config.ZooKeeperClient;
+import com.cjyfff.election.config.ZooKeeperClient;
 import com.cjyfff.dq.task.common.aop.UnlockAfterDbCommit;
 import com.cjyfff.dq.task.common.lock.UnlockAfterDbCommitInfoHolder;
 import com.cjyfff.dq.task.common.lock.ZkLock;

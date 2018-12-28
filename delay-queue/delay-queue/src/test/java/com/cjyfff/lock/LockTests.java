@@ -6,7 +6,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.cjyfff.TestConfig;
-import com.cjyfff.dq.election.config.ZooKeeperClient;
+import com.cjyfff.election.config.ZooKeeperClient;
 import com.cjyfff.dq.task.common.lock.ZkLock;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.apache.curator.framework.CuratorFramework;
