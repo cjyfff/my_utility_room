@@ -146,14 +146,20 @@ public class ReadWriteTest {
     }
 
     private void updateData(String key, String value) {
-        final String key1 = key;
 
+        updateCacheAndDb(() -> db.put(key, value), key);
+
+    }
+
+    private void updateCacheAndDb(IUpdateData updateData, String key) {
+        final String key1 = key;
         // 先删除缓存
         // =============这段时间内的读取请求产生脏数据到缓存================
         RBucket<String> bucket = redisson.getBucket(key1);
         bucket.delete();
 
-        db.put(key, value);
+        updateData.run();
+
         // ===============数据正式提交后读才是安全的======================
 
         // 异步双删除
