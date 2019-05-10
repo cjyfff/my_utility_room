@@ -26,8 +26,6 @@ public class ReadWriteTest {
 
     private RedissonClient redisson;
 
-    private final static String BLANK_STRING = " ";
-
     private final static Long SHORT_EXPIRE = 30L;
 
     private final static Long LONG_EXPIRE = 60L;
@@ -130,11 +128,12 @@ public class ReadWriteTest {
 
         String value = bucket.get();
 
-        if (value == null || BLANK_STRING.equals(value)) {
+        // 缓存中的数据为null时才查库，为空字符串时直接返回
+        if (value == null) {
             value = db.get(key);
 
-            if (value == null || BLANK_STRING.equals(value)) {
-                // 一个查询返回的数据为空，不管是数据不存在，还是该数据真的是空值，我们仍然把这个空结果进行缓存，
+            if (value == null) {
+                // 一个查询返回的数据为null，不管是数据不存在，还是该数据真的是空值，我们仍然把这个空结果进行缓存，
                 // 但它的过期时间应该设置得很短，这样防止恶意查询空数据导致缓存穿透
                 bucket.set(value, SHORT_EXPIRE + (int)(1 + Math.random() * 10), TimeUnit.SECONDS);
             } else {
@@ -147,14 +146,20 @@ public class ReadWriteTest {
     }
 
     private void updateData(String key, String value) {
-        final String key1 = key;
 
+        updateCacheAndDb(() -> db.put(key, value), key);
+
+    }
+
+    private void updateCacheAndDb(IUpdateData updateData, String key) {
+        final String key1 = key;
         // 先删除缓存
         // =============这段时间内的读取请求产生脏数据到缓存================
         RBucket<String> bucket = redisson.getBucket(key1);
         bucket.delete();
 
-        db.put(key, value);
+        updateData.run();
+
         // ===============数据正式提交后读才是安全的======================
 
         // 异步双删除
