@@ -36,6 +36,7 @@ public class ReadWriteTest {
         config.setTransportMode(TransportMode.NIO);
         config.useSingleServer().setAddress("redis://127.0.0.1:6379");
         redisson = Redisson.create(config);
+        db.put("hello", "1");
     }
 
     @Test
@@ -44,7 +45,7 @@ public class ReadWriteTest {
         //updateData("AAA", "123");
         //getData("AAA");
 
-        ConcurrentSkipListSet skipListSet = new ConcurrentSkipListSet();
+        ConcurrentSkipListSet<Long> skipListSet = new ConcurrentSkipListSet<>();
 
         String myKey = "AAA";
 
@@ -111,7 +112,7 @@ public class ReadWriteTest {
         System.out.println("skipListSet last: " + skipListSet.last());
         System.out.println("get Data: " + getData(myKey));
 
-        Assert.assertEquals((Long)skipListSet.last(), Long.valueOf(getData(myKey)));
+        Assert.assertEquals(skipListSet.last(), Long.valueOf(getData(myKey)));
 
         System.out.println("END");
     }
@@ -133,9 +134,9 @@ public class ReadWriteTest {
             value = db.get(key);
 
             if (value == null) {
-                // 一个查询返回的数据为null，不管是数据不存在，还是该数据真的是空值，我们仍然把这个空结果进行缓存，
+                // 一个查询返回的数据为null，不管是数据不存在，还是该数据真的是空值，我们仍然把一个空字符串存到缓存，
                 // 但它的过期时间应该设置得很短，这样防止恶意查询空数据导致缓存穿透
-                bucket.set(value, SHORT_EXPIRE + (int)(1 + Math.random() * 10), TimeUnit.SECONDS);
+                bucket.set("", SHORT_EXPIRE + (int)(1 + Math.random() * 10), TimeUnit.SECONDS);
             } else {
                 // 过期时间加上随机数
                 bucket.set(value, LONG_EXPIRE + (int)(1 + Math.random() * 10), TimeUnit.SECONDS);
