@@ -35,7 +35,7 @@ class TrieTree(object):
 def load_dict(dict_path, stop_word_dict_path,
               punctuation_dict_path, trie_tree):
     print('Loading dict...')
-    with open(dict_path, 'r') as fp:
+    with open(dict_path, 'r', encoding='UTF-8') as fp:
         line = fp.readline()
         while line:
             trie_tree.add(line.strip())
@@ -43,13 +43,13 @@ def load_dict(dict_path, stop_word_dict_path,
 
     stop_word_lst = []
 
-    with open(stop_word_dict_path, 'r') as fp:
+    with open(stop_word_dict_path, 'r', encoding='UTF-8') as fp:
         line = fp.readline()
         while line:
             stop_word_lst.append(line.strip())
             line = fp.readline()
 
-    with open(punctuation_dict_path, 'r') as fp:
+    with open(punctuation_dict_path, 'r', encoding='UTF-8') as fp:
         line = fp.readline()
         while line:
             stop_word_lst.append(line.strip())
