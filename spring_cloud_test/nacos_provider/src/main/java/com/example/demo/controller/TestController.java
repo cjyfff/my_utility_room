@@ -8,6 +8,7 @@ public class TestController {
 
     @GetMapping("/helloNacos")
     public String helloNacos(){
+        System.out.println("get request");
         return "你好，nacos！";
     }
 }
