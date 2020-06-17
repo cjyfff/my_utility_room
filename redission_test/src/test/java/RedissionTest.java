@@ -27,6 +27,16 @@ public class RedissionTest {
     }
 
     @Test
+    public void testAtom() {
+        RAtomicLong long1 = redisson.getAtomicLong("test_long1");
+        long1.expire(60, TimeUnit.SECONDS);
+        // 沒設值或者值已經過期時，執行get()是返回0
+        System.out.println(long1.get());
+        long1.getAndIncrement();
+        System.out.println(long1.get());
+    }
+
+    @Test
     public void testLock0() throws Exception {
 
         try {
