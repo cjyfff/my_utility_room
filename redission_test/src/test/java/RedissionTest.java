@@ -29,6 +29,7 @@ public class RedissionTest {
 
     @Test
     public void testAtom() {
+        // 僅有此語句，而沒有執行getAndIncrement的話，redis中實際上沒有保存該值
         RAtomicLong long1 = redisson.getAtomicLong("test_long1");
         long1.expire(60, TimeUnit.SECONDS);
         // 沒設值或者值已經過期時，執行get()是返回0
