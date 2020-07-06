@@ -32,7 +32,7 @@ public class Consumer {
             log.error("-", e);
             // nack的話，消息會被rabbit mq不斷重發
             // 第二个参数是否应用于多消息，第三个参数是否requeue
-            //channel.basicNack(deliveryTag, false, true);
+            channel.basicNack(deliveryTag, false, true);
         }
     }
 }
