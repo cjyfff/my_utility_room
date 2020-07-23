@@ -27,11 +27,12 @@ public class Consumer {
             // 当该参数为 true 时，则可以一次性确认 delivery_tag 小于等于传入值的所有消息
             channel.basicAck(deliveryTag, false);
 
-            // nack的話，消息會被rabbit mq不斷重發
-            //channel.basicNack(deliveryTag, false, true);
             log.info("receive--1: " + context);
         } catch (Exception e) {
             log.error("-", e);
+            // nack的話，消息會被rabbit mq不斷重發
+            // 第二个参数是否应用于多消息，第三个参数是否requeue
+            channel.basicNack(deliveryTag, false, true);
         }
     }
 }

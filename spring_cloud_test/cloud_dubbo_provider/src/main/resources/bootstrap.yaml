@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: test-provider
+  main:
+    allow-bean-definition-overriding: true
+
+  cloud:
+    nacos:
+      username: nacos
+      password: nacos
+      discovery:
+        enabled: true
+        register-enabled: true
+        server-addr: 192.168.3.107:8848

@@ -1,7 +1,8 @@
 package com.example.hello.controller;
 
-import com.alibaba.dubbo.config.annotation.Reference;
+
 import com.example.hello.service.TestService;
+import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,8 +13,8 @@ public class TestController {
     private TestService testService;
 
     @RequestMapping(path = "/test", method={RequestMethod.GET})
-    public void test() {
+    public String test() {
         System.out.println("start invoke test method.");
-        testService.testDubbo();
+        return testService.testDubbo().getMsg();
     }
 }

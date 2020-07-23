@@ -5,6 +5,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.redisson.Redisson;
+import org.redisson.api.RAtomicLong;
 import org.redisson.api.RLock;
 import org.redisson.api.RSemaphore;
 import org.redisson.api.RedissonClient;
@@ -24,6 +25,17 @@ public class RedissionTest {
         config.setTransportMode(TransportMode.NIO);
         config.useSingleServer().setAddress("redis://127.0.0.1:6379");
         redisson = Redisson.create(config);
+    }
+
+    @Test
+    public void testAtom() {
+        // 僅有此語句，而沒有執行getAndIncrement的話，redis中實際上沒有保存該值
+        RAtomicLong long1 = redisson.getAtomicLong("test_long1");
+        long1.expire(60, TimeUnit.SECONDS);
+        // 沒設值或者值已經過期時，執行get()是返回0
+        System.out.println(long1.get());
+        long1.getAndIncrement();
+        System.out.println(long1.get());
     }
 
     @Test

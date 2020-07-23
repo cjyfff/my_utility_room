@@ -1,5 +1,8 @@
 package com.example.demo.controller;
 
+import com.example.demo.controller.vo.DefaultWebApiResult;
+import com.example.demo.controller.vo.OrderAutoAuditHandlerParaVo;
+import com.example.demo.service.TestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
@@ -18,8 +21,19 @@ public class TestController {
         return new RestTemplate();
     }
 
+    @Autowired
+    private TestService testService;
+
     @GetMapping("/consumer")
     public String test1() {
         return restTemplate.getForObject("http://test-provider/helloNacos",String.class);
+    }
+
+    @GetMapping("/auditOrder")
+    public String auditOrder() {
+        OrderAutoAuditHandlerParaVo reqVo = new OrderAutoAuditHandlerParaVo();
+        reqVo.setOrderId("D1323434");
+        DefaultWebApiResult result = testService.auditOrder(reqVo);
+        return result.getCode();
     }
 }
