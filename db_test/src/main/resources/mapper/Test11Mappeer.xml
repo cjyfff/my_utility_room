@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.db_test.mapper.Test11Mappeer">
+
+    <insert id="insert" parameterType="com.example.db_test.entity.Test11E">
+        insert into test_11 (id, t)
+        values (#{id,jdbcType=INTEGER}, #{t,jdbcType=TIMESTAMP})
+    </insert>
+
+</mapper>
