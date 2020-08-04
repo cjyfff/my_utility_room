@@ -17,7 +17,11 @@ public class TestController {
 
     @RequestMapping(path = "/test", method = {RequestMethod.GET})
     public String test() {
-        testService.test();
-        return "ok";
+        try {
+            testService.test();
+            return "ok";
+        } catch (Exception e) {
+            return e.getMessage();
+        }
     }
 }
