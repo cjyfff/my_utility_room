@@ -33,7 +33,7 @@ public class ZkTest {
         final String path = "/test";
 
         try {
-            for (int j = 0; j < 5; j++) {
+            for (int j = 0; j < 1; j++) {
 
                 Thread t1 = new Thread(() -> {
                     for (int i = 0; i < 100; i++) {
@@ -62,7 +62,10 @@ public class ZkTest {
             stat = client.checkExists().forPath(path);
         }
 
+        // 下面分了两步走，不是原子操作，会有问题，
+        // 原生包使用Stat stat = zk.setData(path, new byte[0], -1)就没有此问题
         client.setData().forPath(path, new byte[0]);
+        stat = client.checkExists().forPath(path);
         return stat.getVersion();
 
     }
