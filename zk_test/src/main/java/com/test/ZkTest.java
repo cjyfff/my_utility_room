@@ -30,12 +30,24 @@ public class ZkTest {
      */
     @Test
     public void testVersion() {
-        String path = "/test";
+        final String path = "/test";
 
         try {
+            for (int j = 0; j < 5; j++) {
 
-            for (int i = 0; i < 100; i++) {
-                System.out.println(next(path));
+                Thread t1 = new Thread(() -> {
+                    for (int i = 0; i < 100; i++) {
+                        try {
+                            System.out.println(next(path));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                });
+
+                t1.start();
+                t1.join();
             }
 
         } catch (Exception e) {
