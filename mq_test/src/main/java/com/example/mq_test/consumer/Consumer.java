@@ -1,5 +1,6 @@
 package com.example.mq_test.consumer;
 
+import java.io.IOException;
 import java.util.Map;
 
 import com.rabbitmq.client.Channel;
@@ -32,7 +33,11 @@ public class Consumer {
             log.error("-", e);
             // nack的話，消息會被rabbit mq不斷重發
             // 第二个参数是否应用于多消息，第三个参数是否requeue
-            channel.basicNack(deliveryTag, false, true);
+            try {
+                channel.basicNack(deliveryTag, false, true);
+            } catch (IOException ioe) {
+                log.error("ioe -", ioe);
+            }
         }
     }
 }
