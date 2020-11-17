@@ -20,25 +20,23 @@ public class TestService {
     @Autowired
     private TestService2 testService2;
 
-    @Transactional(rollbackFor = Exception.class)
-    public void test() throws MyException{
+    @Transactional
+    public void test() {
 
 
 
-//        try {
-//
-//            testService2.test2();
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        try {
+
+            testService2.test2();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         Test11E t1 = new Test11E();
         t1.setId(4);
-        t1.setT(new Date());
+        //t1.setT(new Date());
 
         test11Mappeer.insert(t1);
-
-        throw new MyException();
     }
 }

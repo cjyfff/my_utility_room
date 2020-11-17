@@ -1,6 +1,9 @@
 package com.example.db_test.controller;
 
+import com.example.db_test.mapper.LockTestMapper;
+import com.example.db_test.service.LockTestService;
 import com.example.db_test.service.TestService;
+import com.example.db_test.service.TestService3;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -13,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
 
     @Autowired
-    private TestService testService;
+    private LockTestService testService;
 
     @RequestMapping(path = "/test", method = {RequestMethod.GET})
     public String test() {
