@@ -13,12 +13,10 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @Service
 public class DynamicRouteServiceImpl implements ApplicationEventPublisherAware {
+
     @Autowired
     private RouteDefinitionWriter routeDefinitionWriter;
 
-    /**
-     * 发布事件
-     */
     @Autowired
     private ApplicationEventPublisher publisher;
 
@@ -35,30 +33,12 @@ public class DynamicRouteServiceImpl implements ApplicationEventPublisherAware {
     public String delete(String id) {
         try {
             log.info("gateway delete route id {}",id);
-            this.routeDefinitionWriter.delete(Mono.just(id));
+            // 这里不加 .subscribe() 的话会不生效
+            this.routeDefinitionWriter.delete(Mono.just(id)).subscribe();
+            this.publisher.publishEvent(new RefreshRoutesEvent(this));
             return "delete success";
         } catch (Exception e) {
             return "delete fail";
-        }
-    }
-    /**
-     * 更新路由
-     * @param definition
-     * @return
-     */
-    public String update(RouteDefinition definition) {
-        try {
-            log.info("gateway update route {}",definition);
-            this.routeDefinitionWriter.delete(Mono.just(definition.getId()));
-        } catch (Exception e) {
-            return "update fail,not find route  routeId: "+definition.getId();
-        }
-        try {
-            routeDefinitionWriter.save(Mono.just(definition)).subscribe();
-            this.publisher.publishEvent(new RefreshRoutesEvent(this));
-            return "success";
-        } catch (Exception e) {
-            return "update route fail";
         }
     }
 
@@ -69,7 +49,8 @@ public class DynamicRouteServiceImpl implements ApplicationEventPublisherAware {
      */
     public String add(RouteDefinition definition) {
         log.info("gateway add route {}",definition);
-        routeDefinitionWriter.save(Mono.just(definition)).subscribe();
+        // 这里不加 .subscribe() 的话会不生效
+        this.routeDefinitionWriter.save(Mono.just(definition)).subscribe();
         this.publisher.publishEvent(new RefreshRoutesEvent(this));
         return "success";
     }
