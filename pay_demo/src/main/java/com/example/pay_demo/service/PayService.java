@@ -46,12 +46,13 @@ public class PayService {
      */
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
     public PayServiceResult pay(String orderId) throws Exception, IOException {
-        Order order = orderMapper.getOrder(orderId);
-
-        // 检查订单是否已被处理
-        if (! OrderStatus.INIT.getStatus().equals(order.getStatus())) {
+        // 乐观锁再进行一次加锁，以防 redis 不可靠的情况
+        if (orderMapper.updateOrderWithStatus(
+            orderId, OrderStatus.INIT.getStatus(), OrderStatus.CHANNEL_PAYING.getStatus()) <= 0) {
             return new PayServiceResult("1002", "订单不是初始化状态");
         }
+
+        Order order = orderMapper.getOrder(orderId);
 
         // 调用渠道接口，出现超时等IOException会向外抛出异常
         ChannelResp channelResp = channelService.pay(orderId);

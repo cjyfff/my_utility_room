@@ -16,4 +16,6 @@ public interface OrderMapper {
     int updateOrderStatus(String orderId, Integer orderStatus);
 
     int updateOrderCancelStatus(String orderId, Integer orderCancelStatus);
+
+    int updateOrderWithStatus(String orderId, Integer oldStatus, Integer newStatus);
 }

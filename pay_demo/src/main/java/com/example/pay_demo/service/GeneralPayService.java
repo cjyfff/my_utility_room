@@ -44,7 +44,6 @@ public class GeneralPayService {
         } catch (IOException ioe) {
             logger.error("GeneralPayService get IOException: ", ioe);
 
-
             PayServiceQueryResult queryResult = payService.queryAndGetCancelCondition(orderId);
             // 假设 0001 代表渠道支付成功
             if (queryResult.isOrderSuccess()) {

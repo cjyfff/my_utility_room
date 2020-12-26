@@ -4,9 +4,10 @@ package com.example.pay_demo.common.enumm;
  * Created by jiashen on 2020/9/7.
  */
 public enum OrderStatus {
-    INIT(0, "init"),
-    SUCCESS(1, "success"),
-    FAIL(2, "fail")
+    INIT(100, "init"),
+    CHANNEL_PAYING(101, "正在调用渠道支付"),
+    SUCCESS(800, "success"),
+    FAIL(900, "fail")
     ;
 
     private Integer status;
