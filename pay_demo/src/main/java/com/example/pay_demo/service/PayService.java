@@ -80,6 +80,8 @@ public class PayService {
 
     /**
      * 查询渠道的订单情况，在渠道确认支付成功时操作
+     * 这里可以不用加 REQUIRES_NEW
+     * 不过为了避免外层误加了@Transactional的情况，这里保险起见还是加上
      * @param orderId
      * @throws Exception
      */
