@@ -87,8 +87,14 @@ public class PayService {
      */
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
     public void updateOrderPaySuccess(String orderId) throws Exception {
+        if (orderMapper.updateOrderWithStatus(
+            orderId, OrderStatus.INIT.getStatus(), OrderStatus.CHANNEL_PAYING.getStatus()) <= 0) {
+            log.error("订单不是初始化状态");
+            return;
+        }
+        
         //支付成功通知其它系統(MQ)
-
+        
         otherSystemService.orderSuccessAction(orderId);
 
         // 更新数据库
