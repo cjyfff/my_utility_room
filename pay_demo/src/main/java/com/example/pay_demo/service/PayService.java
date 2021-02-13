@@ -102,17 +102,19 @@ public class PayService {
     }
 
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
-    public void cancel(String orderId) {
+    public void cancelByMq(String orderId) {
         try {
             ChannelResp channelResp = channelService.cancel(orderId);
 
             if (channelResp == null) {
                 logger.error("渠道撤销接口响应为空");
+                nAck();
                 return;
             }
 
             if (! "0000".equals(channelResp.getCode())) {
                 logger.error("渠道撤销接口响应失败, code: {}, msg: {}", channelResp.getCode(), channelResp.getMsg());
+                nAck();
                 return;
             }
 
@@ -121,6 +123,7 @@ public class PayService {
 
         } catch (Exception e) {
             logger.error("PayService cancel method get error: ", e);
+            nAck();
         }
     }
 
@@ -130,4 +133,9 @@ public class PayService {
         BeanUtils.copyProperties(channelQueryResult, result);
         return result;
     }
+
+    /**
+     * MQ no ack method
+     */
+    private void nAck() {}
 }

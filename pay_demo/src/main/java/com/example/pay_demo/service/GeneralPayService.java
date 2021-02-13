@@ -69,7 +69,7 @@ public class GeneralPayService {
             payRespMsg = new PayRespMsg("-9999", e.getMessage());
         } finally {
             if (needCancel) {
-                payService.cancel(orderId);
+                payService.cancelByMq(orderId);
             }
 
             lock.tryUnLock(lockResult);
