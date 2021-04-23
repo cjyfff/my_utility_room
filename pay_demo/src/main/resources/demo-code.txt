@@ -1,0 +1,82 @@
+class Controller {
+    var orderId = "334343";
+    bollean needCancal = fail;
+    String failReason = "System error.";
+    try {
+        lock();
+        service.order(orderId);
+        reture "success";
+        // IO超时
+    } catch (IoExecption ioe) {
+        log.error(ioe);
+        if (service.queryOrder(orderId, true)) {
+        try {
+            service.updateOrderSuc(orderId);
+            reture "success";
+        } catch (Excetption e) {
+            needCancal = true;
+        }
+
+        } else {
+            reture "fail";
+            needCancal = true;
+            failReason = ioe.getMessage();
+        }
+        // 各种Exception，包括db，mq
+    } catch (Exception e) {
+        log.error(e);
+        needCancal = true;
+        failReason = ioe.getMessage();
+        retrun "fail";
+    } finally {
+        if (needCancal) {
+            // 使用MQ撤销（调用渠道、调用其他系统）
+            service.cancalOrderByMq(orderId);
+            updateDbOrderFail(orderId, failReason);
+        }
+        unlock();
+    }
+}
+
+class Service {
+    // 下單
+    // 因为外层没有事务，所以这里可以不用加 REQUIRES_NEW
+    // 不过为了避免外层加了@Transactional的情况，这里保险起见还是加上
+    // 下同
+    @Transactional(rollbackFor=Exception.class, propagation = Propagation.NEW)
+    void order(String orderId) {
+        //检查订单是否已被处理
+        //請求銀行
+        //支付成功通知其它系統(MQ)
+        //更新數據庫
+    }
+
+    // 查詢
+    boolean queryOrder(String orderId) {
+        try() {}catch(){}
+    }
+
+    // 更新訂單狀態
+    @Transactional(rollbackFor=Exception.class, propagation = Propagation.NEW)
+    void updateOrderSuc(String orderId, boolean orderStatus) {
+        //支付成功通知其它系統(MQ)
+        //更新數據庫
+    }
+
+    // 冲正
+    void cancalOrderByMq (String orderId) {
+    // 请求银行冲正(MQ)
+    // 请求其他系统冲正(MQ)
+    // 失败了需要延迟重拾
+}
+
+
+@Transactional(propagation = Propagation.NEW)
+void updateDbOrderFail(String orderId, String failReason) {
+    try {
+        // 更新數據庫
+    } catch (Exception e) {
+        // 不抛出异常，外围没有try catch
+        log.error(e)
+    }
+}
