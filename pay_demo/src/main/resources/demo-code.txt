@@ -1,37 +1,37 @@
 class Controller {
     var orderId = "334343";
-    bollean needCancal = fail;
+    boolean needCancel = fail;
     String failReason = "System error.";
     try {
         lock();
         service.order(orderId);
-        reture "success";
+        return "success";
         // IO超时
-    } catch (IoExecption ioe) {
+    } catch (IoException ioe) {
         log.error(ioe);
         if (service.queryOrder(orderId, true)) {
-        try {
-            service.updateOrderSuc(orderId);
-            reture "success";
-        } catch (Excetption e) {
-            needCancal = true;
-        }
+            try {
+                service.updateOrderSuc(orderId);
+                return "success";
+            } catch (Exception e) {
+                needCancel = true;
+            }
 
         } else {
-            reture "fail";
-            needCancal = true;
+            return "fail";
+            needCancel = true;
             failReason = ioe.getMessage();
         }
         // 各种Exception，包括db，mq
     } catch (Exception e) {
         log.error(e);
-        needCancal = true;
+        needCancel = true;
         failReason = ioe.getMessage();
-        retrun "fail";
+        return "fail";
     } finally {
-        if (needCancal) {
+        if (needCancel) {
             // 使用MQ撤销（调用渠道、调用其他系统）
-            service.cancalOrderByMq(orderId);
+            service.cancelOrderByMq(orderId);
             updateDbOrderFail(orderId, failReason);
         }
         unlock();
@@ -64,7 +64,7 @@ class Service {
     }
 
     // 冲正
-    void cancalOrderByMq (String orderId) {
+    void cancelOrderByMq (String orderId) {
     // 请求银行冲正(MQ)
     // 请求其他系统冲正(MQ)
     // 失败了需要延迟重拾
