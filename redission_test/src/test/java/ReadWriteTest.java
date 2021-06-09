@@ -7,6 +7,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import mylock.RedisLock;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -26,9 +27,13 @@ public class ReadWriteTest {
 
     private RedissonClient redisson;
 
+    private RedisLock redisLock;
+
     private final static Long SHORT_EXPIRE = 30L;
 
     private final static Long LONG_EXPIRE = 60L;
+
+    private final static String READ_THREAD_UPDATE_CACHE_LOCK_PREFIX = "READ_THREAD_UPDATE_CACHE_LOCK:";
 
     @Before
     public void initMethod() {
@@ -36,6 +41,7 @@ public class ReadWriteTest {
         config.setTransportMode(TransportMode.NIO);
         config.useSingleServer().setAddress("redis://127.0.0.1:6379");
         redisson = Redisson.create(config);
+        redisLock = new RedisLock(this.redisson);
         db.put("hello", "1");
     }
 
@@ -125,30 +131,60 @@ public class ReadWriteTest {
     }
 
     private String getData(String key) {
-        RBucket<String> bucket = redisson.getBucket(key);
+        RedisLock.LockObject lockObject = null;
 
-        String value = bucket.get();
+        try {
+            for (int i = 0; i < 3; i++) {
 
-        // 缓存中的数据为null时才查库，为空字符串时直接返回
-        if (value == null) {
-            value = db.get(key);
+                RBucket<String> bucket = redisson.getBucket(key);
 
-            if (value == null) {
-                // 一个查询返回的数据为null，不管是数据不存在，还是该数据真的是空值，我们仍然把一个空字符串存到缓存，
-                // 但它的过期时间应该设置得很短，这样防止恶意查询空数据导致缓存穿透
-                bucket.set("", SHORT_EXPIRE + (int)(1 + Math.random() * 10), TimeUnit.SECONDS);
-            } else {
-                // 过期时间加上随机数
-                bucket.set(value, LONG_EXPIRE + (int)(1 + Math.random() * 10), TimeUnit.SECONDS);
+                String value = bucket.get();
+
+                // 缓存中的数据为null时才查库，为空字符串时直接返回
+                if (value == null) {
+
+                    // 尝试获取锁，避免很多读线程同时访问DB，这是防止缓存击穿
+                    // 注：缓存击穿是一个热点的Key，有大并发集中对其进行访问，突然间这个Key失效了，导致大并发全部打在数据库上
+                    lockObject = redisLock.tryLock(0, 60, TimeUnit.SECONDS, READ_THREAD_UPDATE_CACHE_LOCK_PREFIX + key);
+                    if (lockObject != null && lockObject.isLockSuccess()) {
+
+                        value = db.get(key);
+
+                        if (value == null) {
+                            // 一个查询返回的数据为null，不管是数据不存在，还是该数据真的是空值，我们仍然把一个空字符串存到缓存，
+                            // 但它的过期时间应该设置得很短，这样防止恶意查询空数据导致缓存穿透
+                            value = "";
+                            bucket.set(value, SHORT_EXPIRE + (int) (1 + Math.random() * 10), TimeUnit.SECONDS);
+                        } else {
+                            // 过期时间加上随机数，预防缓存雪崩
+                            bucket.set(value, LONG_EXPIRE + (int) (1 + Math.random() * 10), TimeUnit.SECONDS);
+                        }
+                        return value;
+                    } else {
+                        TimeUnit.SECONDS.sleep(5);
+                        continue;
+                    }
+                } else {
+
+                    return value;
+                }
+            }
+
+            System.out.println("循环结束了，既获取不到锁，缓存里又没有数据，肯定出了问题");
+            return "";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (lockObject != null) {
+                redisLock.tryUnLock(lockObject);
             }
         }
-
-        return value;
     }
 
     private void updateData(String key, String value) {
 
-        updateCacheAndDb(() -> db.put(key, value), key);
+        updateCacheAndDb2(() -> db.put(key, value), key);
 
     }
 
@@ -173,5 +209,22 @@ public class ReadWriteTest {
                 e.printStackTrace();
             }
         }).start();
+    }
+
+    /**
+     * 想了一下，更新数据后，在队列删除redis数据，是最安全，但是增加了系统复杂度。一般就直接更新后删除redis就可以了，
+     * 可以考虑是否放在一个事务中，redis删除失败数据回滚，毕竟删除失败是低概率，而且有过期时间
+     * @param updateData
+     * @param key
+     */
+    private void updateCacheAndDb2(IUpdateData updateData, String key) {
+        updateData.run();
+
+        try {
+            RBucket<String> bucket = redisson.getBucket(key);
+            bucket.delete();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
